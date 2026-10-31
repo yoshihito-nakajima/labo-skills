@@ -17,6 +17,11 @@ labo/
     sections/NN-name.tex    # separately reviewable sections
     ja/                     # optional translation checking, non-authoritative
     .temp/                  # ignored build cache
+  writing/.corpus/          # workspace-level prose examples and source index
+    README.md
+    index.md
+  writing/.rules/           # workspace-level, user-maintained writing rules
+    README.md
   reading/                  # lecture notes, literature notes, derived exposition
   reference/<key>/          # bibliographic identity and source variants
   output/                  # ignored PDFs + same-stem SyncTeX, directly selectable
@@ -48,6 +53,13 @@ one another using relative links or identifiers but do not have to share the
 same slug. A research program may produce several papers, talks, and notes;
 one output may draw from several programs. In particular **do not make an
 output document the owner of a research program**.
+
+`writing/.corpus/` and `writing/.rules/` belong to the workspace rather than
+to an individual paper. The corpus points to author samples, field exemplars,
+and venue sources; its observations inform style softly. Rules state user-
+adopted requirements with an explicit scope. Each paper may keep its own
+`decisions/corpus.toml` to record which examples it selected and how they
+informed that paper.
 
 Keep the research plan's YAML frontmatter short: required `title`, `summary`,
 `status`; optional `tags`, `next`. The full argument, transitions, hypotheses,

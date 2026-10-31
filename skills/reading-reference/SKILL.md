@@ -20,6 +20,11 @@ Ordinary chat stays in chat; create `reading/<slug>/` for requested persistent
 work. Notes may explain the user's own research as well as external sources.
 Review-only requests produce findings, not silent edits.
 
+For a substantial explanation where mathematical clarity, emphasis or pacing
+is the main challenge, also use
+[mathematical-exposition](../mathematical-exposition/SKILL.md). This skill
+continues to own source identity, reading coverage and deliverable checks.
+
 Read only the references needed for the task:
 
 - [Sources](references/source-rules.md): acquisition, versions and coverage.
@@ -71,6 +76,13 @@ Read only the references needed for the task:
    Separate primary-source checks, implementation inspection/execution and
    rendering checks in the handoff; none certifies the others. Required missing
    sources or implementations remain incomplete work, even when disclosed.
+
+Describe the deliverable by its actual contents and scope, such as a full-paper
+explanation, proof reconstruction or reading deck. Do not present notes as a
+substitute for reading the source, or imply that they certify the reader's
+comprehension or let them claim to have read it. State which sections and
+arguments the artifact covers, and name material omissions or source-level
+gaps directly.
 
 Before delivery, check the requested language across the complete reader-facing
 artifact, including headings, captions, labels and navigation as well as body

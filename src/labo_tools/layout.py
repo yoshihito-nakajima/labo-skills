@@ -10,6 +10,12 @@ from .plans import MAX_FRONTMATTER_BYTES, SLUG
 CHECKOUT = Path(__file__).resolve().parents[2]
 ASSETS = CHECKOUT / "skills" / "labo-layout" / "assets"
 CORE_DIRECTORIES = ("inbox", "research", "lean", "writing", "reading", "reference", "output")
+WRITING_DIRECTORIES = ("writing/.corpus", "writing/.rules")
+WRITING_GUIDE_FILES = (
+    "writing/.corpus/README.md",
+    "writing/.corpus/index.md",
+    "writing/.rules/README.md",
+)
 IGNORE_PATTERNS = (
     "/inbox/*", "!/inbox/.gitkeep",
     "output/**", "!output/.gitkeep", "**/.temp/", "*.synctex", "*.synctex.gz",
@@ -18,6 +24,25 @@ IGNORE_PATTERNS = (
 
 class LayoutError(ValueError):
     """A requested layout would overwrite data or cross the policy boundary."""
+
+
+def _writing_layout(
+    workspace: Path,
+) -> tuple[list[tuple[str, Path]], list[tuple[str, Path, str]]]:
+    """Resolve workspace-owned writing guides without replacing existing files."""
+    directories = [
+        (relative, _path(workspace, relative, directory=True))
+        for relative in WRITING_DIRECTORIES
+    ]
+    files = [
+        (
+            relative,
+            _path(workspace, relative),
+            (ASSETS / relative).read_text(encoding="utf-8"),
+        )
+        for relative in WRITING_GUIDE_FILES
+    ]
+    return directories, files
 
 
 def _workspace(workspace: Path) -> Path:
@@ -44,9 +69,14 @@ def _path(workspace: Path, relative: str, *, directory: bool = False) -> Path:
 
 
 def init_layout(workspace: Path, *, dry_run: bool = False) -> list[str]:
-    """Add missing core directories, an empty AGENTS.md and workspace ignores."""
+    """Add missing workspace directories, writing guides, and workspace ignores."""
     workspace = _workspace(workspace)
-    directories = [_path(workspace, name, directory=True) for name in CORE_DIRECTORIES]
+    directories = [
+        (name, _path(workspace, name, directory=True))
+        for name in CORE_DIRECTORIES
+    ]
+    writing_directories, writing_files = _writing_layout(workspace)
+    directories.extend(writing_directories)
     agents = _path(workspace, "AGENTS.md")
     ignore = _path(workspace, ".gitignore")
     original = ignore.read_bytes() if ignore.exists() else b""
@@ -56,15 +86,20 @@ def init_layout(workspace: Path, *, dry_run: bool = False) -> list[str]:
     if missing:
         suffix = (b"\n" if original and not original.endswith(b"\n") else b"")
         suffix += ("\n".join(missing) + "\n").encode("utf-8")
-    changes = [f"create {path.name}/" for path in directories if not path.exists()]
+    changes = [f"create {name}/" for name, path in directories if not path.exists()]
+    changes.extend(f"create {name}" for name, path, _ in writing_files if not path.exists())
     if not agents.exists():
         changes.append("create AGENTS.md (empty)")
     if suffix:
         changes.append("append workspace patterns to .gitignore" if ignore.exists() else "create .gitignore")
     if not dry_run:
         workspace.mkdir(parents=True, exist_ok=True)
-        for path in directories:
-            path.mkdir(exist_ok=True)
+        for _, path in directories:
+            path.mkdir(parents=True, exist_ok=True)
+        for _, path, content in writing_files:
+            if not path.exists():
+                with path.open("x", encoding="utf-8") as stream:
+                    stream.write(content)
         if not agents.exists():
             with agents.open("xb"):
                 pass
@@ -90,6 +125,8 @@ def new_item(
     if folder.exists():
         raise LayoutError(f"{relative} already exists; inspect and resume it instead")
 
+    writing_directories: list[tuple[str, Path]] = []
+    writing_files: list[tuple[str, Path, str]] = []
     directories = []
     if kind == "research":
         if not title or not title.strip() or not summary or not summary.strip():
@@ -110,13 +147,23 @@ def new_item(
             for name in ("main.tex", "sections/01-introduction.tex")
         }
         directories = ["sections"]
+        writing_directories, writing_files = _writing_layout(workspace)
     else:
         files = {"reference.md": (ASSETS / "reference.md").read_text(encoding="utf-8")}
+        writing_directories, writing_files = [], []
 
     changes = [f"create {relative}/"]
+    changes += [f"create {name}/" for name, path in writing_directories if not path.exists()]
+    changes += [f"create {name}" for name, path, _ in writing_files if not path.exists()]
     changes += [f"create {relative}/{name}/" for name in directories]
     changes += [f"create {relative}/{name}" for name in files]
     if not dry_run:
+        for _, path in writing_directories:
+            path.mkdir(parents=True, exist_ok=True)
+        for _, path, content in writing_files:
+            if not path.exists():
+                with path.open("x", encoding="utf-8") as stream:
+                    stream.write(content)
         folder.parent.mkdir(parents=True, exist_ok=True)
         folder.mkdir()  # Exclusive: do not reuse an item created after preflight.
         for name in directories:

@@ -35,11 +35,23 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   inspected subset. Test equations/glyphs, readable labels, cropping, figure
   placement, listings and navigation at real reading scale. Extraction or build
   success does not prove visual correctness, source fidelity or understanding.
-- **R30 Closure** — Adjudicate findings against actual passages, preserve good
-  concise controls, and batch supported repairs. Recheck changed claims and
-  dependencies; a bounded recheck does not establish full coverage. Keep source
-  identity, covered scope, unresolved gaps and next steps in the existing record.
-  A structurally valid record cannot certify scientific truth or independence.
+- **R30 Closure and saturation** — Before review, fix the scope and planned
+  checks. For a substantial artifact, default to one full evidence-based review,
+  one consolidated repair pass, then one targeted recheck of changed claims,
+  dependencies and rendered pages. Do not start another full review panel
+  automatically. A pass is saturated when it adds no new material, actionable
+  finding: a material finding would change a central claim or proof, source
+  fidelity or required coverage, the reader's ability to follow a decisive
+  argument, or the requested deliverable's usability. Resolve every earlier
+  material finding as corrected, disproved with evidence, or explicitly
+  unresolved; keep duplicates, optional preferences and low-impact polish out
+  of the repair queue unless the user requests them. If the targeted recheck
+  reveals a new material issue, repair it if possible, verify that exact issue
+  and its dependencies once, then close the round and report any residual gap.
+  Reopen a broad review only when the user changes the goal or new source
+  evidence undermines a central result. Record source identity, covered scope,
+  unresolved gaps and next steps in the existing record. A structurally valid
+  record cannot certify scientific truth or reader comprehension.
   In the reader-facing handoff, distinguish source verification, implementation
   inspection/execution and visual checks, with their actual scope. Do not use
   an unqualified "verified" or mark the requested explanation complete while

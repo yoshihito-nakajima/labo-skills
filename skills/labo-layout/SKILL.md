@@ -26,10 +26,11 @@ be named `labo`. A placement question alone needs an answer, not scaffolding.
 ## Initialize
 
 When asked to set up the workspace, run `layout init`. It adds missing core
-directories, creates an empty `AGENTS.md` only if absent, and appends missing
-workspace ignore patterns. Root `inbox/` contents are local staging; assigned
-originals under research-specific inboxes remain trackable. Existing files and
-personal instructions stay intact.
+directories, the workspace-level `writing/.corpus/` and `writing/.rules/`
+guides, an empty `AGENTS.md` only if absent, and missing workspace ignore
+patterns. Existing corpus entries, rules, files, and personal instructions
+stay intact. Root `inbox/` contents are local staging; assigned originals under
+research-specific inboxes remain trackable.
 The normal setup is **fork `labo-skills`, then mount the user's fork at
 `.agents` as a submodule**. Installation steps are in the creation reference.
 If already connected, use that checkout; it is where the user develops their
@@ -63,9 +64,11 @@ For an inbox-based research request:
 ## Place other work
 
 Use `layout new paper` or `layout new reference` when a new item is needed.
-Create reading notes under `reading/`, formalizations under `lean/`, and
-optional website/profile material only when those tasks arise. The directory
-contract explains their relationships; output slugs need not match programs.
+Creating a paper also initializes the shared writing corpus and rules guides
+when they are missing. Create reading notes under `reading/`, formalizations
+under `lean/`, and optional website/profile material only when those tasks
+arise. The directory contract explains their relationships; output slugs need
+not match programs.
 Layout creation supplies paths and templates, not mathematical validation or
 permission to publish. Read the owning skill when doing the substantive work.
 

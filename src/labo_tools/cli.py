@@ -104,7 +104,9 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
 
     layout = areas.add_parser("layout", help="initialize and use research workspace directories")
     layout_actions = layout.add_subparsers(dest="action", required=True)
-    init = layout_actions.add_parser("init", help="add missing core directories without overwriting files")
+    init = layout_actions.add_parser(
+        "init", help="add missing workspace directories and writing guides without overwriting files",
+    )
     _workspace(init)
     init.add_argument("--dry-run", action="store_true")
     new = layout_actions.add_parser("new", help="create a research, paper, or reference source template")
