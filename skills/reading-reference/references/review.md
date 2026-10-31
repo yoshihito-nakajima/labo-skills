@@ -10,6 +10,11 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   acquired/inspected material, then expected versus actually explained units.
   Missing required material stays visible. A filename, citation, figure asset
   or source reprint is not evidence of explanatory coverage.
+  For surveys, check each central claim against its required primary evidence,
+  the passages actually inspected and the citation/locator visible in the output.
+  For code-bearing requests, check central algorithms against matching code
+  units, implementation provenance and inspected/executed status. A long code
+  appendix or one successful toy run cannot compensate for missing methods.
 - **R26 Two-way fidelity** — Compare the note's claims to exact sources and
   trace central source claims back into the note. Check headings, formulas,
   figures, analogies and compressed summaries as well as prose. Verify both
@@ -35,6 +40,11 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   dependencies; a bounded recheck does not establish full coverage. Keep source
   identity, covered scope, unresolved gaps and next steps in the existing record.
   A structurally valid record cannot certify scientific truth or independence.
+  In the reader-facing handoff, distinguish source verification, implementation
+  inspection/execution and visual checks, with their actual scope. Do not use
+  an unqualified "verified" or mark the requested explanation complete while
+  required primary evidence or corresponding implementations remain missing;
+  disclosure records the gap rather than waiving it.
 
 Delegate by the evidence needed, with a short task-specific packet and bounded
 paths; no named agent persona or fixed model is required. A source-aware auditor

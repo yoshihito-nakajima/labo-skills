@@ -16,6 +16,14 @@
   Fetch and inspect references/supplements needed for the requested understanding;
   exhaustive acquisition is a separate requested scope. Follow further sources
   to resolve named dependencies, not an unbounded citation crawl.
+  For surveys, identify the primary work behind each central result, method or
+  consequential comparison and inspect the passages needed to explain it.
+  Record the survey location, primary-source version and theorem/algorithm/page,
+  and where that evidence is explained in the deliverable. Select by the role
+  in the requested explanation, not by which PDFs are easiest to obtain;
+  background bibliography entries alone need not trigger full-paper reading.
+  If a required primary source is inaccessible, retain that dependency as an
+  open gap. An abstract, secondary account or easier example cannot close it.
 - **R4 Evidence bundle** — Preserve panel names, captions, axes, legends,
   scale bars and controls. Extract readable figure regions without dropping
   vector labels or surrounding qualifications; inspect the image itself before
@@ -27,6 +35,11 @@
   inspect both the current work and its direct predecessor, including decisive
   supplements. Distinguish verified comparison from the authors' positioning;
   citation absence or an unsuccessful search does not establish novelty.
+  In a survey explanation, place the primary citation and exact locator beside
+  the claim or algorithm it supports, alongside the survey locator when useful.
+  A bibliography-only citation or a private provenance record does not make
+  this connection visible to the reader. Mark statements known only through
+  the survey as secondary reporting rather than primary-source verification.
 - **R6 Preservation** — Keep shared originals in `reference/<key>/` and notes
   in `reading/`; link to existing inbox/research/writing sources rather than
   overwriting them. Record access and reuse restrictions when relevant. Source

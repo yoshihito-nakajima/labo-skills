@@ -53,6 +53,11 @@ Read only the references needed for the task:
    methods, figures/tables and internal appendices; inventory supplements and
    explain those needed for the claims, controls and limitations. A whole-book
    request keeps its full scope while work proceeds through coherent units.
+   For a survey, trace central claims and methods to inspected primary sources
+   and exact locations, not just back to the survey. When code is requested,
+   map each central algorithm to its corresponding implementation and execution
+   status before treating a toy experiment as sufficient coverage; apply the
+   source and methods references.
 5. Explain the question, useful result, decisive argument and its limits.
    Put prerequisite bridges where needed and make each source-to-explanation
    connection findable. A summary, source dump or list of links cannot fulfill
@@ -63,6 +68,9 @@ Read only the references needed for the task:
 7. Check the explanation against the sources and the reader's ability to use
    it. For substantial deliverables, apply the review reference. Report actual
    checks, source versions, covered units and unresolved dependencies.
+   Separate primary-source checks, implementation inspection/execution and
+   rendering checks in the handoff; none certifies the others. Required missing
+   sources or implementations remain incomplete work, even when disclosed.
 
 Before delivery, check the requested language across the complete reader-facing
 artifact, including headings, captions, labels and navigation as well as body

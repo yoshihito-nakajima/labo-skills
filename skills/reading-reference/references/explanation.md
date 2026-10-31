@@ -36,6 +36,10 @@
   formulas, code behavior and interpreted results locally connected. Long
   listings can live in an explained appendix with editable sources; essential
   settings and operations must remain understandable where they are used.
+  When code is requested, let the reader follow a central algorithm from its
+  cited primary-source steps to the essential executable unit and the result
+  interpreted at that point. A distant listing of plotting utilities or a toy
+  experiment cannot stand in for this connection.
 - **R14 Usable navigation** — Keep source and local figure numbers distinct,
   use descriptive equation/code labels and working links where supported, and
   test a route from explanation to evidence and back. Source attachments retain

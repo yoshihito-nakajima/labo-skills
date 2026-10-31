@@ -26,6 +26,12 @@ in a purely theoretical source do not create empirical tasks.
   revision, or both with a declared main route. Preserve discrepancies in
   defaults, inequalities, ties and library behavior. Keep source-reported,
   statically inspected, pedagogical and actually rerun results distinct.
+  For a survey with requested code, identify the central algorithms and their
+  primary papers before selecting implementations. For each, identify the
+  corresponding author implementation, inspected library version or explicitly
+  independent implementation, and map its operations to the source procedure.
+  An API call without inspecting the relevant implementation cannot establish
+  this match. Do not describe a convenient substitute as the paper's code.
 - **R19 State path** — Specify input shapes/units, stable IDs versus local
   indices, preprocessing, updates, parameter values, randomness, ties, edge
   cases, loops, stopping and saved outputs. Explain consequential constants
@@ -36,6 +42,15 @@ in a purely theoretical source do not create empirical tasks.
   entry commands and matching editable files, with provenance and reuse terms.
   Pseudocode or a repository link cannot replace this. Inspect before any
   execution; report what was really run and its outcome.
+  Cover the central algorithms in the requested unit, not only the one easiest
+  to demonstrate. Supply their essential executable units beside the relevant
+  explanation, with explicit links to complete editable sources and any longer
+  appendix listing. Identify which source step each unit implements and any
+  changes made for teaching. An unrelated toy example or a known-answer check
+  does not supply a missing algorithm or reproduce a paper's experiment.
+  Restrictions on code reuse may require a transparent independent implementation;
+  unresolved source, license, data or execution barriers remain visible gaps.
+  Purely theoretical reading does not require inventing a coding task.
 - **R21 Comparisons** — Explain how each baseline computes its score. Check
   data splits/leakage, tuning, aggregation, uncertainty, resources and comparable
   conditions. Implementation claims need fixed code evidence on both sides.
