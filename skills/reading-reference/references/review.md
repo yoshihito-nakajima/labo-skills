@@ -18,6 +18,9 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   For required code, check each in-scope computational method against matching code
   units, implementation provenance and inspected/executed status. A long code
   appendix or one successful toy run cannot compensate for missing methods.
+  For each literature-based code unit, including educational/background units,
+  check its exact method source, corresponding implementation search and local
+  status report. Searches for the main algorithms do not cover auxiliary units.
 - **R26 Two-way fidelity** — Compare the note's claims to exact sources and
   trace central source claims back into the note. Check headings, formulas,
   figures, analogies and compressed summaries as well as prose. Verify both
@@ -28,7 +31,21 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   paper when necessary. Separate cited statements from a cross-source synthesis; an objective or runnable code alone
   cannot establish this account. Check code attribution against the inspected
   source/revision and the actual author-code search status, including adaptations
-  and unresolved availability. For independent code, check the analysis purpose,
+  and unresolved availability. Compare each code's visible search report and
+  adoption reason against places actually visited and code actually inspected.
+  An unvisited supplement, uninspected repository or inaccessible file cannot
+  support "no author code"; flag the unfinished source work and missing local
+  report even if the independent code is correct and its links work.
+  Test the implementation choice, not only the existence of an adoption reason:
+  check whether existing options, a thin wrapper or annotations meet the reader's
+  purpose, and distinguish the main execution route from an explanatory example.
+  If matching code was found later, check that the choice was reopened against
+  the request. Compare the reported selection order and reasons with the actual
+  record; do not accept retrospective reasons presented as original evidence.
+  Flag unexecuted equivalence claims, but do not demand blanket duplicate runs
+  or unconditional adoption of author code. Keep unknown reuse terms distinct
+  from demonstrated inability to run or link the implementation.
+  For independent code, check the analysis purpose,
   operation-to-mathematics mapping, own choices/deviations and validation evidence;
   an origin label alone is insufficient. A faithfully stated source limitation is not
   automatically a defect in the explanation.
@@ -46,10 +63,16 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   Inspect every page/slide for a complete visual review; otherwise disclose the
   inspected subset. Test equations/glyphs, readable labels, cropping, figure
   placement, listings and navigation at real reading scale. For code-bearing
-  deliverables, test each central method's links in the built artifact: body
-  excerpt to its formal code entry/full listing where present and editable
-  source, return to the explanation, and paper/implementation source
-  destinations. Check point-of-use citations against their reference entries
+  deliverables, inspect every displayed method-code block, including appendix
+  listings: its source/link row must appear immediately after that block and
+  visibly identify it. Check that the nearby explanation reconstructs the
+  substantive operations and their correspondence to body equations/steps;
+  correct destinations alone do not establish this. Test its actual links:
+  implementation source at the claimed fixed file/function/lines or supplement
+  location, matching full code/editable unit, and explanatory body, with return
+  routes where separate listings exist. A pre-block link, homepage, generic
+  index or shared filename without a matching post-block row is a finding,
+  even when a document-wide link checker passes. Check point-of-use citations against their reference entries
   and return links. Open external paper/code destinations and inspect whether
   they reach the intended supporting passage or implementation version/function.
   A live homepage, redirect to unrelated content or HTTP 200 is insufficient.

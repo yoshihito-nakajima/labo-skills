@@ -78,8 +78,10 @@ chosen to expose the method's purpose or a consequential difference/limit, and
 explain what its result establishes. Distinguish execution from static inspection.
 Supply complete selected executable units and necessary helpers in editable form;
 a library call, pseudocode or unrelated toy alone is not method implementation.
-Use point-of-use links between explanation, matching full code and sources, with
-return routes according to [Explanation](explanation.md).
+Apply [R20](methods.md) to every displayed method-code block: explain its
+contents and equation/step correspondence locally, and place its specifically
+identified implementation-source and full-code links immediately after it.
+Use the return routes and PDF placement rules in [Explanation](explanation.md).
 
 At each method/code unit, distinguish explicitly:
 
@@ -94,6 +96,13 @@ Do not use “original paper/code” as the sole identification. One work may oc
 more than one role, but the roles must remain clear. Prefer corresponding,
 inspected and reusable author code. Record scoped search and access outcomes
 honestly; finding a repository does not mean inspecting its code.
+
+Apply [R18](methods.md) per literature-based code unit, including added teaching
+examples and background methods. Identify the exact method source, follow its
+implementation pointers, inspect matching code when found, and report checked
+places, access/inspection status and the adoption or independent-code rationale
+at the code's reader-facing location. Unfollowed pointers remain unfinished
+source work; neither a private search log nor the educational label waives it.
 
 For independent code, explain especially carefully why it was written, how each
 substantive operation realizes cited mathematics, its own choices and departures,

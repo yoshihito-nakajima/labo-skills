@@ -32,8 +32,9 @@ standalone policy checkout.
 
 1. Fix the source version and scope. If the abstract is in scope, read it
    alone first and record what question, result and significance are recoverable.
-   Keep research plans, author explanations and earlier reviews out of the
-   initial reader assessment; they can inform subsequent evidence checks.
+   Keep research plans, positioning memos, author explanations and earlier
+   reviews out of the initial reader assessment; they can inform subsequent
+   evidence checks.
 2. For a paper-wide or openings-only review, run
    `python3 <labo-script> paper map --paper <slug> --format json`.
    It follows literal `main.tex` inclusions and reads only section openings
@@ -51,6 +52,14 @@ standalone policy checkout.
    defect, a concern, and unavailable evidence. For verbosity, identify what
    a deletion, replacement or relocation preserves; do not recommend cuts
    from word count alone. Retain clear, economical passages.
+   For a whole-paper/submission review or in-scope novelty, lineage or notation
+   comparison, apply the required
+   [positioning investigation](../reading-reference/references/research-positioning.md)
+   after the initial reading. Inspect the memo and actual primary evidence,
+   search unresolved relevant leads, and check freshness when submission is in
+   scope. Judge the paper's claims, not whether a particular memo filename exists.
+   Report material source gaps without inventing novelty or treating an unchecked
+   concern as a refutation. Local editorial reviews do not start a field survey.
 5. Return findings with **rule ID, severity, passage/line, evidence, and
    smallest sufficient repair**. State the version, sections and dependencies
    actually read, remaining scope, and a concise example that worked. A clean

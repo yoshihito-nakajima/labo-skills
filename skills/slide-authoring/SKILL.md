@@ -30,6 +30,16 @@ it for production and review roles, frozen artifacts, builds and records. Use
 this skill's authoring and audience criteria within that workflow instead of
 starting a parallel review loop.
 
+For talks about the author's own research that assert novelty, significance
+relative to prior work, or other substantive comparisons, run the required
+[research-positioning checkpoint](../reading-reference/references/research-positioning.md)
+before selecting that narrative. Reuse the program's memo, refresh affected
+comparisons, and carry exact attribution and notation/convention choices into
+the visible claims. This does not turn a paper-reading deck into a new research
+program or require a whole-field survey for a layout-only edit. In review-only
+work, inspect the displayed sequence first, then check the positioning evidence
+and return findings without editing the deck or memo.
+
 ## Authoring
 
 1. Identify the question and payoff, then select the claims and evidence that

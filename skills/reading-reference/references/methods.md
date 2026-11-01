@@ -33,15 +33,44 @@ in a purely theoretical source do not create empirical tasks.
   independent implementation, and map its operations to the source procedure.
   An API call without inspecting the relevant implementation cannot establish
   this match. Do not describe a convenient substitute as the paper's code.
-  Before choosing a replacement, look for the corresponding original-author
-  implementation through the paper/supplement software links and author project
-  pages or repositories. Prefer relevant inspected author code when available
-  and reusable; explain material adaptations or the reason for another route.
-  Record where you looked and distinguish not searched, found but uninspected,
-  found but unsuitable/inaccessible, and not located within the searched scope.
-  Show the applicable status near the method/code; an independent implementation
-  does not establish that author code is unavailable. Do not invent a search
-  outcome or treat a discovered repository as inspected implementation evidence.
+  For every literature-based implementation unit, including educational,
+  background and auxiliary code, trace the actual method paper/version and
+  exact equation, algorithm or procedure before choosing an implementation.
+  Actually inspect its software pointers, supplement, author project pages and
+  linked repositories for corresponding author or official code. This applies
+  when choosing independent teaching code from the outset, not only when
+  replacing an existing implementation. A search for a different central method
+  or a survey-level software list does not cover this unit. Unrelated setup
+  commands and syntax-only illustrations do not require author-code searches.
+  When matching code is found, inspect the relevant file/function and compare
+  it with the cited procedure and proposed teaching code. Prefer relevant,
+  inspected and reusable author code; explain adaptations or the concrete reason
+  for retaining an independent implementation, with consequential differences.
+  A discovered repository alone is not an inspected implementation.
+  Before writing independent code, state the reader's explanatory or computational
+  purpose and compare the matching implementation's existing options, a thin
+  wrapper and an annotated excerpt with the proposed independent route. Identify
+  the concrete requirement and how each relevant option meets or misses it.
+  "Educational", shorter code, a later author, or an already working draft alone
+  does not justify choosing independent code as the main execution or reproduction
+  route. A source-grounded execution route may have a separate independent
+  explanatory example. Author provenance alone does not establish suitability.
+  When matching code is discovered after an independent draft exists, reopen
+  the choice against the request; do not merely append a reason to retain it.
+  Consider switching routes, keeping the draft as a bounded explanatory example,
+  or retaining it with a concrete reason. Past effort or a successful toy run
+  cannot settle this choice. Reconsider whether the evidence would support the
+  same route if the independent draft did not already exist.
+  At each unit's reader-facing location, name/link the places actually checked,
+  report their outcomes and the resulting implementation choice. Distinguish
+  not searched, found but uninspected, found but inaccessible, inspected but
+  unsuitable/reuse-restricted, and not located within the searched scope. If a
+  paper's software pointer or supplement was not followed, say so explicitly
+  and retain it as unfinished source work; do not claim the search is complete.
+  Do not infer that code exists merely from a citation, or that it does not exist
+  from an incomplete search, an access failure or the existence of independent
+  code. A private log, successful toy run or generic "educational code" label
+  cannot replace this local report or close an unresolved required search.
 - **R19 State path** — Specify input shapes/units, stable IDs versus local
   indices, preprocessing, updates, parameter values, randomness, ties, edge
   cases, loops, stopping and saved outputs. Explain consequential constants
@@ -63,7 +92,43 @@ in a purely theoretical source do not create empirical tasks.
   third-party/library implementation or independently written for the note.
   Link reused code to its fixed revision/version and relevant file/function or
   lines where available; retain applicable reuse terms and explain consequential
-  changes. Do not fabricate missing revision or license information: state the
+  changes. Immediately after each displayed method-code block, identify its
+  origin and provide a labelled link to the actual corresponding implementation:
+  for GitHub or another repository, the inspected fixed revision and file,
+  function or line range; for supplementary code, the actual supplement file
+  or archive member and function, with a direct link where supported. If a
+  supplement cannot deep-link to a member, give the archive link and the exact
+  member/function visibly; do not pretend the archive opens at that function.
+  A repository homepage, paper citation or generic appendix/index link alone
+  is not a code-source link. For an independent implementation, link the
+  complete delivered editable unit and separately identify its mathematical
+  source; do not label that source as the origin of code written for the note.
+  Beside that block's source/link row, give the R18 search outcome and adoption
+  reason even for independent educational code. If corresponding code was found,
+  link it as well and state whether it was inspected, used, adapted or not used
+  and why. Report unresolved or unvisited sources explicitly; do not substitute
+  a link to the note's own code for the reference's implementation-search report.
+  Briefly report the actual discovery/selection order when it bears on the choice,
+  evidence available at selection, the code's present role and reason, and
+  outstanding comparisons. If independent code preceded the source search, say
+  so; do not present a later rationale as a documented original reason. Mark
+  unrecorded historical reasons as unknown rather than inventing them. This is
+  a short decision record, not a request for inferred inner motives or a detailed
+  thought log. Distinguish public access, permission to redistribute and ability
+  to execute; an unknown redistribution license alone does not establish that
+  execution or linking is prohibited or technically impossible.
+  Use labels that distinguish implementation source, complete editable code,
+  and the paper's equation/algorithm rather than an ambiguous "source" link.
+  Every displayed method-code block also needs a nearby explanation of its
+  inputs/outputs, substantive variables and operations, why they implement
+  the method, and consequential settings, normalizations or deviations. Map
+  those variables and operations to specific equations, algorithm steps and
+  interpreted results in the explanatory body, with links to those passages
+  when separate. "This implements the equations", a function name, an API
+  description or an appendix dump does not supply this explanation. These
+  requirements apply to author, adapted, library and independent code alike;
+  they do not depend on the reader separately requesting a code walkthrough.
+  Do not fabricate missing revision or license information: state the
   uncertainty and any resulting reuse barrier. A general disclaimer or separate
   provenance log cannot replace attribution beside the code. Independently
   written teaching code requires more than an origin label: explain its analysis
@@ -77,6 +142,13 @@ in a purely theoretical source do not create empirical tasks.
   procedure, data, settings and run evidence. These requirements concern paper-method
   code, not unrelated syntax illustrations. An unrelated toy or known-answer check
   does not supply a missing algorithm or reproduce a paper's experiment.
+  Match validation to the claimed correspondence. Static inspection does not
+  establish numerical equivalence or a rerun. For claims of interchangeability,
+  numerical agreement or reproduction, compare the required common inputs,
+  settings and meaningful outputs or invariants, accounting for conventions
+  such as eigenvector sign, scale or basis. If comparison was not executed,
+  restrict the claim accordingly. Do not require duplicate execution of every
+  explanatory function or agreement between different mathematical targets.
   Restrictions on code reuse may require a transparent independent implementation;
   unresolved source, license, data or execution barriers remain visible gaps.
   Purely theoretical reading does not require inventing a coding task.

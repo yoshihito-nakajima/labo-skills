@@ -28,6 +28,11 @@ conjectures, proposals, and open questions visibly distinct.
 
 ## Compare prior work at the mathematical boundary
 
+For a substantive program account that positions its contributions, complete
+the required [research-positioning investigation](research-positioning.md).
+Reuse the program's memo and refresh the comparisons needed for this account;
+a synthesis request alone does not authorize changing plans or source records.
+
 For every central contribution, verify the direct predecessor and the primary
 sources needed to understand the comparison. State what is inherited, what is
 a direct consequence or reformulation, and what this program adds. Compare the
@@ -44,12 +49,13 @@ comparable or incomparable, compare the conclusions, and identify which new
 argument supplies any claimed extension. Call it a generalization only after
 checking that relation against both statements.
 
-Define a useful literature boundary rather than starting an unbounded citation
-crawl: include the direct predecessors and the background results necessary
-to state, prove, or compare the program's central claims. Follow further
-references when they are named as dependencies or materially affect a novelty
-claim. Record source versions and exact locators. State the boundary and any
-missing primary evidence in the delivered account.
+Define a useful literature boundary around the program's central questions,
+not just its known bibliography. Search alternate formulations and adjacent
+fields, follow backward and forward citations, and inspect foundational and
+recent work that may establish, subsume or alter its claims. Use the positioning
+protocol's coverage and stopping criteria; do not call an arbitrary reference
+count exhaustive. Record source versions and exact locators. State the boundary
+and any missing primary evidence in the delivered account.
 
 ## Reconstruct the proofs and the story
 

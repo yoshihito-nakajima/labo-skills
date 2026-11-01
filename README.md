@@ -207,6 +207,28 @@ handles their assignment and provenance. See the
 [creation workflow](skills/labo-layout/references/creation.md) and
 [directory contract](skills/labo-layout/references/layout.md) for details.
 
+## Required research positioning
+
+Before framing or substantially reframing a program, starting substantive
+manuscript work or revising its contribution narrative, and presenting
+novelty/comparative claims in an own-research talk, the skills require a
+[research-positioning investigation](skills/reading-reference/references/research-positioning.md).
+Refresh affected comparisons when the question, result, assumptions or method
+changes, and search again before submission. Routine bookkeeping and typo-only
+edits do not restart the survey; report-only reviews do not authorize file edits.
+
+The investigation searches alternative terminology and adjacent work, follows
+citations in both directions, and compares inspected primary passages with the
+actual research claim. Reuse one program-level memo of searches, source versions,
+inherited and new ingredients, open leads, and notation/convention decisions.
+The [memo template](skills/reading-reference/assets/research-positioning.md) lives
+in this checkout; populated private records stay with the research program,
+normally at `research/<slug>/literature-positioning.md`, or in an adequate
+existing record. Carry the findings and precise citations into the paper itself.
+No search certifies all prior work or proves novelty from an absence of hits.
+This is a skill workflow, not a new CLI gate, mandatory claim catalog or copied
+host policy.
+
 ## Optional evidence and review records
 
 For results that need durable handoff or reuse, `research-management` owns an
@@ -379,6 +401,13 @@ all three submodule mounts. A separate Linux job explicitly prepares official
 Lean 4.19.0 from a fixed URL with a pinned SHA-256, then requires the real smoke
 test: ordinary theorem, transitive `sorryAx`, and custom axiom. This dependency
 preparation is a CI step, not an implicit feature of the replay runner.
+
+Positioning route checks ensure that the owning skills share one local protocol
+and that its memo template can be copied without broken checkout-relative links.
+The [forward-use packets](tests/fixtures/reading-reference/research-positioning.md)
+provide small drafting, local-edit, comparison and refresh tasks for fresh agents;
+they are not run by the unit suite. Neither link checks nor a successful agent
+run certify exhaustive literature coverage or mathematical novelty.
 
 To require the same real smoke with an already prepared local toolchain, set
 `LABO_REPLAY_TOOLCHAIN_DIR` to its directory and `LABO_REQUIRE_REAL_LEAN=1` when

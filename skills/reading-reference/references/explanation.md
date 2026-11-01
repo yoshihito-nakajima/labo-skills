@@ -48,9 +48,16 @@
   test a route from explanation to evidence and back. Link point-of-use
   citations to their formal entries when a reference list is present, with
   return links to the relevant method/code passages. When body excerpts and a
-  final code listing or index coexist, link each excerpt to its matching full listing or formal code entry,
-  and link back to the explanation. Give a working link to the complete editable
-  implementation as delivered, as well as to the external source where available.
+  final code listing or index coexist, link each excerpt to its matching full
+  listing or formal code entry, and link back to the explanation. Immediately
+  after every displayed method-code block, including appendix listings, place
+  an explicit source/link row identifying that particular block. Follow
+  [R20](methods.md) for implementation identity, exact code destinations and
+  the accompanying explanation. A link only before the block, at the start of
+  a section, or in a distant index does not meet this placement requirement.
+  In PDFs, keep the row with the end of its code block in reading order and
+  avoid separating it onto an otherwise unrelated page. Give a working link
+  to the complete editable implementation as delivered.
   Plain filenames, colored text, a table of contents or viewer history do not
   supply these routes. Do not require an appendix merely to create navigation.
   Source attachments retain their evidential role; reproducing a paper or

@@ -1,6 +1,6 @@
 ---
 name: reading-reference
-description: Read and explain papers, mathematical books, proofs and research methods; create or review source-grounded reading notes; preserve bibliographic versions. Not manuscript editing or website publication.
+description: Investigate research positioning, prior work and notation lineage; read and explain papers, mathematical books, proofs and methods; maintain source-grounded notes and bibliographic versions. Not manuscript editing or website publication.
 ---
 
 # Read, reconstruct and explain
@@ -14,7 +14,8 @@ facts or corrections from the user, or facts they ask to save, with source
 context. Apply this skill's normal source-verification rules.
 
 Use for 「この論文を前提から解説して」「この証明を読みたい」,
-book/chapter reading, literature collection, and checking a reading note.
+「自分の研究はどこに位置するか」「先行研究をどう発展させたか」,
+book/chapter reading, literature investigation, and checking a reading note.
 Infer the source/version, audience, question and requested output from context.
 Ordinary chat stays in chat; create `reading/<slug>/` for requested persistent
 work. Notes may explain the user's own research as well as external sources.
@@ -28,6 +29,9 @@ continues to own source identity, reading coverage and deliverable checks.
 Read only the references needed for the task:
 
 - [Sources](references/source-rules.md): acquisition, versions and coverage.
+- [Research positioning](references/research-positioning.md): mandatory
+  literature investigation at research/writing checkpoints, precise contribution
+  comparisons, a reusable memo, and notation/convention lineage.
 - [Explanation](references/explanation.md): teaching a concept, proof or paper.
 - [Methods](references/methods.md): reconstructing mathematical, computational
   or empirical reasoning; use only the applicable branches.
@@ -36,6 +40,21 @@ Read only the references needed for the task:
 - [Research-program synthesis](references/research-program-synthesis.md):
   explaining a local research program across plans, proof records, literature
   and Lean evidence.
+
+## Required research-positioning checkpoints
+
+Before framing or substantively reframing research, starting substantive
+manuscript work or revising its contribution narrative, or preparing own-research
+talks with novelty or comparative claims, run the
+[positioning protocol](references/research-positioning.md).
+Refresh it when the question, claim, hypotheses or method changes the comparison,
+and before submission. Investigate beyond the supplied bibliography; do not
+replace actual searches and primary-source inspection with recalled literature.
+Reuse the program's positioning memo and update affected comparisons rather than
+restarting every time. Typo-only edits and routine progress that do not affect
+positioning are exempt. Review-only and bounded lookup tasks retain their scope;
+a positioning investigation does not itself request full-paper translation,
+implementation reproduction or manuscript edits.
 
 ## Purpose and completion contract
 
@@ -89,9 +108,11 @@ reviews retain their requested scope rather than triggering a full translation.
    primary sources and exact locations, including predecessors beyond its
    bibliography when needed. For a survey, do not stop at the survey citation.
    When code is requested or required by the paper-preparation contract,
-   map each central algorithm to its corresponding implementation and execution
-   status before treating a toy experiment as sufficient coverage; apply the
-   source and methods references.
+   map each literature-based code unit, including educational and auxiliary
+   implementations, to its exact method source and an actual search for matching
+   author/supplement/official code under [R18](references/methods.md). Report
+   the search, implementation choice and execution status at that code unit;
+   a toy experiment does not establish source coverage.
 5. Explain the question, useful result, decisive argument and its limits.
    For central methods, explain the motivating limitation, inherited ideas and
    new contribution with primary evidence. For required code, make provenance
@@ -128,6 +149,8 @@ different language.
 Keep source originals in `reference/<key>/` or their existing inbox; record
 identity in `reference.md`. Persist notes and derived assets in `reading/`,
 with source links and a compact coverage/next-step record when needed to resume.
+Keep the cross-paper positioning memo with its research program, reusing an
+equivalent existing record; the positioning protocol owns its reusable template.
 Reuse existing records; no fixed manifest, helper CLI, reviewer roster or model
 is required. Use `labo-layout` only when creating or locating workspace items.
 

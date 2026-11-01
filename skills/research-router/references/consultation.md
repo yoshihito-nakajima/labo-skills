@@ -6,6 +6,8 @@ reply before performing or delegating that work, or delivering the substantive
 answer. Reading sources to understand the request can come first. An unanswered
 consultation or advice about another task does not complete this step.
 
+Launch the advisor under the [subagent invocation contract](subagent-invocation.md).
+
 Give the advisor the original request, relevant constraints and source evidence,
 your interpretation, and the proposed next action. Ask whether the interpretation,
 scope, and action match the request. Apply the [model check and selection

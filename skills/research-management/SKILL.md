@@ -23,6 +23,16 @@ results; use formalization to pressure-test definitions, assumptions, and
 candidate claims. Let either kind of evidence reshape the plan, and record
 which claims are formalized, proved by other means, or still open.
 
+Before a new or substantively reframed plan, run `reading-reference`'s required
+[research-positioning investigation](../reading-reference/references/research-positioning.md).
+Maintain one reusable program-level memo of the search coverage, exact prior-work
+comparisons, inherited versus added ingredients, and notation/convention lineage.
+Link it from the plan; reuse an adequate existing record. When the central
+question, result, relevant hypotheses or method changes the comparison, refresh
+the affected evidence and story. Ordinary progress updates do not restart the
+survey. If inspection changes the contribution, propose the resulting reframing
+instead of preserving an unsupported novelty claim.
+
 For substantive plan drafts, full plan revisions, or requests to explain a
 whole research program, apply the claim-level evidence and prior-work standard
 in [research policy](references/research-policy.md).

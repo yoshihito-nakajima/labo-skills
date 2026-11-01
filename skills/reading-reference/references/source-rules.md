@@ -29,6 +29,9 @@
   for inspected passages; follow dependencies needed for understanding.
   If a required primary source is inaccessible, retain that dependency as an
   open gap. An abstract, secondary account or easier example cannot close it.
+  For research-positioning checkpoints, also follow the broader iterative
+  [positioning investigation](research-positioning.md); the supplied paper's
+  bibliography does not define that search boundary.
 - **R4 Evidence bundle** — Preserve panel names, captions, axes, legends,
   scale bars and controls. Extract readable figure regions without dropping
   vector labels or surrounding qualifications; inspect the image itself before

@@ -94,7 +94,12 @@ which references resolved dependencies. Missing evidence is not a proven defect.
   results, verified known results, and suspected-known claims still unverified;
   an unsuccessful search does not establish novelty.
 - **P5.4 Contrasts** — Differences from earlier work are accurate, not
-  rhetorical or based on an obsolete preprint.
+  rhetorical or based on an obsolete preprint. Compare both statements' objects,
+  hypotheses, quantifiers, conclusions and decisive mechanisms; distinguish
+  inheritance, special case/reformulation, extension, alternative proof and
+  incomparable scope. A new notation is not a new result. Use the
+  [positioning protocol](../../reading-reference/references/research-positioning.md)
+  after the initial reader assessment when such claims are in scope.
 - **P5.5 Terminology** — Terms remain stable unless the change is explained.
 - **P5.6 Attribution** — Make clear who introduced a concept, proved a result,
   or later reformulated it. Cite borrowed concepts at first substantive use;
@@ -103,6 +108,11 @@ which references resolved dependencies. Missing evidence is not a proven defect.
   earn its reading cost through explanation or reuse. Identify the concrete
   relation it hides and test a simpler formulation; unfamiliarity alone is
   not grounds to call established terminology nonstandard.
+- **P5.8 Notation lineage** — Established definitions, symbols, signs and
+  normalizations are respected where they fit. Consequential departures or
+  translations between conventions are explicit and consistent with the cited
+  source; check that statements and proofs survive the translation. Do not
+  demand wholesale renaming merely because another source uses other symbols.
 
 ## P6. Editorial integrity
 

@@ -46,10 +46,11 @@ change how the question is framed; formalization may clarify assumptions or
 expose gaps; a draft may reveal missing links that should return to the plan.
 Do not require these activities to happen in a fixed sequence.
 
-Use `reading-reference` to inspect or verify prior literature when needed, and
-`research-management` when the program's story or evidence record needs to
-change. Keep citations tied to the version actually read, with precise theorem,
-section, or page details where available. Never invent references or attribute
+Use `reading-reference` for the required positioning checkpoints below and
+source verification, and `research-management` when the program's story or
+evidence record needs to change. Keep citations tied to the version actually
+read, with precise theorem, section, or page details where available.
+Never invent references or attribute
 a result from memory when the source can be checked.
 
 Treat Lean as evidence for exactly the definitions and statements it checks.
@@ -70,6 +71,31 @@ For an adopted TeX writing review, use the optional
 literal inputs with the selected files/tree or existing record, especially after
 adding includes, figures or bibliography files. Resolve omissions explicitly;
 neither the diagnostic nor a fresh snapshot silently renews an earlier pass.
+
+## Position the work before writing
+
+Before starting substantive manuscript work, including outlining and drafting
+the abstract, introduction, contribution or related-work account, complete the
+required
+[research-positioning investigation](../reading-reference/references/research-positioning.md).
+Read and update the program's existing memo; if none adequately records the
+investigation, create it within the authorized writing work using that protocol.
+A bibliography or remembered comparison is not a substitute. Revisit affected
+comparisons when the question, theorem, relevant assumptions or method changes;
+before submission, perform a fresh targeted search and source-version check.
+Typo-only or other local edits that cannot change positioning do not trigger
+a new survey. Unresolved material leads must qualify the contribution and
+block definitive novelty/readiness claims, not be hidden in a private checklist.
+
+Carry the findings into the paper: what earlier work achieved, what is inherited,
+the exact remaining question, what this work changes and how, and its limits.
+Put precise citations beside the claims and definitions they support; a memo
+or bibliography alone does not do this. Follow established notation and
+conventions where appropriate, recording translations or justified departures
+in the memo and explaining consequential changes in the text. Check meaning,
+normalization and proof dependencies before any renaming; raise substantive
+changes to the author's contribution or established notation rather than
+silently rewriting them.
 
 ## Preserve the author's argument and voice
 

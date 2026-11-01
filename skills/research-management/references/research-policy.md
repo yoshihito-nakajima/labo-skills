@@ -35,7 +35,14 @@
 9. The human chooses the significance and tone of the story. The agent should
    challenge gaps, identify alternative questions, and record uncertainty.
 
-10. **Claim-level evidence and prior-work comparison.** For a substantive plan,
+10. **Claim-level evidence and prior-work comparison.** Run the mandatory
+    [research-positioning protocol](../../reading-reference/references/research-positioning.md)
+    for a new or substantively reframed program and refresh affected comparisons
+    when the question, claims, hypotheses or method changes their relation to
+    prior work. Reuse one research-level memo rather than duplicate surveys per
+    paper; preserve actual search provenance, open leads, the contribution's
+    lineage, and notation decisions. This investigation is required independently
+    of the optional evidence catalog below. For a substantive plan,
     full research-story revision, or explicit request for the state of a
     program, give a source-grounded account of each central theorem, method,
     conjecture, and open question. For every central claim, identify the exact
