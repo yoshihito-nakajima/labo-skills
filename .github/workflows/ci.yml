@@ -1,0 +1,70 @@
+name: Source-local research harness
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: harness-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUTF8: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  runtime:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install runtime dependency, not this project
+        run: python -m pip install "PyYAML>=6,<7"
+      - name: Unit, CLI, native locking, and real Git submodule tests
+        run: python -B -m unittest discover -s tests -v
+
+  real-lean:
+    name: Prepared Lean 4.19.0 / real replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LABO_REQUIRE_REAL_LEAN: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Install runtime dependency, not this project
+        run: python -m pip install "PyYAML>=6,<7"
+      - name: Prepare a pinned official toolchain outside the replay runner
+        shell: bash
+        run: |
+          curl --fail --location --retry 2 --max-time 240 \
+            --output "$RUNNER_TEMP/lean-4.19.0-linux.tar.zst" \
+            https://github.com/leanprover/lean4/releases/download/v4.19.0/lean-4.19.0-linux.tar.zst
+          printf '%s  %s\n' \
+            6fe3ce97a58f44e2b3567d455b994eacec5bfe9ae7774f2a573444480ba813fe \
+            "$RUNNER_TEMP/lean-4.19.0-linux.tar.zst" | sha256sum --check --strict
+          tar --no-same-owner --zstd -xf "$RUNNER_TEMP/lean-4.19.0-linux.tar.zst" -C "$RUNNER_TEMP"
+      - name: Require real success, transitive-sorry failure, and custom-axiom observation
+        env:
+          LABO_REPLAY_TOOLCHAIN_DIR: ${{ runner.temp }}/lean-4.19.0-linux
+        run: python -B -m unittest discover -s tests -p test_formal_replay.py -v

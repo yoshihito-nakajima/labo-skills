@@ -18,6 +18,13 @@ improvements there so mathematical practice can feed back into shared skills.
 Fork-specific choices can remain in the fork; upstream acceptance is not a
 prerequisite for using them.
 
+Keep the complete reusable harness in that checkout: instructions, formats,
+templates, executable code, and synthetic tests. `.agents` and `.claude` are
+possible placements, not separate implementations. The host workspace follows
+the checked-out policy. Do not make private host code, copied rules, or a
+separately installed executable the real authority while the skill merely
+describes it. Private mathematical material remains in the parent workspace.
+
 Treat friction in workflows as actionable research infrastructure feedback.
 When a recurring problem appears:
 
@@ -31,6 +38,9 @@ When a recurring problem appears:
    Use synthetic examples to make a reusable change reviewable independently
    of the research that motivated it. For instruction changes, preserve the
    useful decision criterion without accumulating incident-specific prose.
+   For runtime or path changes, test the actual mounted launcher under both
+   `.agents` and `.claude`, including invocation outside the workspace. Preserve
+   host discovery choices and user-owned `AGENTS.md`; do not add policy copies.
 5. When useful, present the concrete reusable change as an upstream PR
    candidate. The user can keep it fork-only or contribute it through `labo-pr`;
    an existing request to contribute already settles that choice. A public

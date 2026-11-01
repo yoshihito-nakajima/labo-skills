@@ -5,6 +5,10 @@ description: Route mathematical research tasks to the appropriate labo skill and
 
 # Research routing
 
+Before drafting or changing source artifacts, follow
+[editing capability and handoff](references/editing-capability.md). Apply this
+check to your own role as well as delegated workers.
+
 ## Lightweight workspace preflight
 
 For each new task that reads or changes a Labo workspace, run this once before

@@ -37,7 +37,13 @@ are preserved, so the command warns when those files prevent reaching the
 limit. Use `--max-files <count>` to choose another limit, or
 `output prune --max-files <count>` to clean `output/` without compiling. The
 internal output lock coordinates build and cleanup commands without adding a
-lock file to `output/`.
+lock file to `output/`. A fixed `.labo-output.lock` in the workspace root is
+retained rather than unlinked or replaced, so concurrent waiters share the same
+file. POSIX uses `flock`; native Windows uses an exclusive one-byte CRT lock at
+offset zero, with interruptible retries on contention. Locking past EOF is
+supported, so no seed write or truncation is needed. The lock is released on
+normal and exceptional exit; this is coordination between cooperating commands,
+not protection against an unrelated program replacing files.
 
 Generated PDFs, SyncTeX files, and caches in these build locations are ignored.
 The root `inbox/` is an unassigned local staging area and is ignored by default;

@@ -1,0 +1,4 @@
+# Optional claim catalog. The active policy checkout defines its format.
+# Fill it from inspected evidence; no claim or approval is created by default.
+schema_version: 1
+claims: {}

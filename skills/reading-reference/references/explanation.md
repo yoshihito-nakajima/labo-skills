@@ -23,7 +23,9 @@
 - **R11 Fidelity** — Preserve the source's hypotheses, generality, quantifiers,
   normalizations, uncertainty and exceptions through prose, formulas and figures.
   Label source statements, checked derivations, analogies, pedagogical examples
-  and open gaps. Reordering is welcome with a route back to source locations;
+  and open gaps. For source-aligned paper preparation, retain the source section order and
+  numbering under [Paper preparation](paper-preparation.md). In other formats,
+  reorder when useful with a route back to source locations;
   an easier special case cannot replace an in-scope general result.
 - **R12 Evidence in view** — Put the actual relevant figure/panel beside its
   substantive explanation at a readable scale. Identify what to compare, the
@@ -36,18 +38,31 @@
   formulas, code behavior and interpreted results locally connected. Long
   listings can live in an explained appendix with editable sources; essential
   settings and operations must remain understandable where they are used.
-  When code is requested, let the reader follow a central algorithm from its
+  When code is requested or required for paper preparation, let the reader
+  follow each in-scope computational method from its
   cited primary-source steps to the essential executable unit and the result
   interpreted at that point. A distant listing of plotting utilities or a toy
   experiment cannot stand in for this connection.
 - **R14 Usable navigation** — Keep source and local figure numbers distinct,
   use descriptive equation/code labels and working links where supported, and
-  test a route from explanation to evidence and back. Source attachments retain
-  their evidential role; reproducing a paper or listing does not itself teach it.
-  When changing teaching order, give a short correspondence to the original.
+  test a route from explanation to evidence and back. Link point-of-use
+  citations to their formal entries when a reference list is present, with
+  return links to the relevant method/code passages. When body excerpts and a
+  final code listing or index coexist, link each excerpt to its matching full listing or formal code entry,
+  and link back to the explanation. Give a working link to the complete editable
+  implementation as delivered, as well as to the external source where available.
+  Plain filenames, colored text, a table of contents or viewer history do not
+  supply these routes. Do not require an appendix merely to create navigation.
+  Source attachments retain their evidential role; reproducing a paper or
+  listing does not itself teach it.
+  For other formats that change teaching order, give a short correspondence
+  to the original.
 
-For each central contribution, explain the relevant prior capability, what is
-retained or changed, what the new evidence establishes, and its limits. Reuse,
-confirmation and negative results can be substantive contributions. Verify
-comparisons on both sides; do not force a superiority claim or an exhaustive
-literature survey onto every background citation.
+For each central contribution, connect the question and prior capability to
+what is retained or changed, the new evidence and its limits. Use the method
+understanding contract in [Paper preparation](paper-preparation.md) for detailed
+method explanations. Ground motivation, inherited structure, novelty and
+comparisons in inspected literature; distinguish authors' statements from an
+added synthesis. Reuse, confirmation and negative results can be substantive
+contributions; do not force superiority or an exhaustive history onto background
+references.

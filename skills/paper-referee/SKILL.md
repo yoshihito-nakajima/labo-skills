@@ -56,6 +56,27 @@ standalone policy checkout.
    actually read, remaining scope, and a concise example that worked. A clean
    local reading is not a correctness or whole-paper certificate.
 
+## Optional durable review record
+
+When the user asks to save a review or the workspace already uses scoped
+records for this task, follow the owning
+[evidence protocol](../research-management/references/evidence.md). Capture
+the actual inputs with `evidence snapshot` before reviewing; proof and writing
+records have different scopes. For a TeX manuscript, the optional
+[scope diagnostic](../research-management/references/evidence-scope.md) helps
+identify literal inputs omitted from that selection; unresolved dependencies
+still require inspection, and the diagnostic never expands a snapshot. The
+snapshot command emits only a pending record. Keep
+catalog verdicts and earlier records out of an independent reader's initial
+brief; a coordinator can capture their hashes without supplying their contents.
+
+After the real review, record the actual verdict, reviewer, date, and report
+hash without changing the captured inputs. If the inputs changed during the
+review, recheck the affected scope instead of refreshing an old pass. State
+single-context versus genuinely independent reading accurately. Never invent
+owner confirmation. A report-only task does not authorize manuscript edits,
+approval promotion, or new persistent files merely to satisfy this protocol.
+
 ## Optional independent reading
 
 If a fresh reader is requested or needed to test an accessibility concern,
@@ -65,6 +86,12 @@ repairs; do not supply the intended story, prior findings, or author answers.
 Compose the assignment for the task; no saved role or model is required.
 Without fresh isolation, label the result a local reading, not a blind review.
 `paper map` and `paper section` load complete openings/sections: they do not
-establish paragraph-by-paragraph prefix isolation. Check a rendered artifact
+establish paragraph-by-paragraph prefix isolation. If staged reading is explicitly
+requested, follow [staged sessions](references/staged-reading.md): a coordinator
+uses `paper reading start/next/observe/status`, exposing only each cumulative
+prefix to the fresh reader. Record initial understanding and first confusion
+before the next exposure; append later rescue separately. The session tool does
+not supply process isolation or certify independence, and creates persistent
+private records only within the authorized task. Check a rendered artifact
 when making visual claims. Subsequent repairs and rechecks follow the user's
 scope; a report-only review does not start an automatic revision loop.

@@ -8,6 +8,8 @@ from pathlib import Path
 import shlex
 import sys
 
+import yaml
+
 from .build import (
     DEFAULT_OUTPUT_MAX_FILES,
     ENGINE_FLAGS,
@@ -17,9 +19,11 @@ from .build import (
     run_build,
     run_source_build,
 )
+from .evidence import EvidenceError, KINDS, check_evidence, init_catalog, snapshot
 from .layout import LayoutError, init_layout, new_item
 from .paper import PaperError, map_openings, read_section
 from .plans import PlanError, ResearchPlan, read_workspace
+from .reader import ReadingError
 from .workspace import WorkspaceError, resolve_workspace
 
 
@@ -38,6 +42,76 @@ def _filtered(
 def _workspace(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--workspace", type=Path,
                         help="private labo workspace (repository launcher defaults to its Git superproject)")
+
+
+def _diagnostic_result(result: dict, output_format: str) -> None:
+    if output_format == "json":
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    print(result["status"].upper())
+    if "research" in result:
+        print(f"research/{result['research']}: {result['adoption']}")
+        for claim in result["claims"]:
+            counts = ", ".join(f"{kind}={count}" for kind, count in claim["current_reviews_by_kind"].items())
+            print(f"[{claim['evidence_status']}] {claim['id']}: "
+                  f"structure={claim['structure']}; current reviews: {counts or 'none'}")
+            if claim["attention"]:
+                print("  attention: " + ", ".join(claim["attention"]))
+        for record in result["records"]:
+            print(f"[{record['state']}] {record['path']}")
+        if not result["claims"]:
+            print("No catalog claims recorded; this is not a statement about the research's completeness.")
+    elif "dependencies" in result:
+        for dependency in result["dependencies"]:
+            print(f"[{dependency['kind']}] {dependency['path']}")
+        for path in result["omitted"]:
+            print(f"not covered by selected inputs: {path}")
+        print("Scope discovery does not expand a snapshot or prove TeX dependency completeness.")
+    for issue in result.get("issues", []):
+        print(f"{issue['severity']}: {issue['path']}: {issue['message']}")
+    limits = result.get("limits", result.get("limitations", []))
+    if isinstance(limits, str):
+        limits = [limits]
+    for limit in limits:
+        print(f"limit: {limit}")
+
+
+def _replay_result(result: dict, output_format: str) -> None:
+    if output_format == "json":
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+    print(f"{result['status'].upper()}: selected-source Lean replay")
+    print(f"{result['catalog']}#{result['claim']}: {result['declaration']}")
+    print(f"Source: {result['source']}; toolchain: {result['toolchain']['pin']}")
+    print(f"Preflight ready: {result['preflight']['ready']}; executed: {result['executed']}")
+    for problem in result["preflight"]["problems"]:
+        print(f"unavailable: {problem}")
+    for index, command in enumerate(result["commands"], 1):
+        print(f"{index}. [{command['status']}] exit={command['exit_code']}: "
+              + shlex.join(command["argv"]))
+        if command["status"] not in {"not-run", "completed"}:
+            for stream in ("stdout", "stderr"):
+                if command[stream]:
+                    print(f"{stream}:\n{command[stream].rstrip()}")
+    if result["toolchain"]["version"]:
+        print(f"Actual version: {result['toolchain']['version']}")
+    if result.get("failure"):
+        print(f"failure: {result['failure']}")
+    audit = result["axiom_audit"]
+    print(f"Axiom audit: {audit['status']}; axioms={audit['axioms']}; "
+          f"trust review required={audit['review_required']}")
+    if audit["raw_output"] and result["commands"][-1]["status"] == "completed":
+        print("Declaration and axiom output:\n" + audit["raw_output"].rstrip())
+    print(f"Inputs before: {result['inputs_before']['sha256']}; "
+          f"changed during execution: {result['inputs_changed']}")
+    print("Full input manifests and command observations are available with --format json.")
+    for warning in result["warnings"]:
+        print(f"limit: {warning}")
+    print("Replay is not informal alignment, owner confirmation, or claim approval.")
+
+
+def _diagnostic_exit(result: dict, strict: bool) -> int:
+    return int(result["status"] == "error" or (strict and result["status"] == "warning"))
 
 
 def _build_arguments(parser: argparse.ArgumentParser) -> None:
@@ -99,6 +173,13 @@ def _build(args: argparse.Namespace) -> None:
 
 
 def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
+    # A pipe on native Windows can otherwise use a legacy code page, even
+    # when the input files and JSON contract are UTF-8. Also works under -I,
+    # which intentionally ignores PYTHONIOENCODING/PYTHONUTF8.
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(prog="labo")
     areas = parser.add_subparsers(dest="area", required=True)
 
@@ -132,6 +213,61 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
             sub.add_argument("--search")
             sub.add_argument("--format", choices=("text", "json"), default="text")
 
+    evidence = areas.add_parser("evidence", help="optional evidence structure and review freshness")
+    evidence_actions = evidence.add_subparsers(dest="action", required=True)
+    evidence_init = evidence_actions.add_parser("init", help="create an empty opt-in claim catalog")
+    _workspace(evidence_init)
+    evidence_init.add_argument("--catalog", required=True)
+    evidence_init.add_argument("--dry-run", action="store_true")
+    evidence_snapshot = evidence_actions.add_parser(
+        "snapshot", help="print pending review inputs as YAML without writing or approving",
+    )
+    _workspace(evidence_snapshot)
+    evidence_snapshot.add_argument("--kind", choices=KINDS, required=True)
+    evidence_snapshot.add_argument("--catalog")
+    evidence_snapshot.add_argument("--claim", action="append", default=[])
+    evidence_snapshot.add_argument("--file", action="append", default=[])
+    evidence_snapshot.add_argument("--tree", action="append", default=[])
+    evidence_snapshot.add_argument("--policy-file", action="append", default=[])
+    evidence_check = evidence_actions.add_parser("check", help="check selected record structure and freshness")
+    _workspace(evidence_check)
+    evidence_check.add_argument("--catalog")
+    evidence_check.add_argument("--record", action="append", default=[])
+    evidence_check.add_argument("--strict", action="store_true")
+    evidence_check.add_argument("--format", choices=("text", "json"), default="text")
+
+    evidence_scope = evidence_actions.add_parser("scope", help="inspect literal TeX dependencies and omitted review inputs")
+    _workspace(evidence_scope)
+    source = evidence_scope.add_mutually_exclusive_group(required=True)
+    source.add_argument("--paper", help="writing/<slug>/main.tex")
+    source.add_argument("--source", help="workspace-relative TeX entry source")
+    evidence_scope.add_argument("--compile-root",
+                                help="workspace-relative TeX working directory; '.' means workspace root (default: source parent)")
+    evidence_scope.add_argument("--record", help="compare discovered dependencies with one saved snapshot")
+    evidence_scope.add_argument("--file", action="append", default=[])
+    evidence_scope.add_argument("--tree", action="append", default=[])
+    evidence_scope.add_argument("--strict", action="store_true")
+    evidence_scope.add_argument("--format", choices=("text", "json"), default="text")
+
+    evidence_inventory = evidence_actions.add_parser("status", help="read one research program's recorded evidence and review coverage")
+    _workspace(evidence_inventory)
+    evidence_inventory.add_argument("--research", required=True)
+    evidence_inventory.add_argument("--catalog", help="catalog within the selected research program (default: claims.yaml)")
+    selection = evidence_inventory.add_mutually_exclusive_group()
+    selection.add_argument("--reviews", help="review directory within the program (default: reviews/)")
+    selection.add_argument("--record", action="append", default=[], help="explicit record selection instead of directory discovery")
+    evidence_inventory.add_argument("--strict", action="store_true")
+    evidence_inventory.add_argument("--format", choices=("text", "json"), default="text")
+
+    evidence_replay = evidence_actions.add_parser("replay", help="plan or explicitly execute a local selected-source Lean replay")
+    _workspace(evidence_replay)
+    evidence_replay.add_argument("--catalog", required=True)
+    evidence_replay.add_argument("--claim", required=True)
+    evidence_replay.add_argument("--execute", action="store_true", help="run the trusted selected Lean project using an already prepared toolchain")
+    evidence_replay.add_argument("--timeout", type=float, default=60.0, help="timeout in seconds per command")
+    evidence_replay.add_argument("--toolchain-dir", type=Path, help="already installed pinned Lean toolchain directory")
+    evidence_replay.add_argument("--format", choices=("text", "json"), default="text")
+
     paper = areas.add_parser("paper", help="local section-by-section TeX reading")
     paper_actions = paper.add_subparsers(dest="action", required=True)
     for name in ("map", "section"):
@@ -142,6 +278,24 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
             sub.add_argument("--format", choices=("text", "json"), default="text")
         else:
             sub.add_argument("--name", required=True, help="section file stem")
+
+    reading = paper_actions.add_parser("reading", help="opt-in staged first-reader session; no implicit approval")
+    reading_actions = reading.add_subparsers(dest="reading_action", required=True)
+    for action in ("start", "next", "observe", "status"):
+        sub = reading_actions.add_parser(action)
+        _workspace(sub)
+        sub.add_argument("--session", required=True, help="private workspace-relative session record")
+        sub.add_argument("--format", choices=("text", "json"), default="text")
+        if action == "start":
+            sub.add_argument("--source", required=True)
+            sub.add_argument("--reader", required=True)
+            sub.add_argument("--mode", choices=("single-context", "independent"), default="single-context")
+        elif action == "next":
+            sub.add_argument("--through-line", type=int, required=True)
+        elif action == "observe":
+            sub.add_argument("--understanding", required=True)
+            sub.add_argument("--confusion", required=True)
+            sub.add_argument("--rescue", action="store_true", help="append later recovery without replacing the initial observation")
 
     build = areas.add_parser("build", help="compile TeX and manage PDF/SyncTeX output")
     _build_arguments(build)
@@ -173,6 +327,50 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
                 print(f"{'would ' if args.dry_run else ''}{change}")
             if not changes:
                 print("No layout changes needed")
+        elif args.area == "evidence":
+            if args.action == "init":
+                for change in init_catalog(args.workspace, args.catalog, dry_run=args.dry_run):
+                    print(f"{'would ' if args.dry_run else ''}{change}")
+            elif args.action == "snapshot":
+                record = snapshot(
+                    args.workspace, kind=args.kind, catalog=args.catalog,
+                    claim_ids=args.claim, files=args.file, trees=args.tree,
+                    policy_files=args.policy_file,
+                )
+                print(yaml.safe_dump(record, allow_unicode=True, sort_keys=False), end="")
+            elif args.action == "scope":
+                from .evidence_scope import inspect_scope
+                result = inspect_scope(args.workspace, source=args.source, paper=args.paper,
+                                       record=args.record, files=args.file, trees=args.tree,
+                                       compile_root=args.compile_root)
+                _diagnostic_result(result, args.format)
+                return _diagnostic_exit(result, args.strict)
+            elif args.action == "status":
+                from .evidence_status import evidence_status
+                result = evidence_status(args.workspace, research=args.research, catalog=args.catalog,
+                                         reviews=args.reviews, records=args.record)
+                _diagnostic_result(result, args.format)
+                return _diagnostic_exit(result, args.strict)
+            elif args.action == "replay":
+                from .formal_replay import replay
+                result = replay(args.workspace, catalog=args.catalog, claim=args.claim,
+                                execute=args.execute, timeout=args.timeout, toolchain_dir=args.toolchain_dir)
+                _replay_result(result, args.format)
+                return int(result["status"] in {"failed", "unavailable"})
+            elif args.action == "check":
+                result = check_evidence(args.workspace, catalog=args.catalog, records=args.record)
+                if args.format == "json":
+                    print(json.dumps(result, ensure_ascii=False, indent=2))
+                else:
+                    print(f"{result['status'].upper()}: {result['claim_count']} catalog claim(s), "
+                          f"{len(result['records'])} selected review record(s)")
+                    for record in result["records"]:
+                        print(f"[{record['state']}] {record['path']}")
+                    for issue in result["issues"]:
+                        print(f"{issue['severity']}: {issue['path']}: {issue['message']}")
+                    print("Checks cover recorded structure and input identity, not mathematical correctness.")
+                return int(result["status"] == "error" or
+                           (args.strict and result["status"] == "warning"))
         elif args.area == "research":
             plans, errors = read_workspace(args.workspace)
             if errors:
@@ -195,7 +393,32 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
                     if not plans:
                         print("No matching research plans")
         elif args.area == "paper":
-            if args.action == "section":
+            if args.action == "reading":
+                from .reader import start_reading, next_reading, observe_reading, reading_status
+                if args.reading_action == "start":
+                    result = start_reading(args.workspace, args.source, args.session, args.reader, mode=args.mode)
+                elif args.reading_action == "next":
+                    result = next_reading(args.workspace, args.session, args.through_line)
+                elif args.reading_action == "observe":
+                    result = observe_reading(args.workspace, args.session, args.understanding,
+                                             args.confusion, rescue=args.rescue)
+                else:
+                    result = reading_status(args.workspace, args.session)
+                if args.format == "json":
+                    print(json.dumps(result, ensure_ascii=False, indent=2))
+                elif args.reading_action == "next":
+                    # Preserve the captured UTF-8 bytes, including CRLF on
+                    # Windows; text-mode translation would produce CRCRLF.
+                    stream = getattr(sys.stdout, "buffer", None)
+                    if stream is None:  # Embedded callers may capture StringIO.
+                        sys.stdout.write(result["text"])
+                    else:
+                        stream.write(result["text"].encode("utf-8"))
+                else:
+                    print(f"Reader {result['reader']}: through line {result['through_line']}; "
+                          f"awaiting observation={result['awaiting_observation']}")
+                    print(f"Declared mode: {result['mode']}; context independence is not certified.")
+            elif args.action == "section":
                 print(read_section(args.workspace, args.paper, args.name), end="")
             else:
                 openings = map_openings(args.workspace, args.paper)
@@ -218,7 +441,7 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
             print(f"Output files: {result.file_count} (limit {result.max_files})")
             if result.over_limit:
                 print("warning: protected or unrecognized files keep output above the limit", file=sys.stderr)
-    except (PlanError, PaperError, WorkspaceError, LayoutError, OSError, UnicodeError) as exc:
+    except (PlanError, PaperError, WorkspaceError, LayoutError, EvidenceError, ReadingError, OSError, UnicodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
     return 0

@@ -23,6 +23,27 @@ results; use formalization to pressure-test definitions, assumptions, and
 candidate claims. Let either kind of evidence reshape the plan, and record
 which claims are formalized, proved by other means, or still open.
 
+For substantive plan drafts, full plan revisions, or requests to explain a
+whole research program, apply the claim-level evidence and prior-work standard
+in [research policy](references/research-policy.md).
+Distinguish what prior sources establish, what this program adds, and what
+remains conjectural or open. Compare the relevant hypotheses, objects,
+conclusions, and proof methods; link each central claim to its exact source and
+proof record. The plan should explain the decisive proof mechanism and its
+dependencies, while each established central result has a complete, inspected
+derivation in the linked record. Open claims need a concrete proof route,
+missing lemmas, and known obstacles. Never infer novelty from an absent
+citation or an unsuccessful search.
+
+For load-bearing results or reviews that need durable reuse, read the optional
+[evidence protocol](references/evidence.md). It defines stable claim IDs,
+scoped proof/formal evidence, and review-input snapshots, with templates and
+checks owned by this checkout. Reuse an adopted catalog when relevant; create
+one only within the requested work. Keep exploration in prose when a catalog
+would add no value. Its claim statuses do not change the plan's two statuses.
+Never treat a structural check or an unchanged snapshot as proof certification,
+and never promote a claim from the owner's praise or permission to edit.
+
 Use `labo-layout` for workspace and program creation. A request to start
 research from supplied material authorizes creating the necessary plan and
 source directory; reuse a relevant existing program when appropriate.
@@ -43,3 +64,14 @@ installing the project. The launcher detects the private Git superproject;
 use `--workspace /absolute/path/to/labo` to override it or when using a
 standalone policy checkout. For a frontmatter-only inventory, run
 `python3 <labo-script> research list --format json`.
+For an adopted evidence catalog or review, run `evidence check` on those
+explicit paths; do not make unrelated research pass a new mandatory gate.
+
+For a program-level account of recorded claims and review coverage, read
+[evidence status](references/evidence-status.md) and use `evidence status
+--research <slug>`. It reads only the selected program or explicit records;
+absence of a catalog does not trigger migration. For manuscript input omissions,
+read [scope diagnostics](references/evidence-scope.md). For authorized actual
+Lean execution, read [selected-source replay](references/formal-replay.md):
+`evidence replay` plans only unless `--execute` is explicit, uses prepared trusted
+code, and never equates a completed replay with informal alignment or approval.

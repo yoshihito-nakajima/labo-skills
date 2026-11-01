@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from dataclasses import dataclass
-import fcntl
 import os
 from pathlib import Path
 import re
@@ -13,6 +12,7 @@ import subprocess
 import sys
 from typing import Iterator
 
+from .locking import exclusive_lock
 from .paper import PaperError, paper_folder
 
 
@@ -48,12 +48,10 @@ def output_transaction(workspace: Path) -> Iterator[Path]:
     lock_path = workspace / _OUTPUT_LOCK_NAME
     if lock_path.is_symlink():
         raise PaperError("output lock must not be a symlink")
-    with lock_path.open("a", encoding="utf-8") as lock_file:
-        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
-        try:
+    # Retain the lock file: unlinking it can split waiters over different inodes.
+    with lock_path.open("a+b") as lock_file:
+        with exclusive_lock(lock_file):
             yield output
-        finally:
-            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
 
 def _output_files(output: Path) -> list[Path]:

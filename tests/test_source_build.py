@@ -14,7 +14,7 @@ class SourceBuildTests(unittest.TestCase):
     def setUp(self):
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)
-        self.root = Path(temp.name)
+        self.root = Path(temp.name).resolve()
         self.folder = self.root / "writing" / "sample-paper"
         self.folder.mkdir(parents=True)
         self.source = self.folder / "sample-paper_en.tex"

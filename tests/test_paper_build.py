@@ -17,7 +17,7 @@ class PaperBuildTests(unittest.TestCase):
     def setUp(self):
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)
-        self.root = Path(temp.name)
+        self.root = Path(temp.name).resolve()
         self.paper = self.root / "writing" / "story-paper"
         self.sections = self.paper / "sections"
         self.sections.mkdir(parents=True)

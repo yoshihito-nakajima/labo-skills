@@ -16,12 +16,17 @@
   Fetch and inspect references/supplements needed for the requested understanding;
   exhaustive acquisition is a separate requested scope. Follow further sources
   to resolve named dependencies, not an unbounded citation crawl.
-  For surveys, identify the primary work behind each central result, method or
+  For any paper explanation, identify the primary work behind each method
+  motivation, historical relationship, shared structure and consequential
+  difference, as well as each central result, method or
   consequential comparison and inspect the passages needed to explain it.
-  Record the survey location, primary-source version and theorem/algorithm/page,
+  Record the target-paper location, primary-source version and theorem/algorithm/page,
   and where that evidence is explained in the deliverable. Select by the role
   in the requested explanation, not by which PDFs are easiest to obtain;
   background bibliography entries alone need not trigger full-paper reading.
+  The explanation may need substantially more references than the target paper.
+  Do not cap their number at its bibliography or substitute recalled history
+  for inspected passages; follow dependencies needed for understanding.
   If a required primary source is inaccessible, retain that dependency as an
   open gap. An abstract, secondary account or easier example cannot close it.
 - **R4 Evidence bundle** — Preserve panel names, captions, axes, legends,
@@ -35,8 +40,16 @@
   inspect both the current work and its direct predecessor, including decisive
   supplements. Distinguish verified comparison from the authors' positioning;
   citation absence or an unsuccessful search does not establish novelty.
-  In a survey explanation, place the primary citation and exact locator beside
-  the claim or algorithm it supports, alongside the survey locator when useful.
+  Place the primary citation and exact locator beside
+  the claim or algorithm it supports, alongside the target-paper locator when
+  useful. Link directly to the supporting page/section/equation/figure where
+  possible, not merely a bibliography entry or repository homepage. Open the
+  external destination and inspect the intended passage; a successful HTTP
+  response or existing hyperlink alone does not establish the right evidence.
+  When direct anchors are unsupported, link the document and give an exact
+  visible locator, recording the navigation limitation. Distinguish literature
+  statements from a reasoned cross-source synthesis and cite its premises.
+  Unverified relationships must remain hypotheses or gaps, not sourced facts.
   A bibliography-only citation or a private provenance record does not make
   this connection visible to the reader. Mark statements known only through
   the survey as secondary reporting rather than primary-source verification.

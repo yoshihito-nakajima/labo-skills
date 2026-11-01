@@ -10,6 +10,8 @@ labo/
   research/<slug>/
     plan.md                 # narrative plan + YAML index
     inbox/                  # originals submitted for this research
+    claims.yaml             # optional scoped evidence catalog; not initialized
+    reviews/                # optional private review records and reports
   inbox/                    # local staging; contents are gitignored until assigned
   lean/                     # mathematical formalizations
   writing/<paper>/
@@ -47,6 +49,14 @@ explicit workspace. The default mount places the real skills directly under
 can still run the launcher, but require their own host discovery arrangement.
 Do not create `vendor/`,
 generated forwarding skills, or private README policy copies.
+
+The same policy checkout can be mounted at `.claude` or another chosen path;
+only the host's discovery setup and the launcher path differ. Its reusable
+formats, templates, checks, and tests remain authoritative at that location.
+Private catalogs and reports follow the owning
+[evidence protocol](../../research-management/references/evidence.md). They
+are optional research artifacts, not host-side implementations of the harness;
+layout initialization does not create them.
 
 `research/`, `lean/`, `writing/`, `reading/`, and `reference/` may reference
 one another using relative links or identifiers but do not have to share the

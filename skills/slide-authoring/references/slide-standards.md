@@ -22,12 +22,19 @@ one criticism per criterion.
   automatically separate full-length topics. Unused backup alone does not
   establish overrun. Without a time budget, report qualitative pacing risks
   and leave time fit unverified; an estimate is not a measured rehearsal.
-- **S4 Notation** — At first consequential use, supply the necessary object,
+- **S4 Notation and names** — At first consequential use, supply the necessary object,
   domain, parameter range, metric/measure and convergence meaning through a
   visible setup or declared prerequisite. Earlier setup suffices while plainly
   in scope. Use operational definitions when enough; do not front-load unused
   generality. A later appendix or notes-only definition cannot repair a claim
-  that is unintelligible now.
+  that is unintelligible now. Keep the symbols on each frame sparse enough to
+  follow at talk pace. Introduce a symbol or abbreviation when it makes a
+  comparison, inference or repeated expression easier to follow; write one-off
+  quantities directly when that takes less decoding. Give a lemma, estimate,
+  construction, condition or object a new name when recognition or later
+  reference repays the cost of learning it. State local facts directly and
+  describe one-off objects in ordinary language. Preserve useful standard
+  terminology and cross-reference labels.
 - **S5 Accuracy** — Reconstruct the strongest reasonable claim from title,
   formula, legend and nearby prose before opening sources. Check quantifiers,
   hypotheses, normalization and implication direction against exact locators.
