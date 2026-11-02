@@ -5,6 +5,8 @@ description: Contribute selected research-skill improvements from the user's lab
 
 # Selective public pull request
 
+Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
+
 For each user request, follow the [required consultation](../research-router/references/consultation.md).
 
 When author identity, voice, or preferences matter, consult the Labo workspace

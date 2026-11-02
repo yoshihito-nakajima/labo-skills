@@ -5,6 +5,8 @@ description: Create or revise mathematical lecture notes for undergraduate reade
 
 # Write for an undergraduate mathematics reader
 
+Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
+
 Use this skill for an undergraduate-targeted lecture note or a manuscript
 target named `*_lec.tex`. It specializes the explanation; it does not create a
 second production workflow. For a research lecture manuscript, also follow

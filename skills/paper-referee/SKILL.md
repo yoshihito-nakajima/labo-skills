@@ -1,9 +1,11 @@
 ---
 name: paper-referee
-description: Review mathematical papers, section openings, proof exposition, or verbosity using numbered criteria and local reading. Report supported findings without rewriting; not for slides or lecture notes.
+description: Rigorously audit mathematical papers, decisive proofs, section openings and exposition against numbered criteria, actively testing claims and hypotheses. Report evidence-based findings without rewriting; not for slides or lecture notes.
 ---
 
 # Mathematical paper referee
+
+Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
 
 For each user request, follow the [required consultation](../research-router/references/consultation.md).
 
@@ -27,6 +29,46 @@ use a globally installed `labo` command or infer the workspace from the
 shell's current directory. The launcher uses its private Git superproject;
 pass `--workspace /absolute/path/to/labo` to override it or when using a
 standalone policy checkout.
+
+The `paper map` and `paper section` commands below apply to the standard Labo
+TeX layout with `main.tex` and `sections/`. For Markdown, a single TeX file or
+another layout, inspect the actual source and heading/include order directly
+with line locators; for PDF-only input use page/statement locators. Preserve
+the existing layout while applying the same local-reading and evidence rules.
+
+## Adversarial mathematical audit
+
+Treat the assigned claims as obligations to withstand attempts at falsification.
+Prioritize the central theorem and its weakest load-bearing inference over
+editorial polishing. Follow the decisive argument to its actual inputs, even
+when several routine calculations around it are correct. Within the requested
+scope, actively test:
+
+- Every cited theorem's hypotheses on the actual objects and substitutions;
+  the exact prior-art statement and the claimed new delta.
+- Quantifier order, dependence of choices/constants/subsequences, uniformity,
+  and whether a pointwise assertion was promoted to a simultaneous one.
+- Empty, zero, endpoint, degenerate and extremal cases relevant to the claim;
+  limit/interchange, compactness, attainment and existence steps.
+- Hidden standing assumptions, definitions that import the conclusion,
+  circular lemma reuse, and changes of objects or conventions during the proof.
+
+A counterexample must satisfy the stated hypotheses and contradict the exact
+conclusion. An apparent proof gap requires the missing inference and its
+consequence identified at a precise passage. Keep a demonstrated defect,
+a plausible concern needing a named check, and an unavailable check distinct.
+Do not promote suspicion to refutation, or the ability to imagine a repair to
+a passed proof. When an adopted dependency graph exists, inspect affected
+edges against the source; acyclicity alone cannot establish complete extraction.
+
+Keep blockers explicit and first in the report. State the affected claim,
+downstream consequence and minimum obligation for resolving each finding.
+Do not silently supply a new lemma, missing proof or stronger hypothesis and
+then judge the manuscript as if it contained that repair. A requested review
+remains report-only. Use direct, exact criticism of the mathematics and text;
+avoid insults, theatrical hostility, compulsory praise and criticism quotas.
+If attempted stress tests reveal no supported defect, say what was tested
+and what remains unchecked rather than manufacturing one.
 
 ## Review protocol
 
@@ -52,6 +94,11 @@ standalone policy checkout.
    defect, a concern, and unavailable evidence. For verbosity, identify what
    a deletion, replacement or relocation preserves; do not recommend cuts
    from word count alone. Retain clear, economical passages.
+   When mathematical terminology, symbols or conventions are in scope, run
+   the [corpus-backed terminology audit](../reading-reference/references/terminology-audit.md)
+   after the initial reader assessment. Match actual types and roles to
+   definitions/formulas on inspected source pages; distinguish undefined role
+   labels and semantic mismatches from coherent alternatives or preferences.
    For a whole-paper/submission review or in-scope novelty, lineage or notation
    comparison, apply the required
    [positioning investigation](../reading-reference/references/research-positioning.md)
@@ -60,9 +107,12 @@ standalone policy checkout.
    scope. Judge the paper's claims, not whether a particular memo filename exists.
    Report material source gaps without inventing novelty or treating an unchecked
    concern as a refutation. Local editorial reviews do not start a field survey.
-5. Return findings with **rule ID, severity, passage/line, evidence, and
-   smallest sufficient repair**. State the version, sections and dependencies
-   actually read, remaining scope, and a concise example that worked. A clean
+5. Return findings with **rule ID, severity, passage/line, evidence status,
+   evidence, consequence, and smallest sufficient repair obligation**. Order
+   them by consequence for the assigned use. State the version, sections and
+   dependencies actually read, stress tests attempted, and remaining scope.
+   Mention effective passages when that helps preserve a working choice;
+   a positive example is not a required counterweight to a blocker. A clean
    local reading is not a correctness or whole-paper certificate.
 
 ## Optional durable review record

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Introduction"
+  short_description: "Discover and order an evidence-led research story"
+  default_prompt: "Use $paper-introduction to find the central question, position the contribution, and shape this paper’s introduction from its evidence."

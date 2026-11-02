@@ -14,6 +14,7 @@ OWNER_ROUTES = (
     "skills/research-management/SKILL.md",
     "skills/research-management/references/research-policy.md",
     "skills/paper-writing/SKILL.md",
+    "skills/paper-introduction/SKILL.md",
     "skills/paper-referee/SKILL.md",
     "skills/paper-referee/references/standards.md",
     "skills/slide-authoring/SKILL.md",

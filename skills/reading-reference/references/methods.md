@@ -22,6 +22,14 @@ in a purely theoretical source do not create empirical tasks.
 
 ## Algorithms and computation
 
+Apply [Applications to code](application-to-code.md) to every in-scope
+method-code unit: keep the current passage's translation/necessary explanation,
+corresponding code and interpretation adjacent within its source section. Map
+the practical application need and the example's learning purpose to that unit.
+The application logic does not require withholding all code until a long
+standalone account ends. Establish application requirements before selecting
+the implementation under R18; a working synthetic example is not application evidence.
+
 - **R18 Target** — Choose the paper's procedure, an inspected fixed code
   revision, or both with a declared main route. Preserve discrepancies in
   defaults, inequalities, ties and library behavior. Keep source-reported,
@@ -85,7 +93,9 @@ in a purely theoretical source do not create empirical tasks.
   Cover the central algorithms in the requested unit, not only the one easiest
   to demonstrate. Supply their essential executable units beside the relevant
   explanation, with explicit links to complete editable sources and any longer
-  appendix listing. At each code unit that implements or explains a paper
+  appendix listing. Put the essential executable operations at the point where
+  their translation/explanation is read; a remote full listing or API call alone
+  does not supply this local implementation. At each code unit that implements or explains a paper
   algorithm, identify the paper/version and exact algorithm, equation or step,
   with a working source link and a page/section anchor where supported. State
   locally whether the code is original-author code, an adaptation, an inspected
@@ -152,6 +162,11 @@ in a purely theoretical source do not create empirical tasks.
   Restrictions on code reuse may require a transparent independent implementation;
   unresolved source, license, data or execution barriers remain visible gaps.
   Purely theoretical reading does not require inventing a coding task.
+  For every code unit, identify its actual application account and relationship
+  to relevant other procedures/code under [Applications to code](application-to-code.md).
+  Map shared and changed equations to functions/lines and explain their effect
+  on the application requirement and output interpretation. Origin labels or a
+  generic "variant" caption do not establish this relationship.
 - **R21 Comparisons** — Explain how each baseline computes its score. Check
   data splits/leakage, tuning, aggregation, uncertainty, resources and comparable
   conditions. Implementation claims need fixed code evidence on both sides.

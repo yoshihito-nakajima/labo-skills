@@ -5,6 +5,8 @@ description: Start or resume story-centered research from inbox material, mainta
 
 # Research program maintenance
 
+Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
+
 For each user request, follow the [required consultation](../research-router/references/consultation.md).
 
 When author identity, voice, or preferences matter, consult the Labo workspace
@@ -53,6 +55,16 @@ one only within the requested work. Keep exploration in prose when a catalog
 would add no value. Its claim statuses do not change the plan's two statuses.
 Never treat a structural check or an unchanged snapshot as proof certification,
 and never promote a claim from the owner's praise or permission to edit.
+
+For categories, theorem/question nodes and nested work progress, use
+[research-exploration](../research-exploration/SKILL.md). It supplements the
+program story without changing this skill's two plan statuses. Its formal
+completion gate reuses adopted claim catalogs and directly covering formal
+reviews. When accepting plan edits or exploration in an existing program, follow
+[labo-layout's safe structural migration](../labo-layout/references/research-migration.md)
+to create a missing tree and reuse existing records. Read-only work preserves
+the layout. Structural migration leaves past proof statuses and links intact;
+new proof-bearing tasks use the formal completion gate.
 
 Use `labo-layout` for workspace and program creation. A request to start
 research from supplied material authorizes creating the necessary plan and

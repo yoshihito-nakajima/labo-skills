@@ -1,0 +1,7 @@
+# Project example: check installed support before merging these [agents] keys.
+# Keep the user's primary model, effort, provider and permissions unchanged.
+# Select suitable model/effort explicitly in role files or native invocations.
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 6
+interrupt_message = true

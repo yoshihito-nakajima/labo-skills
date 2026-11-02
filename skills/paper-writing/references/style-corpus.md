@@ -3,6 +3,13 @@
 Use the workspace writing corpus to learn from examples while keeping its
 observations distinct from instructions.
 
+For mathematical names, symbols and role labels, also apply the shared
+[terminology and notation audit](../../reading-reference/references/terminology-audit.md).
+Its definition/semantic verification is distinct from the soft style cues
+below: compare actual same-role definitions and formulas, preserving valid
+alternative conventions and recording missing source evidence. For an existing
+manuscript, keep the initial local reader assessment ahead of corpus access.
+
 ## Per-task workflow
 
 1. Identify the manuscript's field, target venue, language, and document type.

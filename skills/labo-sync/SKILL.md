@@ -5,6 +5,8 @@ description: Review and selectively adopt shared labo-skills changes into the us
 
 # Adopt upstream labo-skills changes
 
+Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
+
 Use this skill when the user wants newer shared Labo skills or tools in their
 fork. A routine `git pull` of the private research repository is a separate
 Git task and does not need this workflow.

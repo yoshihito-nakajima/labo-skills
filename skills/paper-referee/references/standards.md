@@ -80,6 +80,18 @@ which references resolved dependencies. Missing evidence is not a proven defect.
 - **P4.7 Proof interfaces** — Track dependencies and assumptions through
   reuse. Apply an established result directly when it suffices; a different
   variant needs its additional argument. Check for circular dependencies.
+- **P4.8 Quantifier stress test** — Rewrite the decisive assertion with its
+  quantifiers and allowed dependencies explicit. Test whether a common bound,
+  subsequence, neighborhood or witness was inferred from separate pointwise
+  choices. Verify any asserted independence from parameters and ranges.
+- **P4.9 Limiting and existence steps** — Check the hypotheses enabling
+  exchanged limits/integrals/extrema, compactness, extraction, attainment and
+  passage to the boundary. Test the actual topology, domain and limiting
+  objects; formal similarity to a known argument supplies no missing condition.
+- **P4.10 Hidden assumptions** — Compare the proof's working assumptions with
+  the statement, including nonemptiness, nonvanishing, finiteness, regularity,
+  choice and normalization when relevant. Identify the exact use and the
+  affected conclusion; do not add a hypothesis silently to save the theorem.
 
 ## P5. Exposition and references
 
@@ -113,6 +125,15 @@ which references resolved dependencies. Missing evidence is not a proven defect.
   translations between conventions are explicit and consistent with the cited
   source; check that statements and proofs survive the translation. Do not
   demand wholesale renaming merely because another source uses other symbols.
+- **P5.9 Corpus-backed semantic fit** — Apply the
+  [terminology audit](../../reading-reference/references/terminology-audit.md)
+  after the initial reader assessment. Match a name/symbol's actual type, role
+  and scope to inspected same-field definitions and source formulas/pages;
+  distinguish semantic misuse, undefined role labels, collisions, normalization
+  errors, defined alternatives and preferences. A missing corpus hit proves
+  no nonstandardness. For a supremum variable, a label such as “test” needs a
+  usable meaning; “maximizer” additionally requires attainment. Preserve valid
+  test-function terminology and coherent alternative conventions.
 
 ## P6. Editorial integrity
 
@@ -144,6 +165,9 @@ which references resolved dependencies. Missing evidence is not a proven defect.
   (material comprehension gap), or minor (local editorial friction).
   Reserve blocker for a central failure preventing the requested use. Label
   style preferences separately; an unavailable check is an explicit limitation.
+  A supported central proof failure remains a blocker even if an author may
+  later repair it. Severity describes the consequence, while evidence status
+  separately distinguishes demonstrated defect, concern and unchecked scope.
 - **P7.4 Minimal repair** — Give a concrete, focused remedy, including a
   cross-reference instead of repeated text when appropriate.
 - **P7.5 Epistemic limit** — Separate proven defect, plausible concern, and
@@ -152,3 +176,9 @@ which references resolved dependencies. Missing evidence is not a proven defect.
   before checking the intended answer. Prior author context, full-text preload
   or a previous review prevents claiming a fresh first encounter; neither
   reviewer agreement nor a tool's success proves human comprehension.
+- **P7.7 Unrepaired verdict** — Assess the argument actually present. Name the
+  missing obligation and its downstream effect without completing it on the
+  author's behalf or counting a hypothetical repaired proof as a pass.
+- **P7.8 Audit honesty** — Actively challenge decisive claims within scope.
+  Report attempted tests and supported findings without a praise/criticism
+  quota. A failed attempt to refute a statement is bounded evidence, not proof.

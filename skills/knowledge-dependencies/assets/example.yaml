@@ -1,0 +1,35 @@
+schema_version: 1
+scope: Synthetic bounded-sequence argument; all four ingredients in the paired source note.
+coverage:
+  status: source-reviewed
+  note: Synthetic example only; nodes and hard edges were matched to the paired note.
+nodes:
+  - id: conclusion
+    kind: theorem
+    statement: For every natural n, |x_n| is at most M + 1.
+    source:
+      path: research/example/example-source.md
+      locator: Conclusion and proof
+    requires: [estimate]
+  - id: estimate
+    kind: lemma
+    statement: For every natural n, |x_n| is at most M.
+    source:
+      path: research/example/example-source.md
+      locator: Estimate
+    requires: [ambient, uniform]
+  - id: uniform
+    kind: assumption
+    statement: A real M >= 0 satisfies |x_n| <= M for every natural n.
+    source:
+      path: research/example/example-source.md
+      locator: Uniform hypothesis
+    requires: [ambient]
+  - id: ambient
+    kind: definition
+    statement: x is a real sequence indexed by natural numbers.
+    source:
+      path: research/example/example-source.md
+      locator: Ambient objects
+    requires: []
+    references: [conclusion]

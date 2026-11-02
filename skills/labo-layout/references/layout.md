@@ -12,6 +12,8 @@ labo/
     inbox/                  # originals submitted for this research
     claims.yaml             # optional scoped evidence catalog; not initialized
     reviews/                # optional private review records and reports
+    exploration/tree.json   # standard for new/resumed work; schema_version identifies structure
+    exploration/notes/       # optional scoped investigation records
   inbox/                    # local staging; contents are gitignored until assigned
   lean/                     # mathematical formalizations
   writing/<paper>/
@@ -57,6 +59,12 @@ Private catalogs and reports follow the owning
 [evidence protocol](../../research-management/references/evidence.md). They
 are optional research artifacts, not host-side implementations of the harness;
 layout initialization does not create them.
+
+`layout new research` creates an empty exploration tree by default. Existing
+programs gain that structure when accepted plan-editing or exploration work
+needs it, following [safe migration](research-migration.md). A program without
+a tree retains its plan, claims and proof statuses; inventories and report-only
+work do not write one. Structure and Lean-evidence status are independent.
 
 `research/`, `lean/`, `writing/`, `reading/`, and `reference/` may reference
 one another using relative links or identifiers but do not have to share the

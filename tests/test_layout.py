@@ -1,15 +1,18 @@
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
+import json
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from labo_tools.cli import main
+from labo_tools import exploration
 from labo_tools.layout import CHECKOUT, LayoutError, init_layout, new_item
 from labo_tools.paper import map_openings
 from labo_tools.plans import read_plan
@@ -61,7 +64,7 @@ class LayoutTests(unittest.TestCase):
     def test_research_creation_roundtrips_yaml_and_existing_item_is_preserved(self):
         title = '有限観測: "問い"'
         summary = "第一の問い\n---\nstatus: completed\nこれは資料の本文"
-        code, _, error = self.cli(
+        code, output, error = self.cli(
             "layout", "new", "research", "finite-observations",
             "--title", title, "--summary", summary, "--next", "反例を計算する",
         )
@@ -73,10 +76,45 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(plan.status, "in_progress")
         self.assertEqual(plan.next, "反例を計算する")
         self.assertTrue((folder / "inbox").is_dir())
+        self.assertIn("create research/finite-observations/exploration/tree.json", output)
+        tree = exploration.inspect(self.root, folder.name)
+        self.assertEqual(tree["adoption"], "enabled")
+        self.assertEqual(tree["revision"], 0)
+        self.assertEqual(tree["settings"]["mode"], "sequential")
+        self.assertEqual(tree["nodes"], [])
+        self.assertEqual(tree["proof_targets"], 0)
+        self.assertFalse((folder / "claims.yaml").exists())
         (folder / "plan.md").write_text("The user's edited research", encoding="utf-8")
         with self.assertRaisesRegex(LayoutError, "already exists"):
             new_item(self.root, "research", folder.name, title="Other", summary="Other")
         self.assertEqual((folder / "plan.md").read_text(), "The user's edited research")
+
+    def test_research_dry_run_reports_tree_without_writing(self):
+        self.root.mkdir()
+        original = self.root / "original.bin"
+        original.write_bytes(b"private original\x00\xff")
+        code, output, error = self.cli("layout", "new", "research", "example", "--title", "A", "--summary", "B", "--dry-run")
+        self.assertEqual((code, error), (0, ""))
+        self.assertIn("would create research/example/exploration/tree.json", output)
+        self.assertEqual(list(self.root.iterdir()), [original])
+        self.assertEqual(original.read_bytes(), b"private original\x00\xff")
+
+    def test_failed_new_tree_preserves_new_plan_and_original_material_for_retry(self):
+        original = self.root / "research" / "legacy" / "proof.md"
+        original.parent.mkdir(parents=True)
+        original.write_bytes(b"existing proof\r\n\xff")
+        with patch("labo_tools.exploration.os.replace", side_effect=OSError("synthetic write failure")):
+            with self.assertRaisesRegex(LayoutError, "plan.md and inbox/ were created and preserved"):
+                new_item(self.root, "research", "example", title="A", summary="B")
+        folder = self.root / "research" / "example"
+        before = (folder / "plan.md").read_bytes()
+        self.assertTrue((folder / "inbox").is_dir())
+        self.assertFalse((folder / "exploration/tree.json").exists())
+        self.assertEqual(list((folder / "exploration").glob(".tree-*.tmp")), [])
+        exploration.initialize(self.root, "example", if_missing=True)
+        self.assertEqual((folder / "plan.md").read_bytes(), before)
+        self.assertEqual(original.read_bytes(), b"existing proof\r\n\xff")
+        self.assertEqual(json.loads((folder / "exploration/tree.json").read_text())["nodes"], [])
 
     def test_templates_work_with_existing_readers(self):
         self.assertEqual(self.cli("layout", "init")[0], 0)

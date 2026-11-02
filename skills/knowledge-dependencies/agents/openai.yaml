@@ -1,0 +1,4 @@
+interface:
+  display_name: "Knowledge Dependencies"
+  short_description: "Check sourced mathematical dependencies and proof order"
+  default_prompt: "Use $knowledge-dependencies to extract and check this argument’s sourced dependencies, topological order and unresolved coverage."

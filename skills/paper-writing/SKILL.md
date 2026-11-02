@@ -5,11 +5,23 @@ description: Draft or revise mathematical research manuscripts from research pla
 
 # Mathematical paper writing
 
+Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
+
 For each request, follow the [required consultation](../research-router/references/consultation.md).
 
 For substantive mathematical explanation or revisions to exposition, also use
 [mathematical-exposition](../mathematical-exposition/SKILL.md) as a clarity
 overlay; this skill remains responsible for manuscript scope and authorship.
+For introduction drafting, restructuring or substantive narrative assessment,
+also use [paper-introduction](../paper-introduction/SKILL.md) to discover the
+central question, position the supported contribution and choose its telling
+order; this skill retains manuscript editing and production ownership.
+For whole-paper outlines, section merges/splits or structural reassessment,
+also use [paper-structure](../paper-structure/SKILL.md) to map the question and
+proof route to section purposes, inputs and outputs before applying moves.
+For an adopted explicit dependency graph or a requested dependency audit, use
+[knowledge-dependencies](../knowledge-dependencies/SKILL.md) to check affected
+hard prerequisites and downstream impact; ordinary writing requires no graph.
 For a `*_lec.tex` target, also use
 [undergraduate-lecture](../undergraduate-lecture/SKILL.md) for its reader floor.
 
@@ -24,6 +36,14 @@ wording, sentence rhythm, transitions, register, and rhetorical pacing. The
 corpus informs style without turning every observed feature into a requirement;
 never copy distinctive wording or claims from an example. Keep the detailed
 selection and promotion process in [the style-corpus workflow](references/style-corpus.md).
+
+For substantive drafting/revision and requested terminology checks, apply the
+[terminology and notation audit](../reading-reference/references/terminology-audit.md)
+to affected names, symbols and conventions. Compare actual object types and
+roles with inspected corpus definitions and source pages, reading the affected
+existing manuscript passages before corpus verification. Soft style cues do
+not weaken definition/semantic checks; check downstream formulas before a
+scoped rename and retain coherent alternative conventions.
 
 Keep workspace and field-specific rules in `writing/.rules/`. If no close
 corpus examples match the requested field, language, genre, or register—or the

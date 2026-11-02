@@ -157,6 +157,8 @@ def new_item(
     changes += [f"create {name}" for name, path, _ in writing_files if not path.exists()]
     changes += [f"create {relative}/{name}/" for name in directories]
     changes += [f"create {relative}/{name}" for name in files]
+    if kind == "research":
+        changes += [f"create {relative}/exploration/", f"create {relative}/exploration/tree.json"]
     if not dry_run:
         for _, path in writing_directories:
             path.mkdir(parents=True, exist_ok=True)
@@ -171,4 +173,14 @@ def new_item(
         for name, content in files.items():
             with (folder / name).open("x", encoding="utf-8") as stream:
                 stream.write(content)
+        if kind == "research":
+            from .exploration import ExplorationError, initialize
+            from .plans import PlanError
+            try:
+                initialize(workspace, slug, if_missing=True)
+            except (ExplorationError, PlanError, OSError) as exc:
+                raise LayoutError(
+                    f"{relative}/plan.md and inbox/ were created and preserved; "
+                    f"exploration initialization needs resuming with research exploration init --if-missing: {exc}"
+                ) from exc
     return changes

@@ -27,6 +27,14 @@
   The explanation may need substantially more references than the target paper.
   Do not cap their number at its bibliography or substitute recalled history
   for inspected passages; follow dependencies needed for understanding.
+  For every method-bearing code unit, including educational and auxiliary code,
+  also inspect actual application studies under [Applications to code](application-to-code.md).
+  Locate evidence of the need/obstacle, pipeline role and obtained result, plus
+  both sides of consequential method/code relationships; method proposals and
+  implementation provenance alone do not establish application coverage. Map
+  evidence and code to the source section/subsection and precise operation
+  before drafting. Separate evidence for the study's need/choice from the
+  writer's reason for selecting this example to teach the current passage.
   If a required primary source is inaccessible, retain that dependency as an
   open gap. An abstract, secondary account or easier example cannot close it.
   For research-positioning checkpoints, also follow the broader iterative

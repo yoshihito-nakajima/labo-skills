@@ -5,6 +5,8 @@ description: Create, revise or review mathematical talk slides and paper-reading
 
 # Make the mathematical path visible
 
+Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
+
 For each user request, follow the [required consultation](../research-router/references/consultation.md).
 
 When author identity, voice, or preferences matter, consult the Labo workspace

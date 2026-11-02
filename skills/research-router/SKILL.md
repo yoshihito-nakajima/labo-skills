@@ -5,9 +5,9 @@ description: Route mathematical research tasks to the appropriate labo skill and
 
 # Research routing
 
-Before drafting or changing source artifacts, follow
-[editing capability and handoff](references/editing-capability.md). Apply this
-check to your own role as well as delegated workers.
+Before substantive work, follow
+[substantive-work eligibility and handoff](references/editing-capability.md).
+Apply this check to your own role as well as delegated workers.
 
 ## Lightweight workspace preflight
 
@@ -55,9 +55,10 @@ context. Apply the selected skill's normal verification rules.
 Before the first delegation, including consultation, retrieve the models and
 reasoning settings actually callable through the host's delegation interface,
 using its discovery tools/API or runtime catalogue. A provider-wide catalogue
-alone does not establish availability. If readily exposed, obtain your own
-model and effort from matching current-session metadata; otherwise mark them
-unknown, rather than inferring them from defaults or self-description.
+alone does not establish availability. Establish your own model and effort
+from the invocation provenance accepted by the eligibility rule; keep
+unverified values unknown rather than inferring them from defaults or
+self-description.
 
 Before making any subagent call, including the required consultation, follow
 the [subagent invocation contract](references/subagent-invocation.md) for
@@ -69,8 +70,8 @@ advisor, prover, or reviewer roles to model families by convention. Honor explic
 user model constraints; otherwise prefer current suitable models and justify older
 choices. Reuse discovery within the task and pass selections through actual tool
 arguments.
-Apply the same criteria to roles you keep; delegate content-understanding or
-research-reasoning work if your own model's suitability cannot be established.
+Apply the eligibility rule to roles you keep; delegate all substantive work
+when your own eligibility cannot be established.
 
 For each user request, follow the [required consultation](references/consultation.md).
 
@@ -84,17 +85,24 @@ For each user request, follow the [required consultation](references/consultatio
    `paper-referee`; paper compilation → `labo-build`; slides →
    `slide-authoring`; research positioning, source collection, paper/book
    explanation and reading notes → `reading-reference`; website →
-   `website-publishing`; skill improvements in the user's fork →
+   `website-publishing`; continuous Japanese reading translations →
+   [japanese-translation](../japanese-translation/SKILL.md);
+   actual Codex/Claude host settings and subagent roles →
+   [agent-host-setup](../agent-host-setup/SKILL.md); skill improvements in the user's fork →
    `labo-self-improve`; selected upstream
    contributions → `labo-pr`; selective upstream adoption into the fork →
    `labo-sync`.
 4. Beyond the required consultation, if task-specific delegation is useful,
    formulate a short task-specific assignment *from the selected skill* and
    follow the [subagent invocation contract](references/subagent-invocation.md).
-   Do not depend on a proprietary stored subagent persona or prompt template.
+   Host role presets may select a suitable model and narrow job; the selected
+   skill and current packet remain authoritative. Use the
+   [mathematical role contract](references/mathematical-roles.md) for decomposition,
+   proving and verification. Nested workers share the root's finite depth and
+   descendant concurrency budget.
    Choose by the mathematical judgment needed to establish correctness:
 
-   - **Routine processing** (organization, extraction, prescribed conversion):
+   - **Literal evidence collection and coordination**:
      lightweight model, low reasoning effort.
    - **Content understanding** (literature synthesis, explaining known arguments):
      general-purpose model, standard or higher reasoning effort.
@@ -104,6 +112,27 @@ For each user request, follow the [required consultation](references/consultatio
    Reconstructing missing arguments counts as research reasoning, even in a
    summary.
 5. Keep the user's `AGENTS.md` independent. Do not edit it as part of routing.
+
+For paper-introduction drafting, restructuring or narrative assessment, also
+use [paper-introduction](../paper-introduction/SKILL.md). It owns discovery and
+telling order, while `paper-writing` owns manuscript edits and `reading-reference`
+owns the positioning investigation. A report-only request remains report-only.
+
+For whole-paper architecture or structural reassessment, use
+[paper-structure](../paper-structure/SKILL.md). It maps section roles and
+proposed moves from the actual question and proof route. For explicit
+definition/assumption/result dependencies, topological order, cycle diagnosis,
+prerequisite closure or change impact, use
+[knowledge-dependencies](../knowledge-dependencies/SKILL.md). Its declared hard
+dependencies constrain logical order; reader order can include clear previews.
+
+For nested mathematical exploration, compact progress trees or bounded
+parallel node ownership, use [research-exploration](../research-exploration/SKILL.md).
+For accepted plan edits or exploration in an existing program, use
+[labo-layout's safe migration](../labo-layout/references/research-migration.md)
+to add missing current structure. Read-only work leaves it intact; missing
+structure is not a compliance or proof failure. Existing plans retain their format and two statuses; tree
+classification is separate from logical dependencies and formal-proof evidence.
 
 Research planning, substantive manuscript writing, changed contribution claims,
 submission preparation, and own-research talks with novelty/comparative claims

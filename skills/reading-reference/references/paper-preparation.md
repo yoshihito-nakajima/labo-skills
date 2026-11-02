@@ -6,13 +6,29 @@ paper's questions, reasoning, methods and evidence while consulting the original
 Apply to the agreed unit; do not turn a short answer or source search into a
 full-paper project. Keep original sources unchanged.
 
+Translation-only requests use
+[japanese-translation](../../japanese-translation/SKILL.md), including when the
+requested translation covers a whole paper. This expanded preparation contract
+applies when explanatory or presentation-preparation materials are requested.
+
 ## Source-aligned reading structure
 
-Retain the target paper's main section numbers, titles' meaning and order as the
-backbone. Put prerequisites, implementation commentary and cross-method synthesis
-under clearly identified supplemental subsections or boxes. Keep source and
+Retain the target paper's section and subsection numbers, titles' meaning, order
+and hierarchy as the reading backbone. Keep translation, local explanation,
+application context and corresponding implementation within that source unit.
+Do not flatten original subsections into paragraphs or move their substance to
+a later generic supplement. Clearly label added commentary or subordinate boxes
+without changing or impersonating the source hierarchy. Keep source and
 added equation/figure numbers distinguishable. For a bounded request, retain the
 original numbers of the selected sections rather than renumbering them from one.
+
+Use meaningful subordinate headings for added explanation so that application
+requirements, the reason for using the method/example, code correspondence,
+results/scope and method relationships can be found locally. In a PDF, make the
+source hierarchy and these useful added units directly reachable through nested
+bookmarks under [R14](explanation.md). Distinguish actual PDF bookmarks from
+visible headings, the table of contents and ordinary hyperlinks. Keep the short
+explanation/code cycles below while adding this structure.
 
 Account for the in-scope original text and provide a faithful translation into
 the requested language (Japanese for Japanese reading materials). Present the
@@ -32,20 +48,22 @@ scale; merely paraphrasing its caption is insufficient.
 
 ## Method understanding with literature evidence
 
-For each in-scope method, make the following connected reasoning recoverable:
+For every in-scope method, make the question, required properties, decisive
+design, fit/limits and consequential relationships recoverable. This also
+applies to noncomputational methods; their reasoning need not be numerical or
+empirical.
 
-- **Question:** what objects or observations are analyzed, and what needs to be
-  understood about them? Explain why the question matters in this paper.
-- **Requirements:** what must be preserved, distinguished, estimated or tested
-  to answer it? State the relevant assumptions and what counts as success.
-- **Design:** why do the definitions, theoretical framework, objective and
-  operations serve those requirements? Explain the mechanism, not just symbols.
-- **Fit and limits:** which properties of the target make the method appropriate,
-  what conclusions its outputs support, and when assumptions or design fail.
-- **Relationships:** what purpose, assumptions or mathematical structure is shared
-  with relevant methods, exactly where they diverge, and what that divergence
-  changes in computation or interpretation. Distinguish a special case, variant,
-  extension, alternative theory for the same question and a different question.
+For computational methods, follow [Applications to code](application-to-code.md).
+Within each section/subsection, connect the actual application problem, need and
+obstacle, pipeline/mechanism, published result and significance to the code.
+Explain why the study uses the method and why this example is introduced here
+for the reader. These dependencies do not require an extended standalone account
+before any code: place the corresponding implementation immediately after each
+passage's translation and necessary explanation, then interpret its operations
+and outputs. Use short cycles for multi-step methods. Apply this to educational,
+background and auxiliary code, including relevant method/implementation relationships.
+For noncomputational proof methods, explain the question, hypotheses, decisive
+argument and consequences without inventing an empirical application.
 
 Use inspected primary passages for the motivation, inherited ideas, new
 contribution and every historical/comparative assertion. Inspect both sides of
@@ -71,7 +89,8 @@ reuse and execution rules in [Methods](methods.md). Proof techniques without a
 computational procedure use its mathematical branch; do not invent a numerical
 substitute for a proof or fabricate an algorithm for a noncomputational method.
 
-Connect analysis question → mathematical objects/equations/steps → code operations
+Preserve the section-local presentation above. In each explanation/code cycle,
+trace inputs → mathematical objects/equations/steps → code operations
 → outputs → interpretation. Explain input/output meanings and match substantive
 variables, functions and line ranges to the source mathematics. Show an example
 chosen to expose the method's purpose or a consequential difference/limit, and
@@ -88,7 +107,8 @@ At each method/code unit, distinguish explicitly:
 1. the **target paper** currently being read;
 2. the **method literature**, including the proposal or later modification and
    the exact procedure implemented;
-3. the **implementation source**, its author, revision/version, file/function
+3. the **application study**, its actual need, method placement and reported results;
+4. the **implementation source**, its author, revision/version, file/function
    and status (author implementation, later author version, adaptation,
    third-party implementation or independent teaching code).
 
@@ -115,10 +135,19 @@ the requirement for a transparent corresponding implementation.
 
 Before declaring the agreed unit complete, check the actual delivered artifact:
 
-- Every in-scope source section has its original numbering and order, corresponding
-  original text, faithful translation and distinct substantive explanation.
-- Each method has a recoverable question-to-design-to-interpretation account,
-  with relevant relationships grounded in inspected literature at linked locations.
+- Every in-scope source section/subsection retains its number, title meaning,
+  order and hierarchy, with corresponding original text, faithful translation
+  and distinct substantive explanation in that unit.
+- Each computational passage leads directly from translation/necessary
+  explanation into its corresponding code and operation/output reading. Local
+  application context states both the practical need and the reason for choosing
+  that example here, with inspected results and method/code relationships.
+  Shared accounts and full listings supplement, rather than replace, this content.
+- Added application/requirements and code-correspondence explanations have
+  identifiable local headings. For PDFs, inspect the actual bookmark tree for
+  source sections and required added units, checking nesting, titles and targets;
+  inspect source and added-unit landing content. A populated contents page or
+  accurate prose alone does not establish this navigation.
 - Each computational method has matching complete code, local attribution,
   mathematics-to-operation correspondence and meaningful example interpretation.
   Independent implementations include design/deviation and validation explanations.

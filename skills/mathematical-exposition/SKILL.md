@@ -5,6 +5,8 @@ description: Explain mathematical papers, proofs and concepts, or improve the cl
 
 # Explain the mathematics clearly
 
+Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
+
 For each request, follow the [research-router consultation](../research-router/references/consultation.md).
 
 Use this skill when the task centers on explaining a mathematical argument,
@@ -49,6 +51,25 @@ Keep source assertions, checked derivations, illustrative examples and new
 claims distinguishable. Preserve hypotheses, quantifiers and limits. If a
 proof gap remains, identify the unresolved implication instead of smoothing
 it into finished prose.
+
+For substantive computational-method explanations, follow
+[the application-to-code contract](../reading-reference/references/application-to-code.md).
+Keep each source section/subsection as a coherent reading unit, preserving its
+number, title meaning, order and hierarchy. Place the operation's code immediately
+after its translation and necessary explanation, followed by operation/output
+interpretation; use short cycles for multi-step procedures. Explain both why
+the application needs the method and why this example is introduced here for
+the reader. Application problem, requirements, mechanism, published result and
+code remain connected dependencies, not a long mandatory block delaying all code.
+Explain relevant method/code relationships locally, including shared/changed
+operations and consequences, for educational/background/auxiliary methods too.
+Give these local purposes meaningful subordinate headings so the reader can
+find the application requirements and code correspondence. For substantial PDFs,
+follow the reading skill's [navigation rules](../reading-reference/references/explanation.md)
+for source-aligned nested bookmarks and added explanatory units; preserve the
+short operation/code cycles rather than collecting long prefatory sections.
+Bounded questions and purely theoretical arguments retain their scope; the
+reading skill owns source checks.
 
 ## Check the result
 

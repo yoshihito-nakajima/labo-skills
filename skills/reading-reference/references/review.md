@@ -15,12 +15,21 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   For paper preparation, also check source section numbers/order, original-text
   and faithful-translation coverage, separation of translation and commentary,
   and figure/equation explanations under [Paper preparation](paper-preparation.md).
+  Check title meaning and actual section/subsection hierarchy, not just matching
+  numbers in a contents list; detached or flattened local content is a finding.
+  Check that added application requirements, local example rationale, code
+  correspondence, results/scope and relationships have identifiable headings
+  at the relevant passage; accurate sentences buried in prose are insufficient
+  when the reader needs to find these units directly.
   For required code, check each in-scope computational method against matching code
   units, implementation provenance and inspected/executed status. A long code
   appendix or one successful toy run cannot compensate for missing methods.
   For each literature-based code unit, including educational/background units,
   check its exact method source, corresponding implementation search and local
   status report. Searches for the main algorithms do not cover auxiliary units.
+  Check actual application evidence and code-unit relationships under
+  [Applications to code](application-to-code.md), including background and
+  educational units. A method citation or toy run does not cover a missing use case.
 - **R26 Two-way fidelity** — Compare the note's claims to exact sources and
   trace central source claims back into the note. Check headings, formulas,
   figures, analogies and compressed summaries as well as prose. Verify both
@@ -49,8 +58,18 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   operation-to-mathematics mapping, own choices/deviations and validation evidence;
   an origin label alone is insufficient. A faithfully stated source limitation is not
   automatically a defect in the explanation.
+  For claimed method/code relationships, inspect both sides and trace shared
+  and changed assumptions, equations and functions/lines to their consequences.
+  Do not accept "variant", shared provenance or similar syntax as the explanation.
 - **R27 Reconstruction** — From the source, identify the inputs, reasoning or
   operations, result and limits. Then locate each needed link in the explanation.
+  For computational methods, read each source unit in order: translation and
+  necessary explanation → immediately corresponding code → operation/output
+  interpretation. Check short cycles for multi-step methods and both reasons:
+  why the application needs the method, and why this example teaches the current
+  passage. Flag global batching, intervening unrelated material or a link-only
+  substitute even when all ingredients and destinations exist. Shared accounts
+  may deepen evidence but must not make the local reading unit incomplete.
   Record the first step a reader could not carry out using it. Knowledge recalled
   from the source cannot fill a missing explanation; this check is source-aware.
 - **R28 Fresh reading** — When independent accessibility evidence is requested
@@ -62,12 +81,19 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
 - **R29 Rendered output** — Check the current built version, not a stale PDF.
   Inspect every page/slide for a complete visual review; otherwise disclose the
   inspected subset. Test equations/glyphs, readable labels, cropping, figure
-  placement, listings and navigation at real reading scale. For code-bearing
+  placement, listings and navigation at real reading scale. For PDFs, inspect
+  the actual nested bookmark tree as well: source section/method
+  parentage, useful added local entries, readable titles and correct destinations.
+  Inspect representative landing content for source and added units. A visible
+  heading hierarchy, linked contents page or successful body links cannot
+  establish that bookmark navigation exists. For code-bearing
   deliverables, inspect every displayed method-code block, including appendix
   listings: its source/link row must appear immediately after that block and
   visibly identify it. Check that the nearby explanation reconstructs the
   substantive operations and their correspondence to body equations/steps;
-  correct destinations alone do not establish this. Test its actual links:
+  correct destinations alone do not establish this. Inspect the preceding
+  translation/explanation too: the code must correspond to that operation in
+  the same source unit, not be reachable only in a later catalogue. Test its actual links:
   implementation source at the claimed fixed file/function/lines or supplement
   location, matching full code/editable unit, and explanatory body, with return
   routes where separate listings exist. A pre-block link, homepage, generic

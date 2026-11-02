@@ -65,9 +65,14 @@ python3 <labo-script> layout new reference example-source
   Repeating it preserves existing files; empty directories can be recreated
   after cloning. Inspect pre-existing broad ignore rules such as `*.pdf` so
   they do not hide assigned source materials.
-- `layout new research` creates `research/<slug>/plan.md` and `inbox/`.
+- `layout new research` creates `research/<slug>/plan.md`, `inbox/` and the same
+  empty sequential `exploration/tree.json` as `research exploration init`.
   The YAML contains the supplied title, summary, optional next step, an empty
   tag list and `in_progress`. Complete the narrative body from actual sources.
+  Create `claims.yaml` when registering concrete claims; an empty tree does not
+  certify any mathematics. Existing programs follow the
+  [safe resume/migration procedure](research-migration.md) during plan editing
+  or exploration, while read-only requests preserve their layout.
 - `layout new paper` creates `writing/<slug>/main.tex` and
   `sections/01-introduction.tex`, compatible with `paper map` and `build`. It
   also creates missing workspace-level corpus/rules guides, preserving any

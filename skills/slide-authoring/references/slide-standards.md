@@ -42,6 +42,11 @@ one criticism per criterion.
   prior input versus new contribution. A correct source or speaker note cannot
   repair a false headline. Test a boundary case when useful, without weakening
   a correctly stated theorem or repeating conditions whose scope is clear.
+  On a slide, accurate means the listener's takeaway points the right way. Flag a
+  claim only when it would lead the audience to a wrong belief, such as a reversed
+  implication or a false headline. Do not require visible hedges, side conditions
+  or caveats whose omission leaves the takeaway correct; those belong in speech or
+  backup, and a slide that visibly hedges or looks complicated costs the audience.
 - **S6 Examples and figures** — Use concrete cases and actual readable panels
   near their interpretation. Preserve axes, units, scales, controls, legends,
   uncertainty and source identity as needed for the claim. Distinguish data
@@ -63,7 +68,9 @@ one criticism per criterion.
   contrast, figures, labels and reading order. Add redundant labels for color
   distinctions. Build success or text extraction is not visual inspection;
   legibility only after zooming is not evidence of projection readability.
-- **S10 Repair and closure** — State the smallest needed change: correct a
+- **S10 Repair and closure** — State the smallest needed change, the lightest
+  visible one; a repair that adds unnecessary hedges, meta-comments or avoidable
+  complexity to a live talk is itself a defect. Correct a
   claim, expose a condition, reorder a bridge, add an example, split an
   overloaded frame or move optional detail to backup. Preserve concise correct
   algebra, sketches and figures. Batch supported repairs and recheck affected

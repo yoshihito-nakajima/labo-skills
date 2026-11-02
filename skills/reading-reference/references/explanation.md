@@ -9,7 +9,12 @@
   picture, then deepen into the statement, proof/method and consequences. Bring
   in a prerequisite when its role becomes visible. A natural stopping point
   leaves the reader with a useful result, mechanism or newly usable tool.
-  Avoid a front-loaded glossary or an unrelated textbook survey.
+  Avoid a front-loaded glossary or an unrelated textbook survey. For substantive
+  computational-method explanations, use the local reading cycles in
+  [Applications to code](application-to-code.md). Explain the application need
+  and why the example belongs here, then keep the current operation's
+  translation/explanation, code and interpretation together. Do not scatter
+  ingredients across global translation, application and code collections.
 - **R9 Local bridges** — Before using an object, supply its type/domain,
   notation and needed structure. Connect each important inference to its inputs
   and justification. A permitted background black box needs a usable statement,
@@ -24,7 +29,7 @@
   normalizations, uncertainty and exceptions through prose, formulas and figures.
   Label source statements, checked derivations, analogies, pedagogical examples
   and open gaps. For source-aligned paper preparation, retain the source section order and
-  numbering under [Paper preparation](paper-preparation.md). In other formats,
+  numbering and section/subsection hierarchy under [Paper preparation](paper-preparation.md). In other formats,
   reorder when useful with a route back to source locations;
   an easier special case cannot replace an in-scope general result.
 - **R12 Evidence in view** — Put the actual relevant figure/panel beside its
@@ -41,11 +46,28 @@
   When code is requested or required for paper preparation, let the reader
   follow each in-scope computational method from its
   cited primary-source steps to the essential executable unit and the result
-  interpreted at that point. A distant listing of plotting utilities or a toy
-  experiment cannot stand in for this connection.
+  interpreted at that point. Show the essential implementation immediately
+  after the relevant translation and necessary explanation, then read its
+  operations against the equations and outputs. Divide multi-step methods into
+  short such cycles instead of delaying all code until a long application
+  account ends. Keep application and method/implementation relationships locally
+  understandable under [Applications to code](application-to-code.md); links to
+  shared evidence or full listings do not replace this content.
 - **R14 Usable navigation** — Keep source and local figure numbers distinct,
   use descriptive equation/code labels and working links where supported, and
-  test a route from explanation to evidence and back. Link point-of-use
+  test a route from explanation to evidence and back. For substantial PDFs,
+  provide a nested bookmark outline matching the source section/subsection
+  hierarchy, with useful added explanatory units subordinate to the relevant
+  source section or method. Give local application requirements, code
+  correspondence, results/scope and method relationships identifiable headings
+  and bookmark entries where applicable; include distinct operation stages when
+  they help the reader jump within a multi-step method. Preserve the source's
+  numbering and parentage and distinguish added labels. Do not turn every
+  paragraph or citation into a bookmark. Inspect the built PDF's actual outline:
+  check required entries, readable titles, nesting and destinations, then inspect
+  representative landing content for both source and added units. Correct
+  headings or a linked contents page cannot prove that these bookmarks exist
+  or reach the intended passage. Link point-of-use
   citations to their formal entries when a reference list is present, with
   return links to the relevant method/code passages. When body excerpts and a
   final code listing or index coexist, link each excerpt to its matching full

@@ -7,10 +7,18 @@ answer. Reading sources to understand the request can come first. An unanswered
 consultation or advice about another task does not complete this step.
 
 Launch the advisor under the [subagent invocation contract](subagent-invocation.md).
+Both roles follow [substantive-work eligibility](editing-capability.md).
+The advisor's approval checks the plan; it does not qualify a restricted
+coordinator to perform the substantive work.
+A restricted coordinator forwards the original request, constraints and literal
+evidence; the qualified advisor supplies the interpretation and proposed next
+action. The coordinator can then relay that checked assignment to the qualified
+worker without supplying its own substantive judgment.
 
-Give the advisor the original request, relevant constraints and source evidence,
-your interpretation, and the proposed next action. Ask whether the interpretation,
-scope, and action match the request. Apply the [model check and selection
+Give the advisor the original request, relevant constraints and source evidence.
+An eligible coordinator also supplies its interpretation and proposed next
+action; a restricted coordinator asks the advisor to supply them. Ask whether
+the interpretation, scope, and action match the request. Apply the [model check and selection
 criteria](../SKILL.md): request interpretation is at least **content
 understanding**, even when the ensuing work is routine; use **research
 reasoning** when the check requires mathematical judgment.

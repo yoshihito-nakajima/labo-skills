@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Structure"
+  short_description: "Design section roles from the question and proof route"
+  default_prompt: "Use $paper-structure to assess this paper’s architecture and propose a section map with clear inputs, outputs and dependency-safe routes."

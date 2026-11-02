@@ -1,9 +1,11 @@
 ---
 name: labo-layout
-description: Initialize a labo research workspace, start research from inbox material, and create or locate research, manuscript, and reference files in its directory structure.
+description: Initialize a labo research workspace, start or resume research with the current exploration-tree layout, and create or locate research, manuscript, and reference files while preserving existing material.
 ---
 
 # Create and use a research workspace
+
+Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
 
 For each user request, follow the [required consultation](../research-router/references/consultation.md).
 
@@ -38,6 +40,20 @@ own improvements and optional upstream contributions.
 
 ## Start or resume research
 
+The current research layout includes `plan.md`, `inbox/` and an empty
+`exploration/tree.json` by default. The tree's `schema_version` identifies its
+structure; no extra style field in the plan or claim catalog is required.
+An existing program without a tree simply has no exploration tree. Its claims
+and research status retain their original meanings.
+
+When accepting plan edits or mathematical exploration in an existing program,
+follow [safe research-layout migration](references/research-migration.md) as
+part of that work, without asking for separate migration permission. Reuse and
+check an existing tree; initialize a missing one, then add or reuse only the
+current scoped work node. Read-only inventories, explanations, report-only
+reviews and checks preserve the existing layout. A directory placement question
+alone still authorizes no writes. `layout init` does not scan or migrate programs.
+
 For an inbox-based research request:
 
 1. Read the selected sources, preserving their original bytes. Inventory
@@ -50,7 +66,9 @@ For an inbox-based research request:
    would substantially change the research direction. Propose splits or
    mergers of existing programs before changing their boundaries.
 3. For a new program, use `layout new research` with a meaningful title and
-   summary grounded in the material. Fill the generated `plan.md` body with
+   summary grounded in the material. It creates the empty exploration tree
+   through the shared exploration initializer; create `claims.yaml` when
+   registering concrete claims. Fill the generated `plan.md` body with
    the question, context, current evidence, open issues, and first concrete
    investigation. A template alone does not complete an intake request.
 4. Store assigned originals in `research/<slug>/inbox/`; check for name

@@ -14,6 +14,9 @@ from this evolving evidence, with its introduction as part of the story.
 Papers, slides, reading notes, and web pages are outputs of the
 research institute. Japanese translations are supplementary reading/checking
 material; English remains the manuscript original.
+Use [japanese-translation](skills/japanese-translation/SKILL.md) for a continuous
+Japanese reading copy that includes its equations and figures and preserves
+the source's argument, so wording and reasoning can be examined in Japanese.
 
 ## Separation and ownership
 
@@ -113,6 +116,35 @@ and user-specific records remain in the parent workspace.
 
 ## Agent integration
 
+Use [agent-host-setup](skills/agent-host-setup/SKILL.md) for actual Codex or
+Claude Code settings and native mathematical roles. Its create-only installer
+requires an explicit model and effort, preserves existing differing roles, and
+references this checkout's current contracts. Host discovery, role loading,
+actual model execution and parent→child→grandchild execution are separate
+validation steps. The [invocation contract](skills/research-router/references/subagent-invocation.md)
+allocates a shared finite descendant budget; the
+[mathematical roles](skills/research-router/references/mathematical-roles.md)
+specify exact lemma interfaces, hypothesis discharge, integration and independent
+verification. Native caps and behavioral allocation are reported separately.
+
+The mathematical role bodies and descriptions live in
+[math-decomposer](skills/math-decomposer/SKILL.md),
+[math-proof-worker](skills/math-proof-worker/SKILL.md), and
+[math-verifier](skills/math-verifier/SKILL.md). Project Codex adapters read these
+skills in their existing child. Claude supports both direct forked-skill
+execution and native adapters that preload the same skill; the adapter does
+not reinvoke it. Claude-specific frontmatter does not configure other harnesses.
+
+Distribute this policy directory as `.agents` for Codex/general harnesses, or
+as `.claude` for Claude Code. For both, use an `.agents` submodule and the
+whole-directory relative alias `.claude -> .agents`. Native Claude `agents/`
+and minimal `settings.json` ship at the policy root; external Codex configuration
+is expanded from the included installer/example. The
+[deployment procedure](skills/agent-host-setup/references/deployment.md) covers
+these three forms without individual skill links or a second policy copy.
+Actual submodule tests cover fresh deployment, external working directories,
+relocation, repeat runs and conflict preservation.
+
 The actual skills are `skills/<name>/SKILL.md` inside this checkout.
 `plugin.json` also describes the collection for
 [Agent Plugin](https://agent-plugins.org/specification) hosts; plugin installation
@@ -207,6 +239,66 @@ handles their assignment and provenance. See the
 [creation workflow](skills/labo-layout/references/creation.md) and
 [directory contract](skills/labo-layout/references/layout.md) for details.
 
+## Mathematical exploration and safe layout migration
+
+[research-exploration](skills/research-exploration/SKILL.md) adds nested
+categories, theorem/question nodes and compact progress trees to the standard
+research layout. `layout new research` creates `plan.md`, `inbox/` and an empty
+`exploration/tree.json`. When the agent accepts plan edits or exploration in an
+existing program, [labo-layout](skills/labo-layout/references/research-migration.md)
+adds missing structure as part of that work, preserves original material and
+reuses existing nodes. Inventories, explanations, report-only reviews and checks
+remain read-only. A missing tree is simply a structural absence; old plans and
+claim statuses retain their meanings. The versioned tree identifies its format
+without a second style field in `plan.md` or `claims.yaml`. Classification, work progress and mathematical
+dependencies are separate. Read summaries first and selected detail files next:
+
+```sh
+python3 .agents/scripts/labo.py research exploration init --research finite-observations --if-missing
+python3 .agents/scripts/labo.py research exploration add --research finite-observations \
+  --node reconstruction --kind question --title 'Reconstruction question' \
+  --summary 'Identify the hypotheses needed for reconstruction.' \
+  --next 'Test a finite counterexample.' --proof-required
+python3 .agents/scripts/labo.py research exploration tree --research finite-observations --depth 2
+python3 .agents/scripts/labo.py research exploration show --research finite-observations --node reconstruction
+python3 .agents/scripts/labo.py research exploration tree --research finite-observations --with-evidence
+python3 .agents/scripts/labo.py research exploration check --research finite-observations
+```
+
+The lightweight tree reads metadata only and labels formal records unchecked.
+`--with-evidence` and `check` additionally inspect linked evidence and input
+freshness; counts describe scoped work, never a percentage of mathematics proved.
+Mutations use native process locks, atomic JSON replacement and per-node
+optimistic revisions; failed stale updates must be reread and reconciled.
+Parallel workers have named nodes and separate records/modules; one integrator
+owns the program story, shared Lean definitions and final integration.
+
+The initializer safely reuses an existing tree, including concurrent work;
+it neither duplicates nodes nor overwrites settings. Start with the current
+scoped work rather than generating nodes from every historical claim. Create
+`claims.yaml` when registering concrete claims. Sequential/parallel mode is an
+execution choice, separate from layout adoption and task authorization.
+
+For work recorded in the tree, every proof-bearing result needs Lean evidence before
+its task can be `done`. Theorem/lemma nodes require it automatically; mark all
+other mathematical conclusions, examples and counterexamples `--proof-required`.
+Reuse `claims.yaml` as the theorem index, with exact source/declaration,
+substantive kernel and mathematical-alignment reports, and directly covering
+current formal reviews for the claim and its prerequisites. Existing evidence
+formats and legacy research statuses retain their meanings. See
+[Lean completion and placement](skills/research-exploration/references/lean.md).
+
+Prefer small modules in projects grouped by their Lean environment. Current
+fingerprints cover the whole mapped project's `.lean` sources: adding a module
+can stale another result's review. Finish related edits before renewing reviews;
+different change/reuse boundaries can justify separate projects. Stale done
+tasks require rechecking. `current_records` describes input-matching assessment
+records, not automatic mathematical certification. Existing selected-source
+replay does not rebuild all prepared imports or support every local dependency;
+unsupported execution stays pending. Explicit local-dependency tree snapshots
+are required for completion records using path packages. No background scheduler
+or automatic legacy formalization is introduced.
+
 ## Required research positioning
 
 Before framing or substantially reframing a program, starting substantive
@@ -228,6 +320,39 @@ existing record. Carry the findings and precise citations into the paper itself.
 No search certifies all prior work or proves novelty from an absence of hits.
 This is a skill workflow, not a new CLI gate, mandatory claim catalog or copied
 host policy.
+
+Writing and in-scope reviews also use a
+[corpus-backed terminology audit](skills/reading-reference/references/terminology-audit.md):
+compare actual object types, roles and conventions with inspected definitions
+and formulas, preserving legitimate alternatives and recording source gaps.
+Corpus style cues remain soft; semantic verification checks the mathematics.
+
+For an introduction's central question, concrete significance and narrative
+order, use [paper-introduction](skills/paper-introduction/SKILL.md) alongside
+`paper-writing`. It shapes the story from the actual results and positioning
+evidence, without forcing a novelty claim or fixed paragraph formula.
+
+For whole-paper design or structural reassessment, use
+[paper-structure](skills/paper-structure/SKILL.md). It maps current material to
+proposed sections with purpose, inputs, outputs and proof/reader routes.
+[knowledge-dependencies](skills/knowledge-dependencies/SKILL.md) manages an
+optional sourced graph of definitions, assumptions and results, distinguishing
+hard prerequisites from narrative references. Its checked-out Python harness
+sorts declared dependencies, diagnoses actual cycles separately from downstream
+blocked nodes, checks full proposed orders, and computes prerequisite closure
+or change impact:
+
+```sh
+python3 .agents/scripts/labo.py dependencies sort --graph research/example/dependencies.yaml
+python3 .agents/scripts/labo.py dependencies closure --graph research/example/dependencies.yaml --node conclusion
+python3 .agents/scripts/labo.py dependencies impact --graph research/example/dependencies.yaml --node uniform
+```
+
+The [graph contract](skills/knowledge-dependencies/references/graph.md) defines
+the schema and all five commands. Checks cover every **declared** hard edge;
+complete extraction and mathematical validity require source review. A proof
+schedule and a paper's reader order can differ through clear early statements
+and later proofs. Ordinary manuscripts need no dependency-graph migration.
 
 ## Optional evidence and review records
 
@@ -425,6 +550,7 @@ development or optional packaging, not as the submodule deployment mechanism.
 ## Scope
 
 The tools implement workspace initialization, item creation, research inventory,
+optional sourced mathematical dependency checks/order/closure/impact,
 optional evidence snapshots/scope/status/replay, scoped and staged TeX reading,
 TeX builds, and output cleanup. Skills define review,
 research lifecycle, directory layout, self-improvement, PR, slides, and web
