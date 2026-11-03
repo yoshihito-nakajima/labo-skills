@@ -22,13 +22,21 @@ in a purely theoretical source do not create empirical tasks.
 
 ## Algorithms and computation
 
+Apply [source-grounded implementations across languages](multilanguage-code.md)
+when selecting a language, adding another version or explaining a port. Author
+code is preferred regardless of language; Python is not the automatic default.
+
 Apply [Applications to code](application-to-code.md) to every in-scope
-method-code unit: keep the current passage's translation/necessary explanation,
-corresponding code and interpretation adjacent within its source section. Map
-the practical application need and the example's learning purpose to that unit.
-The application logic does not require withholding all code until a long
-standalone account ends. Establish application requirements before selecting
-the implementation under R18; a working synthetic example is not application evidence.
+method-code unit. Establish its practical application, visible context and
+obstacle first, and explain why the example teaches this unit. Introduce the
+whole computation and complete selected implementation before its walkthrough;
+keep corresponding code, necessary mathematical explanation and interpretation
+nearby within the owning source section. Complete that unit with the
+explanation-to-source correspondence and original/faithful translation under
+[Paper preparation](paper-preparation.md#prepare-the-reader-then-return-to-the-source),
+unless a different format is requested. Establish application requirements before
+selecting the implementation under R18; a working synthetic example is not
+application evidence.
 
 - **R18 Target** — Choose the paper's procedure, an inspected fixed code
   revision, or both with a declared main route. Preserve discrepancies in
@@ -79,6 +87,12 @@ the implementation under R18; a working synthetic example is not application evi
   from an incomplete search, an access failure or the existence of independent
   code. A private log, successful toy run or generic "educational code" label
   cannot replace this local report or close an unresolved required search.
+  Make this a complete factual account of the scoped search, not a one-line
+  status: include checked locations and versions, access and inspection outcomes,
+  relevant options, the adoption reason, execution conditions and unresolved
+  work. Optional collections retain selection facts and limits needed for their
+  task under [the view contract](paper-preparation.md#keep-section-progression-and-purpose-specific-views-distinct);
+  they do not require repeating the entire local search record.
 - **R19 State path** — Specify input shapes/units, stable IDs versus local
   indices, preprocessing, updates, parameter values, randomness, ties, edge
   cases, loops, stopping and saved outputs. Explain consequential constants
@@ -93,16 +107,22 @@ the implementation under R18; a working synthetic example is not application evi
   Cover the central algorithms in the requested unit, not only the one easiest
   to demonstrate. Supply their essential executable units beside the relevant
   explanation, with explicit links to complete editable sources and any longer
-  appendix listing. Put the essential executable operations at the point where
-  their translation/explanation is read; a remote full listing or API call alone
-  does not supply this local implementation. At each code unit that implements or explains a paper
+  appendix listing. Establish the application, visible background and obstacle
+  before these operations under [Applications to code](application-to-code.md).
+  Follow [whole before part](application-to-code.md#show-the-whole-implementation-before-its-parts):
+  introduce the input-to-output flow and display its complete selected unit
+  before detailed excerpts, with necessary imports/helpers and interfaces.
+  Within that account keep code close to its mathematical explanation; a remote
+  full listing or API call alone does not supply this local implementation. At each code unit that implements or explains a paper
   algorithm, identify the paper/version and exact algorithm, equation or step,
   with a working source link and a page/section anchor where supported. State
   locally whether the code is original-author code, an adaptation, an inspected
   third-party/library implementation or independently written for the note.
   Link reused code to its fixed revision/version and relevant file/function or
   lines where available; retain applicable reuse terms and explain consequential
-  changes. Immediately after each displayed method-code block, identify its
+  changes. Before each displayed method-code block, name the method and
+  implementation visibly; an operation description or source row after the block
+  does not replace this entrance label. Immediately after the block, identify its
   origin and provide a labelled link to the actual corresponding implementation:
   for GitHub or another repository, the inspected fixed revision and file,
   function or line range; for supplementary code, the actual supplement file
@@ -118,25 +138,42 @@ the implementation under R18; a working synthetic example is not application evi
   link it as well and state whether it was inspected, used, adapted or not used
   and why. Report unresolved or unvisited sources explicitly; do not substitute
   a link to the note's own code for the reference's implementation-search report.
-  Briefly report the actual discovery/selection order when it bears on the choice,
+  Report the actual factual discovery/selection order when it bears on the choice,
   evidence available at selection, the code's present role and reason, and
   outstanding comparisons. If independent code preceded the source search, say
   so; do not present a later rationale as a documented original reason. Mark
-  unrecorded historical reasons as unknown rather than inventing them. This is
-  a short decision record, not a request for inferred inner motives or a detailed
-  thought log. Distinguish public access, permission to redistribute and ability
-  to execute; an unknown redistribution license alone does not establish that
+  unrecorded historical reasons as unknown rather than inventing them. Completeness
+  here concerns observable search actions, evidence, decisions, conditions and
+  gaps; it does not request inferred inner motives, private chain-of-thought or a
+  speculative thought log. Keep retained selection/status facts consistent in
+  optional collections. Distinguish public access, permission to
+  redistribute and ability to execute; an unknown redistribution license alone
+  does not establish that
   execution or linking is prohibited or technically impossible.
   Use labels that distinguish implementation source, complete editable code,
   and the paper's equation/algorithm rather than an ambiguous "source" link.
   Every displayed method-code block also needs a nearby explanation of its
   inputs/outputs, substantive variables and operations, why they implement
-  the method, and consequential settings, normalizations or deviations. Map
+  the method, and consequential settings, normalizations or deviations. For
+  the initial complete listing, give the whole-flow explanation and point to
+  its following walkthrough; do not require detailed line-by-line explanation
+  before that first listing. Supply the detailed reasoning beside the selected
+  operations in the same method account. Map
   those variables and operations to specific equations, algorithm steps and
   interpreted results in the explanatory body, with links to those passages
   when separate. "This implements the equations", a function name, an API
   description or an appendix dump does not supply this explanation. These
-  requirements apply to author, adapted, library and independent code alike;
+  requirements in a complete method account include the operation's specific
+  property, how it addresses the previously shown application obstacle, and its
+  conditions/limits, followed by
+  relevant method comparisons. Refer back to the same visible example where
+  useful; objective restatement or generic praise does not establish fit. Keep
+  the immediate source row compact enough for this explanation to follow; the
+  full local search/adoption record can follow the explanation in the same
+  method account. A code collection retains usable operation explanations and
+  links to that fuller account under the view contract; it does not repeat all
+  application stages for each listing. These requirements apply to author,
+  adapted, library and independent code alike;
   they do not depend on the reader separately requesting a code walkthrough.
   Do not fabricate missing revision or license information: state the
   uncertainty and any resulting reuse barrier. A general disclaimer or separate
@@ -169,7 +206,9 @@ the implementation under R18; a working synthetic example is not application evi
   generic "variant" caption do not establish this relationship.
 - **R21 Comparisons** — Explain how each baseline computes its score. Check
   data splits/leakage, tuning, aggregation, uncertainty, resources and comparable
-  conditions. Implementation claims need fixed code evidence on both sides.
+  conditions. Implementation claims need fixed code evidence on both sides, with
+  actual matching excerpts visible under [Applications to code](application-to-code.md#explain-relationships-for-every-code-unit),
+  not only source links or prose about line ranges.
   A pipeline-level gain does not isolate the effect of one changed operation.
 
 ## Empirical evidence

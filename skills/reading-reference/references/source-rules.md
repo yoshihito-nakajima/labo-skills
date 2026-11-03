@@ -24,6 +24,12 @@
   and where that evidence is explained in the deliverable. Select by the role
   in the requested explanation, not by which PDFs are easiest to obtain;
   background bibliography entries alone need not trigger full-paper reading.
+  In substantial paper-preparation materials, apply
+  [supporting-source reading](paper-preparation.md#make-supporting-literature-readable):
+  map substantively used passages to displayed original excerpts and faithful
+  translations beside their explanations. Track inspected, excerpted and
+  translated coverage separately; code citations and final bibliography entries
+  do not satisfy this passage-level requirement.
   The explanation may need substantially more references than the target paper.
   Do not cap their number at its bibliography or substitute recalled history
   for inspected passages; follow dependencies needed for understanding.

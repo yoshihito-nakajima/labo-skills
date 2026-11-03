@@ -12,15 +12,53 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   or source reprint is not evidence of explanatory coverage.
   For surveys, check each central claim against its required primary evidence,
   the passages actually inspected and the citation/locator visible in the output.
+  In substantial paper preparation, check supporting literature used for
+  definitions, methods, applications and consequential comparisons for original
+  excerpts and corresponding faithful translations at the relevant explanation
+  under [supporting-source reading](paper-preparation.md#make-supporting-literature-readable).
+  Bibliography membership alone does not require full translation. A code
+  citation, paraphrase, source attachment or working link does not supply a
+  missing required passage pair. Record inaccessible or restricted scope exactly.
+  At each original/translation entrance, identify the named work, version and
+  locator from the visible block itself. A bare "original", generic source role
+  or bibliography elsewhere does not identify it. A shared source-labelled
+  heading may identify both texts; the work need not be repeated on every line.
+  Read the passage as a unit:
+  does its introductory clause reach its equation/conclusion and retain the
+  needed qualifications? Check clear source switches and descriptive link labels;
+  a collection of accurate but detached sentence/link fragments can still fail.
   For paper preparation, also check source section numbers/order, original-text
   and faithful-translation coverage, separation of translation and commentary,
   and figure/equation explanations under [Paper preparation](paper-preparation.md).
+  For preparatory reading order, check each owning source unit for connected
+  explanation before the original and an immediate explanation-to-source bridge.
+  It must map the already introduced objects/steps to exact source locations and
+  give reading targets, not just repeat an outline. Moving all originals to a
+  larger chapter's end fails source locality; unchanged source wording alone
+  does not establish that the reader has been prepared.
   Check title meaning and actual section/subsection hierarchy, not just matching
   numbers in a contents list; detached or flattened local content is a finding.
-  Check that added application requirements, local example rationale, code
-  correspondence, results/scope and relationships have identifiable headings
-  at the relevant passage; accurate sentences buried in prose are insufficient
-  when the reader needs to find these units directly.
+  Check subject identity at each unit entrance and method/implementation labels
+  before code, not only content-specific headings or post-block attribution.
+  Across the whole main route, each source unit's translation must lead to the
+  next source unit. Optional collections must serve distinct tasks under
+  [the view contract](paper-preparation.md#keep-section-progression-and-purpose-specific-views-distinct).
+  A whole-document duplicate without an explicit request is a structural finding.
+  Check the common bibliography at the end, and separately inspect the citations
+  throughout each route: can the reader identify the source and inspected location
+  for each source-based claim, equation, figure, code operation and comparison at
+  the passage using it? A final-list link, end-of-section source note or post-code
+  attribution alone does not pass this check. Locate unsupported or ambiguous
+  citation scope and unverified locators as findings.
+  Treat an interleaved duplicate, an unexplained restart, or a collection whose
+  actual content does not meet its declared purpose as a structural finding.
+  For structured added explanations, run the [heading audit H1--H5](../../mathematical-exposition/references/roles-and-headings.md#audit-the-headings-against-the-body).
+  Derive role order and boundaries from the owning contract/agreed skeleton,
+  not from the draft's existing outline. Check both role and concrete point in
+  each heading, fulfillment by the actual body, progression and consistency
+  across methods/routes. Locate findings with R25/H1--H5 and the actual heading
+  and passage. Content buried in another role does not excuse a missing section;
+  merely restoring a role label does not repair detached prose under R27.
   For required code, check each in-scope computational method against matching code
   units, implementation provenance and inspected/executed status. A long code
   appendix or one successful toy run cannot compensate for missing methods.
@@ -30,10 +68,21 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   Check actual application evidence and code-unit relationships under
   [Applications to code](application-to-code.md), including background and
   educational units. A method citation or toy run does not cover a missing use case.
+  Judge optional collections by their declared tasks, not identical field
+  coverage. A code collection needs usable code and operational dependencies;
+  an explanation view needs the premises and evidence of its retained argument.
+  An accurately labelled lookup index does not promise either full account.
+  Inventory the existing application photographs, figures, captions and their
+  explanation too. Text alone does not preserve this account if its visual
+  context has been omitted or deferred beyond the code that depends on it.
 - **R26 Two-way fidelity** — Compare the note's claims to exact sources and
   trace central source claims back into the note. Check headings, formulas,
   figures, analogies and compressed summaries as well as prose. Verify both
-  sides of consequential historical or method comparisons. For central methods,
+  original excerpts and translations against the identified versions and their
+  surrounding context. Check omissions, equations, assumptions, quantifiers,
+  uncertainty and separation of added commentary. Read Japanese independently
+  as well as against the source; presence of paired blocks alone is not fidelity.
+  Verify both sides of consequential historical or method comparisons. For central methods,
   trace question, required properties, design, fit/limits and method relationships
   to inspected primary passages with point-of-use deep links. Check both shared
   structure and consequential differences, including sources beyond the target
@@ -42,9 +91,17 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   source/revision and the actual author-code search status, including adaptations
   and unresolved availability. Compare each code's visible search report and
   adoption reason against places actually visited and code actually inspected.
+  Compare claims retained in multiple views with their sources and with
+  each other, including exact locators, search order, adoption reasons, status
+  labels, consequential differences and unresolved limits.
   An unvisited supplement, uninspected repository or inaccessible file cannot
   support "no author code"; flag the unfinished source work and missing local
   report even if the independent code is correct and its links work.
+  For multiple languages, apply [the multilingual code contract](multilanguage-code.md):
+  check author-code preference regardless of language, source/port identity,
+  complete implementations, purpose and explained decisions, actual operation
+  mappings and per-language execution evidence. Same seed is not necessarily
+  the same input; numerical comparisons must respect the method's invariances.
   Test the implementation choice, not only the existence of an adoption reason:
   check whether existing options, a thin wrapper or annotations meet the reader's
   purpose, and distinguish the main execution route from an explanatory example.
@@ -60,17 +117,60 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   automatically a defect in the explanation.
   For claimed method/code relationships, inspect both sides and trace shared
   and changed assumptions, equations and functions/lines to their consequences.
+  Inspect the delivered visible code on both sides, its fixed source/line identity,
+  and the local pairing. Links, prose or a line table without actual excerpts do
+  not discharge an implementation comparison. Check the author-code preference
+  and any scoped access gap; a substitute must not impersonate an author version.
   Do not accept "variant", shared provenance or similar syntax as the explanation.
 - **R27 Reconstruction** — From the source, identify the inputs, reasoning or
   operations, result and limits. Then locate each needed link in the explanation.
-  For computational methods, read each source unit in order: translation and
-  necessary explanation → immediately corresponding code → operation/output
-  interpretation. Check short cycles for multi-step methods and both reasons:
-  why the application needs the method, and why this example teaches the current
-  passage. Flag global batching, intervening unrelated material or a link-only
-  substitute even when all ingredients and destinations exist. Shared accounts
+  Check [adjacent-passage continuity](../../mathematical-exposition/SKILL.md#carry-the-argument-across-adjacent-passages)
+  in the delivered reading order, including sections without code. At each
+  transition, use the adjoining prose to identify what result, object or question
+  is being taken up, why this next step follows, and what it contributes. Read
+  titles together with their openings; a specific title cannot repair a detached
+  paragraph, nor can "next" or "below" supply a missing dependency. Locate the
+  first broken boundary in the actual text rather than inferring an intended
+  connection from an outline, another route or source knowledge. Check whether
+  joining unnecessarily split units within a role is the appropriate repair;
+  preserve required role boundaries and repair their transitions rather than
+  merging those roles. Do not add a formulaic recap at every paragraph. Apply this
+  equally across prose, definitions, proofs, figures, equations, code and comparisons.
+  For computational methods, read the application/method account in order:
+  visible application context → obstacle → overall computation and full selected
+  implementation → explained code excerpts → specific
+  strengths and fit to that obstacle, with limits → other-method relationships.
+  Stop before the first code and use only the preceding material to identify
+  the target, data meaning, goal and difficulty. Inspect the actual photographs,
+  figures, captions and explanation needed to do so. Before the first detailed
+  excerpt, check that the reader has encountered the input-to-output flow and
+  complete selected code with its dependencies. Locate that earlier listing;
+  a later appendix, overview table or working link alone cannot pass this check.
+  Confirm that excerpts belong to that same implementation and show where each
+  operation fits. During the detailed walkthrough, trace a concrete
+  operation to its property and its effect on that same obstacle; compare it to
+  the shown example and source/code evidence. Generic usefulness or objective
+  restatement fails this test. Check both why the application needs the method
+  and why the example teaches this passage. Multi-step methods must advance a
+  coherent account; forced five-part repetition around tiny snippets can break
+  that account. Flag missing/deferred visual context, global batching or link-only
+  substitutes even when all headings, ingredients and destinations exist.
+  Passing marker-order, keyword, length or link checks cannot establish this
+  semantic reading dependency. In a bounded preview, inspect at least one complete
+  obstacle-to-operation-to-capability account in the selected scope. Record where
+  the prose explains why the decisive operation works and where the corresponding
+  code and source can actually be reached. A correct listing followed by limits,
+  or a correspondence table without that reasoning, leaves this account unfinished.
+  Keep this content check separate from compilation and visual-layout checks.
+  Shared accounts
   may deepen evidence but must not make the local reading unit incomplete.
-  Record the first step a reader could not carry out using it. Knowledge recalled
+  Read the main route without relying on a later collection. Read each optional
+  view using its declared prerequisites for its stated task: follow the argument
+  in an explanation view, or understand/use the implementation in a code
+  collection. Look for missing definitions, equations, captions, helper functions,
+  references or transitions after extraction. Record the first blocked step;
+  links to fuller detail cannot replace prerequisites needed for the advertised
+  task. Do not require all views to repeat the same content. Knowledge recalled
   from the source cannot fill a missing explanation; this check is source-aware.
 - **R28 Fresh reading** — When independent accessibility evidence is requested
   or materially useful, give a fresh isolated reader only the frozen output and
@@ -81,18 +181,27 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
 - **R29 Rendered output** — Check the current built version, not a stale PDF.
   Inspect every page/slide for a complete visual review; otherwise disclose the
   inspected subset. Test equations/glyphs, readable labels, cropping, figure
-  placement, listings and navigation at real reading scale. For PDFs, inspect
+  placement, listings and navigation at real reading scale. Check that the
+  application visuals and their explanations are encountered before the code
+  that requires them; later visibility does not repair a missing introduction.
+  Inspect mixed-role figures for their background as well as result roles.
+  For PDFs, inspect
   the actual nested bookmark tree as well: source section/method
-  parentage, useful added local entries, readable titles and correct destinations.
+  parentage, named subjects above role entries, useful local entries, readable
+  titles and correct destinations. Inspect the main-route section boundary and
+  any optional collection entry, not only navigation inside one method.
+  Check that excerpt/translation pairs remain visibly associated with the
+  relevant explanation and exact source identity after pagination.
   Inspect representative landing content for source and added units. A visible
   heading hierarchy, linked contents page or successful body links cannot
   establish that bookmark navigation exists. For code-bearing
   deliverables, inspect every displayed method-code block, including appendix
-  listings: its source/link row must appear immediately after that block and
+  listings: its method/implementation label must be visible before the block,
+  and its source/link row must appear immediately after that block and
   visibly identify it. Check that the nearby explanation reconstructs the
   substantive operations and their correspondence to body equations/steps;
-  correct destinations alone do not establish this. Inspect the preceding
-  translation/explanation too: the code must correspond to that operation in
+  correct destinations alone do not establish this. In the main route, inspect
+  the preceding translation/explanation too: the code must correspond to that operation in
   the same source unit, not be reachable only in a later catalogue. Test its actual links:
   implementation source at the claimed fixed file/function/lines or supplement
   location, matching full code/editable unit, and explanatory body, with return
@@ -108,6 +217,10 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   Check that file links/attachments remain usable in the delivered bundle, not
   only at the author's absolute workspace paths. Record untested destinations
   or viewer restrictions as limits, rather than claiming the route works.
+  When optional views exist, inspect their bookmark subtrees, landing content,
+  main-route next-section links, corresponding-unit links and references.
+  Check filtered targets and relocated content; assess each landing against
+  its advertised scope rather than requiring a duplicate full account.
   Extraction or build success does not prove visual correctness, source
   fidelity or understanding.
 - **R30 Closure and saturation** — Before review, fix the scope and planned
@@ -127,6 +240,9 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   evidence undermines a central result. Record source identity, covered scope,
   unresolved gaps and next steps in the existing record. A structurally valid
   record cannot certify scientific truth or reader comprehension.
+  Remove unnecessary whole-document repetition while preserving content and
+  dependencies needed for each requested view. Do not remove a local explanation
+  or supporting passage pair merely because a link to it exists elsewhere.
   In the reader-facing handoff, distinguish source verification, implementation
   inspection/execution and visual checks, with their actual scope. Do not use
   an unqualified "verified" or mark the requested explanation complete while

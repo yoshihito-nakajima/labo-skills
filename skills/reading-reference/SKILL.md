@@ -82,21 +82,54 @@ and mathematical operations to implementation and interpreted outputs. For
 computational methods, follow the section-local reading contract and per-code
 relationships in [Applications to code](references/application-to-code.md), including
 background and educational methods. Explain both why the application needs the
-method and why that example belongs in this section. Place corresponding code
-immediately after the translation and necessary explanation of its operation.
-Use identifiable subordinate headings for local application requirements and
-code correspondence; in PDFs expose the source hierarchy and useful added units
-as nested bookmarks, checking the built outline under [R14](references/explanation.md).
+method and why that example belongs in this section. Establish the full
+application context, including its photographs/figures, captions and reading,
+and the obstacle before the first code. Introduce the overall computation and
+display its complete selected implementation before walking through excerpts.
+Connect those operations to their specific strengths and fit to that obstacle,
+followed by method relationships.
+Keep code near its mathematical explanation after this context is established;
+use a coherent method/application account rather than a template per excerpt.
+Throughout the explanation, apply
+[adjacent-passage continuity](../mathematical-exposition/SKILL.md#carry-the-argument-across-adjacent-passages),
+including passages without code. For structured added explanations, name the method or concept at its entrance,
+before background, then retain the role sections prescribed by the method
+contract or agreed outline and use
+[role | concrete point headings](../mathematical-exposition/references/roles-and-headings.md).
+Keep those role boundaries and connect their openings to the preceding content;
+consolidate unnecessary subdivisions only within a role. Audit headings and body
+under H1--H5 in that reference. In PDFs retain both title parts in nested bookmarks
+under the source hierarchy, checking the built outline under [R14](references/explanation.md).
+Complete each local method account through meaningful stages. Follow
+[document sequence and optional views](references/paper-preparation.md#keep-section-progression-and-purpose-specific-views-distinct):
+after a main section's translation, advance to the next source section. Do not
+add or retain a whole-document duplicate merely to provide another reading route.
+An optional background/explanation or code collection must serve a distinct task,
+retain the dependencies needed for that task, and share maintained source content
+with the main account. Neither collection is mandatory. Cite sources at the
+claims, equations, figures, code operations and comparisons they support, with
+inspected locators, and put the common bibliography last. A final-list link or
+code-end attribution does not replace those in-text citations.
 
 For substantial close-reading or presentation-preparation materials about a
 paper or specified part, read
 [Paper preparation](references/paper-preparation.md) before drafting. It owns
-the source-aligned structure, original text and faithful translation, and the
-purpose-to-evidence-to-code completion contract. Apply its code requirement to
-each explained computational method even without a separate request for code.
+the source-aligned structure, preparatory explanation followed by an explicit
+return to original text and faithful translation, and the purpose-to-evidence-
+to-code completion contract. Supporting literature actually used in the explanation
+also needs selected original passages and faithful translations beside the relevant
+explanation under [supporting-source reading](references/paper-preparation.md#make-supporting-literature-readable).
+This covers the passages used, not full translations of every bibliographic entry.
+Apply its code requirement to each explained computational method even without
+a separate request for code.
 A proof-only paper does not require fabricated software; explain its proof
 methods through the mathematical branch. Bounded questions, source lookup and
 reviews retain their requested scope rather than triggering a full translation.
+
+For implementation selection and language-learning examples, follow
+[source-grounded implementations across languages](references/multilanguage-code.md):
+prefer inspected author code in its actual language, supply source-based code
+when unavailable, and explain each added language's design and verification.
 
 ## Workflow
 
@@ -141,15 +174,32 @@ reviews retain their requested scope rather than triggering a full translation.
    role and obtained result under [Applications to code](references/application-to-code.md).
    Map source sections/subsections and local passages to that evidence, the
    reader's learning purpose and adjacent code before drafting.
+   For paper preparation, map each supporting passage to its displayed original,
+   faithful translation and the explanation it supports. For optional views,
+   select content by their declared reader task and preserve its dependencies.
+   Place background and mixed-role visuals where the problem first needs them;
+   do not defer every figure to results. Link optional views to corresponding
+   main units; label an index as an index rather than a complete explanation.
 5. Explain the question, useful result, decisive argument and its limits.
    For central methods, explain the motivating limitation, inherited ideas and
    new contribution with primary evidence. For required code, make provenance
    and the route between explanation, full implementation and sources usable
    in the delivered artifact; apply the explanation and methods references.
    Preserve source section/subsection hierarchy and complete each local unit
-   with translation, necessary explanation, immediately corresponding code and
-   operation/output interpretation. Use short explanation/code cycles for
-   multi-step methods, with application and relationship context in that unit.
+   with faithful translation and a coherent application-first explanation.
+   Bring the existing background photographs, figures, captions and explanation
+   together before code. Once the obstacle is understood, explain the overall
+   computation and show its complete selected implementation. Then develop its
+   mathematics and code through meaningful stages, explain their specific fit to that
+   problem, then compare methods through visible matching excerpts of actual implementations.
+   Do not restart five headings at every excerpt. Finish each source unit with
+   the explanation-to-source correspondence and original/translation under the
+   paper-preparation contract; preserve their internal order and then advance to
+   the next source unit. Name each method/code unit before explaining it.
+   By the end of each local method unit, those distributed cycles must form a
+   complete application/evidence/search/reproduction account. Optional views
+   select and reorganize this content for a different use; they do not replace
+   the local explanation or require duplicating its entire account.
    Put prerequisite bridges where needed and make each source-to-explanation
    connection findable. A summary, source dump or list of links cannot fulfill
    a request to reconstruct the reasoning or reproduce a method.
@@ -162,6 +212,10 @@ reviews retain their requested scope rather than triggering a full translation.
    Separate primary-source checks, implementation inspection/execution and
    rendering checks in the handoff; none certifies the others. Required missing
    sources or implementations remain incomplete work, even when disclosed.
+   Review each optional view against its declared task, including dependencies,
+   retained claims, locators, statuses, limits and return links. Check supporting
+   originals/translations against their actual sources separately from code
+   attribution; working code links do not establish passage coverage or fidelity.
    For paper preparation, explicitly check every completion condition in the
    paper-preparation reference before calling the requested material complete.
 
