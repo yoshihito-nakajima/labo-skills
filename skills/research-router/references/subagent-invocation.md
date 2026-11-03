@@ -19,8 +19,8 @@ assignment needs:
 - relevant constraints and evidence needed to do the work;
 - invocation provenance: actual model selection and exposed reasoning setting,
   their native invocation fields or matching host-session metadata, and the
-  task-specific basis for worker suitability; record an absent reasoning
-  control as unsupported rather than inventing a value;
+  configured role or explicit assignment source and its permitted work;
+  record an absent reasoning control as unsupported rather than inventing a value;
 - consultation status for this assignment, so a worker can reuse a completed
   check without recursively commissioning another advisor;
 - context and files the agent must not use, when the selected skill requires
@@ -30,7 +30,8 @@ For substantive roles, explicitly use the host's native model-selection and
 exposed reasoning controls; prompt text alone is not a selection. Use the
 [eligibility rule](editing-capability.md) to resolve unknown or conflicting
 provenance. An explicit parent selection in this packet is sufficient
-identity evidence for the selected worker, subject to that suitability check.
+identity evidence for the selected worker. Carry the established role assignment
+forward; do not require another mathematical-ability assessment.
 
 Do not paste the full conversation, implementation transcript, unrelated
 decisions, or another reviewer's report. Do not rely on a saved persona or

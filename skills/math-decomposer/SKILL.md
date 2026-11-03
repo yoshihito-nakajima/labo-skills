@@ -19,7 +19,7 @@ hypotheses and permitted dependencies, and explain how these lemmas imply the
 requested conclusion. Check dependency direction and cycles; split at an
 interface another worker can establish and the integrator can apply.
 
-Choose suitable proof workers for the hardest obligations. Delegate only
+Use the configured proof-worker role for the hardest obligations. Delegate only
 authorized proper subproblems within the remaining depth and shared descendant
 slots. Keep definitions and hypotheses consistent across branches. When native
 tools or the budget do not permit another child, return a bounded redispatch

@@ -53,7 +53,7 @@ class ExplorationTests(unittest.TestCase):
     def cli(self, *args):
         return subprocess.run([sys.executable, "-I", str(ROOT / "scripts/labo.py"), "research", "exploration", *args,
                                "--research", "example", "--workspace", str(self.root), "--format", "json"],
-                              cwd="/tmp", capture_output=True, text=True)
+                              cwd=self.root.parent, capture_output=True, text=True)
 
     def formal_fixture(self, *, status="verified-formally", review_kind="formal", local=False):
         project = "lean/synthetic"

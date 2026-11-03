@@ -52,26 +52,25 @@ personal facts there rather than in skill text; update only explicit durable
 facts or corrections from the user, or facts they ask to save, with source
 context. Apply the selected skill's normal verification rules.
 
-Before the first delegation, including consultation, retrieve the models and
-reasoning settings actually callable through the host's delegation interface,
-using its discovery tools/API or runtime catalogue. A provider-wide catalogue
-alone does not establish availability. Establish your own model and effort
-from the invocation provenance accepted by the eligibility rule; keep
-unverified values unknown rather than inferring them from defaults or
-self-description.
+Before the first delegation, inspect the host's configured roles and native
+invocation interface. Reuse their explicit role/model/effort assignments and
+check that the needed roles are callable. Record the current assignment and
+invocation provenance under the [eligibility rule](references/editing-capability.md).
+A provider catalogue alone does not establish host availability. Keep unknown
+metadata unknown; an established parent assignment need not be rediscovered
+by its worker.
 
 Before making any subagent call, including the required consultation, follow
 the [subagent invocation contract](references/subagent-invocation.md) for
 thread isolation, assignment packets, and independent-review boundaries.
 
-Choose each needed role's model and effort from that set using task requirements
-and available model-selection skills or current official guidance. Do not fix
-advisor, prover, or reviewer roles to model families by convention. Honor explicit
-user model constraints; otherwise prefer current suitable models and justify older
-choices. Reuse discovery within the task and pass selections through actual tool
-arguments.
-Apply the eligibility rule to roles you keep; delegate all substantive work
-when your own eligibility cannot be established.
+Route by the responsibility the task requires, using the configured roles.
+Use existing explicit model/effort selections rather than ranking model
+families or asking workers to judge their general mathematical ability.
+Creating or revising those selections belongs to `agent-host-setup`, with user
+constraints and current host availability as inputs. Apply the eligibility
+rule to work you keep, and hand off work outside your assigned role. If the
+needed role is unavailable, report the completed scope and missing role.
 
 For each user request, follow the [required consultation](references/consultation.md).
 
@@ -95,22 +94,25 @@ For each user request, follow the [required consultation](references/consultatio
 4. Beyond the required consultation, if task-specific delegation is useful,
    formulate a short task-specific assignment *from the selected skill* and
    follow the [subagent invocation contract](references/subagent-invocation.md).
-   Host role presets may select a suitable model and narrow job; the selected
-   skill and current packet remain authoritative. Use the
+   Host role presets supply the operational role/model/effort assignment;
+   the selected skill and current packet control its scope. Use the
    [mathematical role contract](references/mathematical-roles.md) for decomposition,
    proving and verification. Nested workers share the root's finite depth and
    descendant concurrency budget.
-   Choose by the mathematical judgment needed to establish correctness:
+   Choose by the work required:
 
-   - **Literal evidence collection and coordination**:
-     lightweight model, low reasoning effort.
-   - **Content understanding** (literature synthesis, explaining known arguments):
-     general-purpose model, standard or higher reasoning effort.
-   - **Research reasoning** (proofs, assumptions, counterexamples, mathematical
-     review): current upper-tier model suited to mathematical reasoning, high effort.
+   - **Evidence and coordination**: literal source collection and dispatch.
+   - **Content and production**: explanations of supplied arguments, literature
+     synthesis, drafting and ordinary artifact edits.
+   - **Proof**: new arguments, missing steps, hypotheses and counterexamples.
+   - **Verification**: a separate fresh check of an exact statement and proof
+     before adopting a newly established decisive mathematical conclusion as a
+     research result or decisive proof dependency. Routine explanations and
+     clearly marked tentative work follow their own assigned scope.
 
-   Reconstructing missing arguments counts as research reasoning, even in a
-   summary.
+   Reconstructing missing arguments uses the proof role, even in a summary.
+   Follow [concrete escalation triggers](references/editing-capability.md) when
+   assumptions, proof steps, examples or source support reveal an obstacle.
 5. Keep the user's `AGENTS.md` independent. Do not edit it as part of routing.
 
 For paper-introduction drafting, restructuring or narrative assessment, also

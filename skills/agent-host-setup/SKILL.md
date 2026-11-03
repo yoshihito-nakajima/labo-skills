@@ -34,8 +34,12 @@ records are optional deployment results.
    user configuration. Global changes need an understood scope and authority;
    a project request normally belongs in project files. Keep reusable behavior
    in this policy checkout and private host choices in the consuming workspace.
-4. Select callable suitable models and explicit supported effort for mathematical
-   roles using [the role contract](../research-router/references/mathematical-roles.md)
+4. Maintain explicit model/effort assignments for mathematical roles, using
+   user constraints, callable host choices and task requirements. Reuse an
+   existing assignment when it covers the task. Record the configuration's
+   source and scope; use available task evidence when revising it. Assignment
+   is an operational choice, not a guarantee of mathematical correctness.
+   Follow [the role contract](../research-router/references/mathematical-roles.md)
    and the corresponding `math-decomposer`, `math-proof-worker` or
    `math-verifier` skill, which owns the role body and description.
    Use native model fields; a persona title is not model selection. The
@@ -63,7 +67,7 @@ records are optional deployment results.
    Commit/push only within the user's publication authorization, policy before
    the parent pin when both repositories are involved.
 
-Examples (preview first; replace model with a currently callable suitable one):
+Examples (preview first; use the model assigned to the role and callable on the host):
 
 ```sh
 python3 .agents/skills/agent-host-setup/scripts/install_roles.py --workspace . --host codex --model gpt-6.1-sol --effort high

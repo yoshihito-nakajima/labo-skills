@@ -18,10 +18,11 @@ worker without supplying its own substantive judgment.
 Give the advisor the original request, relevant constraints and source evidence.
 An eligible coordinator also supplies its interpretation and proposed next
 action; a restricted coordinator asks the advisor to supply them. Ask whether
-the interpretation, scope, and action match the request. Apply the [model check and selection
-criteria](../SKILL.md): request interpretation is at least **content
-understanding**, even when the ensuing work is routine; use **research
-reasoning** when the check requires mathematical judgment.
+the interpretation, scope, and action match the request. Apply the [role routing
+criteria](../SKILL.md): request interpretation needs a **content/production**
+assignment, even when the ensuing work is routine; use a configured mathematical
+role when the check requires proof or hypothesis analysis. Carry the explicit
+assignment and provenance forward without a separate competence assessment.
 
 The advisor checks against the request and evidence, rather than merely echoing
 your interpretation. A sound plan needs only brief agreement; otherwise return

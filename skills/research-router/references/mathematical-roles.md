@@ -1,11 +1,16 @@
 # Mathematical delegation roles
 
-Use these roles for a research task that actually benefits from decomposition.
-Role names do not establish model capability: apply [eligibility](editing-capability.md),
-select a currently callable model suited to research reasoning through native
-fields, and record model/effort provenance. Luna remains evidence/coordination
-only in this fork. A preset is a starting choice, to be reconsidered for the
-task; high effort alone does not establish mathematical competence.
+Use the host's configured decomposition, proof and verification roles for the
+corresponding work. Apply [assignment and provenance](editing-capability.md)
+without asking each worker to assess its general mathematical competence.
+Record the role configuration or explicit assignment source and native
+model/effort selection. Luna remains evidence/coordination only in this fork.
+The assignment permits the work; its correctness still needs proof and checks.
+Use separate fresh verification before adopting newly established decisive
+mathematical claims as research results or decisive proof dependencies,
+following the owning skill's review rules and the adoption scope in the linked
+routing rule. When the necessary role is absent,
+return the established scope and remaining obligations to the parent.
 
 ## Packet shared by all roles
 
