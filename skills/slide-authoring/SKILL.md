@@ -1,6 +1,6 @@
 ---
 name: slide-authoring
-description: Create, revise or review mathematical talk slides and paper-reading decks for accurate visible claims, audience understanding, figures and pacing. Pair with skill-tuning when the user wants to shape the slide skill and a concrete deck together through a preview and feedback.
+description: Create, revise or review mathematical talk slides, blackboard-talk manuscripts and paper-reading decks for accurate visible claims, audience understanding, figures and pacing. Pair with skill-tuning when the user wants to shape the slide skill and a concrete deck together through a preview and feedback.
 ---
 
 # Make the mathematical path visible
@@ -23,7 +23,8 @@ decisions; do not turn one deck's preference into a general rule without
 evidence from the feedback.
 
 Use for talks, seminar slides, paper introductions, reading decks and their
-reviews. Read [slide standards](references/slide-standards.md). Infer the
+reviews. For a blackboard talk, read
+[board manuscripts](references/board-manuscript.md) as well. Read [slide standards](references/slide-standards.md). Infer the
 audience, prerequisites, language, purpose, source version and output format
 from context. Distinguish a live talk from a deck intended for reading alone.
 Use supplied talk/Q&A time; do not invent a duration or slide quota.
