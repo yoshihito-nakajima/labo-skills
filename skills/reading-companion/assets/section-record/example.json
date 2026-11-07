@@ -1,0 +1,192 @@
+{
+ "note": "Fictional example: a made-up survey 'Smoothing on graphs'.",
+ "sections": [
+  {
+   "id": "1",
+   "title": "Introduction",
+   "parent": null,
+   "pages": [
+    1,
+    1
+   ],
+   "question": "Why smooth values on a graph?",
+   "answer": "Neighbouring nodes should have similar values.",
+   "evidence": "motivation, p. 1",
+   "figures": [],
+   "code": [
+    {
+     "name": "(none)",
+     "kind": "none"
+    }
+   ],
+   "sell": "Sets the question: values on neighbouring nodes should agree.",
+   "weights": [
+    1,
+    1,
+    0
+   ],
+   "materials": [
+    {
+     "item": "text",
+     "state": "held",
+     "note": ""
+    }
+   ],
+   "no_comparison_reason": null,
+   "heading_word": "Introduction",
+   "translation": [
+    "(faithful translation of section 1 goes here)"
+   ]
+  },
+  {
+   "id": "2",
+   "title": "Neighbour averaging",
+   "parent": null,
+   "pages": [
+    2,
+    3
+   ],
+   "question": "How does repeated averaging smooth?",
+   "answer": "Each step replaces a value by its neighbours' mean; high frequencies decay fastest.",
+   "evidence": "Eq. (2), p. 2; Fig. 1, p. 3",
+   "figures": [
+    "Fig.1"
+   ],
+   "code": [
+    {
+     "name": "average_step",
+     "kind": "lib",
+     "state": "ran",
+     "src": "toylib",
+     "lic": "MIT",
+     "file": "code/avg.py"
+    },
+    {
+     "name": "weighted_step",
+     "kind": "ai",
+     "state": "ran",
+     "src": "this reading",
+     "lic": "",
+     "file": "code/avg.py",
+     "labelled_standin": true
+    }
+   ],
+   "sell": "One averaging step is a matrix-vector product; repeating it damps high frequencies.",
+   "weights": [
+    2,
+    3,
+    1
+   ],
+   "materials": [
+    {
+     "item": "Smith 2010 (cited)",
+     "state": "requested",
+     "note": "not found; asked the user"
+    }
+   ],
+   "steps": [
+    {
+     "title": "Step 1 neighbours",
+     "what": "collect each node's neighbours",
+     "file": "code/avg.py",
+     "first": 2,
+     "last": 3,
+     "math": "$N_i$"
+    },
+    {
+     "title": "Step 2 mean",
+     "what": "replace the value by the neighbours' mean",
+     "file": "code/avg.py",
+     "first": 4,
+     "last": 5,
+     "math": "Eq. (2): $x\\leftarrow D^{-1}Ax$"
+    }
+   ],
+   "comparison": {
+    "title": "plain mean vs weighted mean",
+    "left": {
+     "name": "plain mean",
+     "kind": "lib"
+    },
+    "right": {
+     "name": "weighted mean",
+     "kind": "ai"
+    },
+    "rows": [
+     {
+      "status": "same",
+      "label": "neighbours",
+      "left": [
+       "code/avg.py",
+       2,
+       3
+      ],
+      "right": [
+       "code/avg.py",
+       2,
+       3
+      ],
+      "why": "both collect the same neighbours"
+     },
+     {
+      "status": "changed",
+      "label": "average",
+      "left": [
+       "code/avg.py",
+       4,
+       5
+      ],
+      "right": [
+       "code/avg.py",
+       6,
+       7
+      ],
+      "why": "the weighted version multiplies by edge weights first"
+     },
+     {
+      "status": "only_right",
+      "label": "weights",
+      "left": null,
+      "right": [
+       "code/avg.py",
+       7,
+       7
+      ],
+      "why": "only the weighted version reads edge weights"
+     }
+    ],
+    "params": [
+     [
+      "steps",
+      "number of repeats",
+      "same",
+      "more repeats damp more"
+     ]
+    ],
+    "note": "Fictional example."
+   },
+   "heading_word": "Neighbour",
+   "translation": [
+    "(faithful translation of section 2 goes here)"
+   ]
+  }
+ ],
+ "figures": {
+  "Fig.1": {
+   "page": 3,
+   "what": "values before and after three averaging steps",
+   "color": "blue = before, orange = after (caption)",
+   "color_checked": true
+  }
+ },
+ "edges": [
+  [
+   "1",
+   "2",
+   "the averaging operation the paper studies"
+  ]
+ ],
+ "title": "Smoothing on graphs (fictional survey)",
+ "source": "A. Author, Smoothing on graphs, 2020 (fictional)",
+ "figure_links": []
+}

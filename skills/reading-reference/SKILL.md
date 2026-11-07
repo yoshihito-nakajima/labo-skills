@@ -53,6 +53,8 @@ Read only the references needed for the task:
 - [Method-paper profile](references/method-paper-profile.md): the parts of a detailed note for a
   paper whose contribution is a method with code (life science, information science), with a
   skeleton in `assets/method-note/`; not a template for proof-centred mathematical papers.
+- [Survey-paper profile](references/survey-profile.md): a survey read section by section — one record per section as
+  the single source of the PDF and the HTML, edges stated once, claims checked against pages and figures.
 - [Lineage and comparison](references/lineage-and-comparison.md): inventory of inherited,
   compared, criticised, encompassing/encompassed, origin and earlier-version works, and the
   level at which each is treated, down to code differences.

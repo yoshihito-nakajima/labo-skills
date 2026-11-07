@@ -52,3 +52,20 @@ correspond to the authors' ones, offer a switch that links the two sets of contr
 the same input and show both figures side by side, never only as a toggle. When their random
 draws cannot be aligned (different languages or generators), compare what does not depend on
 the draw (frequencies, curves, invariants) and say so.
+
+## Cards for every code section (survey papers)
+
+When code is spread over sections, give each code section a **Steps** list: each Step names what
+it does, shows the verbatim lines, and states the math it corresponds to after the code. Then:
+
+- Comparison card where an earlier method exists: left and right code in aligned blocks coloured
+  same / changed / only-in-one, each with its reason, a count ("N of M compared lines are
+  the same"), and a parameter table for both sides.
+- The earlier method may be the same code minus the added lines (mean shift inside its
+  constrained variant; a plain normalisation inside a renormalised one). Then the left side points
+  at the same file with the added blocks marked "only right"; a one-line literal stands in for a
+  replaced line and says so.
+- No earlier method with code (or none that can be shown): write "no comparison" with the reason,
+  keep the Steps, and record the missing original in the request list.
+- A stand-in on one side is labelled and stepped like any other; it never replaces an original
+  that can be obtained.

@@ -51,6 +51,10 @@ itself is generic and public; its examples are fictional.
 - [The pair](references/pair.md): the note (PDF) and the companion (HTML) kept as one pair: `PAIR.json`,
   `new_pair.py` / `build_pair.py` (start and build both halves, provisional), `check_pair.py` (stale builds, treated comparisons and figure differences present on both sides,
   intake record), `archive_pair.py` (copy into the local-only corpus).
+- [Section-structured page](references/section-page.md): for survey papers read section by section — a common
+  collapsed layout, a head panel per section, original region beside the faithful translation, Steps and comparison
+  cards per code section; `scripts/check_section_record.py` checks the record and
+  `scripts/build_section_page.py` builds the HTML and the TeX parts from it.
 - [Fidelity](references/fidelity.md): the authors'-code parameter grid, reproduction levels,
   re-implementation only with a parity record, provenance labels, licences.
 
