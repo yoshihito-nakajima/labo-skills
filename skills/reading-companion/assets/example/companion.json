@@ -1,0 +1,892 @@
+{
+ "title": "Companion: A Fictional Ordering Method (Doe, 2001)",
+ "lang": "en",
+ "paper": {
+  "citation": "J. Doe (2001), A Fictional Ordering Method. Fictional Journal 1:1-9.",
+  "main_figures": 2
+ },
+ "note": {
+  "pdf": "note.pdf",
+  "aux": "note.aux"
+ },
+ "background": {
+  "question": "How can unlabelled points be ordered along a path?",
+  "context": "Earlier graph methods join near points, so a short edge across a gap can shortcut the path.",
+  "terms": [
+   {
+    "term": "k-nearest-neighbour graph",
+    "meaning": "each point joined to its k closest points"
+   }
+  ],
+  "picture": "Nine points are measured once each; nobody saw them move. We want the path they would lie on if they were steps of one process, so that the order along the path can be read off.",
+  "summary": "The paper orders unlabelled points along a path. Its Introduction names one obstacle: in a plain k-nearest-neighbour graph a short edge across a gap joins two distant parts, and the shortest path then skips steps. It declares one change: keep the k nearest neighbours but make an edge longer than 1.0 cost more (the parameter boost).",
+  "primer": {
+   "object": "The method outputs an ordering of the points along a path: a line of points, each joined to the next by an edge.",
+   "parts": [
+    {
+     "term": "point",
+     "meaning": "one measured item"
+    },
+    {
+     "term": "edge",
+     "meaning": "a joint between two points, drawn longer when the points are farther apart"
+    }
+   ],
+   "learn": "which points come before which, and where a long edge marks a gap",
+   "encodings": [
+    {
+     "mark": "line thickness",
+     "meaning": "cost of the edge",
+     "figures": [
+      "fig1"
+     ]
+    }
+   ]
+  }
+ },
+ "methods": {
+  "author": {
+   "name": "Doe 2001 code",
+   "repo": "example/fictional",
+   "commit": "example",
+   "license": "MIT (fictional)",
+   "root": "code",
+   "url": "https://example.org/fictional/doe2001"
+  },
+  "prior": [
+   {
+    "id": "older",
+    "name": "Plain kNN graph",
+    "repo": "example/fictional",
+    "commit": "example",
+    "license": "MIT (fictional)",
+    "root": "related",
+    "source": "cited: Roe (1999), Alg. 1",
+    "url": "https://example.org/fictional/roe1999"
+   }
+  ]
+ },
+ "features": [
+  {
+   "id": "f1",
+   "title": "Costly edges across gaps",
+   "background": "A path through the points should not jump across an empty gap; the plain graph lets it.",
+   "question": "Which edge disappears from the shortest path when the boost grows?",
+   "selling_point": {
+    "text": "Edges longer than 1.0 are multiplied by a boost factor.",
+    "source": "Sec. 2, Eq. (1), p.4"
+   },
+   "note_labels": [
+    "sec:graph",
+    "eq:boost"
+   ],
+   "deck_pages": [
+    "R3"
+   ],
+   "author_code": {
+    "impl": "author",
+    "file": "method.py",
+    "first": 4,
+    "last": 10,
+    "params": [
+     {
+      "name": "k",
+      "line": 4,
+      "token": "k=3",
+      "default": 3,
+      "grid": [
+       2,
+       3
+      ],
+      "stated_in": "paper",
+      "effect": "more edges per point",
+      "label": "k (neighbours per point)"
+     },
+     {
+      "name": "boost",
+      "line": 4,
+      "token": "boost=1.5",
+      "default": 1.5,
+      "grid": [
+       1.0,
+       1.5
+      ],
+      "stated_in": "code",
+      "effect": "cost of long edges",
+      "added": [
+       1.0
+      ],
+      "label": "boost (cost factor for edges longer than 1.0)"
+     }
+    ],
+    "roles": [
+     {
+      "first": 7,
+      "last": 9,
+      "text": "for each point, sort the others by distance and keep the k nearest, boosting long edges"
+     }
+    ],
+    "fold": [
+     [
+      5,
+      5
+     ]
+    ]
+   },
+   "prior_code": {
+    "impl": "older",
+    "file": "older.py",
+    "first": 4,
+    "last": 9,
+    "failure": "The plain graph joins the same neighbours but every edge costs its length, so the edge across the gap (marks 1–2) is as cheap as a short one.",
+    "params": [
+     {
+      "name": "k",
+      "line": 4,
+      "token": "k=3",
+      "default": 3,
+      "grid": [
+       2,
+       3
+      ],
+      "stated_in": "paper",
+      "effect": "edges per point",
+      "label": "k (neighbours per point, plain graph)"
+     }
+    ]
+   },
+   "figure": {
+    "paper_crop_absent": "fictional example: no paper figure",
+    "paper_locator": "Fig. 1B, p.3 (fictional)",
+    "encoding": "position = the two measured values",
+    "marks": [
+     {
+      "n": 1,
+      "text": "the two ends of the gap"
+     }
+    ]
+   },
+   "results": "results/f1.json",
+   "reading": {
+    "see": "marks 1 and 2 at the ends of the gap",
+    "learn": "with boost 1.0 the gap edge is as cheap as any other",
+    "trouble": "the boost is a fixed constant; the next feature would set it from density"
+   },
+   "limits": "Nine fictional points; two grid values per parameter.",
+   "step": "graph",
+   "idea": "Join every point to its few nearest points. An edge that is long probably crosses an empty gap, so make it more expensive than its length.",
+   "terms": [
+    {
+     "term": "k",
+     "meaning": "how many nearest points each point is joined to"
+    },
+    {
+     "term": "boost",
+     "meaning": "factor multiplying the cost of an edge longer than 1.0"
+    },
+    {
+     "term": "gap",
+     "meaning": "an empty region between two groups of points (between marks 1 and 2 in the figure)"
+    },
+    {
+     "term": "k (earlier method)",
+     "meaning": "the same neighbour count in the plain graph"
+    }
+   ],
+   "formula": {
+    "text": "cost(i, j) = d(i, j) × (boost if d(i, j) > 1.0, else 1)",
+    "source": "paper: Sec. 2, Eq. (1), p.4 (fictional)"
+   },
+   "example": [
+    "Two points at distance 0.5: cost 0.5 whatever the boost.",
+    "Two points at distance 1.5 with boost = 1.5: cost 2.25."
+   ],
+   "example_source": "speaker's (hand computation from the formula)",
+   "recap": "Purpose: a path should not jump across an empty gap. Idea: long edges cost more. The code builds the edges in one loop.",
+   "presets": [
+    {
+     "label": "default",
+     "values": {
+      "k": 3,
+      "boost": 1.5
+     },
+     "expect": "the gap edge (marks 1–2) costs 1.5 times its length"
+    },
+    {
+     "label": "no boost",
+     "values": {
+      "k": 3,
+      "boost": 1.0
+     },
+     "expect": "the gap edge costs the same as any short edge"
+    }
+   ],
+   "dataset": "nine",
+   "prior_presets": [
+    {
+     "label": "plain, k = 2",
+     "values": {
+      "k": 2
+     },
+     "expect": "fewer edges; the gap edge is still there and costs its length"
+    }
+   ],
+   "comparison": [
+    {
+     "prior": [
+      4,
+      4
+     ],
+     "author": [
+      4,
+      4
+     ],
+     "relation": "changed",
+     "role": "another aim",
+     "text": "the authors add the parameter boost",
+     "does": "declares the function and its arguments",
+     "lineage": "changed from the plain kNN code: one argument added"
+    },
+    {
+     "prior": [
+      6,
+      7
+     ],
+     "author": [
+      7,
+      8
+     ],
+     "relation": "same",
+     "text": "for each point, sort the others by distance",
+     "does": "for each point, list the other points from the nearest",
+     "lineage": "inherited from the plain kNN code, unchanged"
+    },
+    {
+     "prior": [
+      8,
+      8
+     ],
+     "author": [
+      9,
+      9
+     ],
+     "relation": "changed",
+     "role": "fixes the obstacle",
+     "text": "keep the k nearest, but an edge longer than 1.0 costs boost times its length",
+     "does": "joins each point to its k nearest points",
+     "lineage": "changed from the plain kNN code: long edges cost more"
+    },
+    {
+     "prior": null,
+     "author": [
+      5,
+      5
+     ],
+     "relation": "author-only",
+     "role": "bookkeeping",
+     "text": "docstring",
+     "does": "describes the function",
+     "lineage": "added by the authors"
+    }
+   ],
+   "run_role": {
+    "role": "code",
+    "shows": "what k and boost do to the edges of the nine points"
+   },
+   "run_card": {
+    "calls": [
+     {
+      "code": "points = load('nine points')",
+      "where": "make_example.py (fictional)",
+      "by": "AI"
+     },
+     {
+      "code": "neighbour_graph(points, k=k, boost=boost)",
+      "where": "method.py L4–10",
+      "by": "author",
+      "times": "once per grid point (4)"
+     },
+     {
+      "code": "plain_graph(points, k=k)",
+      "where": "older.py L4–9",
+      "by": "earlier",
+      "times": "once per grid point (2)"
+     }
+    ],
+    "flow": [
+     {
+      "control": "k",
+      "argument": "k",
+      "line": 9,
+      "output": "edges (the k nearest of each point)",
+      "drawn": "grey lines"
+     },
+     {
+      "control": "boost",
+      "argument": "boost",
+      "line": 9,
+      "output": "edge costs above 1.0",
+      "drawn": "not drawn directly; changes which edge the path uses"
+     },
+     {
+      "control": "k",
+      "side": "prior",
+      "argument": "k",
+      "line": 8,
+      "output": "edges",
+      "drawn": "grey lines"
+     }
+    ],
+    "steps": [
+     "graph"
+    ],
+    "not_run": "the shortest path (step 2) is not computed here",
+    "drawn": "points at their two values; lines are the edges returned"
+   }
+  },
+  {
+   "id": "d1",
+   "title": "Check by hand: the boost on nine points",
+   "author_code": {
+    "impl": "author",
+    "file": "method.py",
+    "first": 4,
+    "last": 10,
+    "params": [
+     {
+      "name": "k",
+      "line": 4,
+      "token": "k=3",
+      "default": 3,
+      "grid": [
+       2,
+       3
+      ],
+      "stated_in": "paper",
+      "effect": "more edges per point",
+      "label": "k (neighbours per point)"
+     },
+     {
+      "name": "boost",
+      "line": 4,
+      "token": "boost=1.5",
+      "default": 1.5,
+      "grid": [
+       1.0,
+       1.5
+      ],
+      "stated_in": "code",
+      "effect": "cost of long edges",
+      "added": [
+       1.0
+      ],
+      "label": "boost (cost factor for edges longer than 1.0)"
+     }
+    ],
+    "roles": [
+     {
+      "first": 7,
+      "last": 9,
+      "text": "for each point, sort the others by distance and keep the k nearest, boosting long edges"
+     }
+    ],
+    "fold": [
+     [
+      5,
+      5
+     ]
+    ]
+   },
+   "prior_code": {
+    "impl": "older",
+    "file": "older.py",
+    "first": 4,
+    "last": 9,
+    "failure": "The plain graph joins the same neighbours but every edge costs its length, so the edge across the gap (marks 1–2) is as cheap as a short one.",
+    "params": [
+     {
+      "name": "k",
+      "line": 4,
+      "token": "k=3",
+      "default": 3,
+      "grid": [
+       2,
+       3
+      ],
+      "stated_in": "paper",
+      "effect": "edges per point",
+      "label": "k (neighbours per point, plain graph)"
+     }
+    ]
+   },
+   "figure": {
+    "paper_crop_absent": "fictional example: no paper figure",
+    "paper_locator": "Fig. 1B, p.3 (fictional)",
+    "encoding": "position = the two measured values",
+    "marks": [
+     {
+      "n": 1,
+      "text": "the two ends of the gap"
+     }
+    ]
+   },
+   "results": "results/f1.json",
+   "limits": "Nine fictional points; two grid values per parameter.",
+   "terms": [
+    {
+     "term": "k",
+     "meaning": "how many nearest points each point is joined to"
+    },
+    {
+     "term": "boost",
+     "meaning": "factor multiplying the cost of an edge longer than 1.0"
+    },
+    {
+     "term": "gap",
+     "meaning": "an empty region between two groups of points (between marks 1 and 2 in the figure)"
+    },
+    {
+     "term": "k (earlier method)",
+     "meaning": "the same neighbour count in the plain graph"
+    }
+   ],
+   "example_source": "speaker's (hand computation from the formula)",
+   "presets": [
+    {
+     "label": "default",
+     "values": {
+      "k": 3,
+      "boost": 1.5
+     },
+     "expect": "the gap edge (marks 1–2) costs 1.5 times its length"
+    },
+    {
+     "label": "no boost",
+     "values": {
+      "k": 3,
+      "boost": 1.0
+     },
+     "expect": "the gap edge costs the same as any short edge"
+    }
+   ],
+   "dataset": "synth",
+   "prior_presets": [
+    {
+     "label": "plain, k = 2",
+     "values": {
+      "k": 2
+     },
+     "expect": "fewer edges; the gap edge is still there and costs its length"
+    }
+   ],
+   "comparison": [
+    {
+     "prior": [
+      4,
+      4
+     ],
+     "author": [
+      4,
+      4
+     ],
+     "relation": "changed",
+     "role": "another aim",
+     "text": "the authors add the parameter boost",
+     "does": "declares the function and its arguments",
+     "lineage": "changed from the plain kNN code: one argument added"
+    },
+    {
+     "prior": [
+      6,
+      7
+     ],
+     "author": [
+      7,
+      8
+     ],
+     "relation": "same",
+     "text": "for each point, sort the others by distance",
+     "does": "for each point, list the other points from the nearest",
+     "lineage": "inherited from the plain kNN code, unchanged"
+    },
+    {
+     "prior": [
+      8,
+      8
+     ],
+     "author": [
+      9,
+      9
+     ],
+     "relation": "changed",
+     "role": "fixes the obstacle",
+     "text": "keep the k nearest, but an edge longer than 1.0 costs boost times its length",
+     "does": "joins each point to its k nearest points",
+     "lineage": "changed from the plain kNN code: long edges cost more"
+    },
+    {
+     "prior": null,
+     "author": [
+      5,
+      5
+     ],
+     "relation": "author-only",
+     "role": "bookkeeping",
+     "text": "docstring",
+     "does": "describes the function",
+     "lineage": "added by the authors"
+    }
+   ],
+   "run_role": {
+    "role": "demo",
+    "shows": "what k and boost do to the edges",
+    "truth": "there is a gap between points 3 and 4",
+    "values_note": "fictional: same call as Fig.1's run, on the 9-point example with boost 1 and 3 (the paper's figure used another data set)"
+   },
+   "run_card": {
+    "calls": [
+     {
+      "code": "points = load('nine points')",
+      "where": "make_example.py (fictional)",
+      "by": "AI"
+     },
+     {
+      "code": "neighbour_graph(points, k=k, boost=boost)",
+      "where": "method.py L4–10",
+      "by": "author",
+      "times": "once per grid point (4)"
+     },
+     {
+      "code": "plain_graph(points, k=k)",
+      "where": "older.py L4–9",
+      "by": "earlier",
+      "times": "once per grid point (2)"
+     }
+    ],
+    "flow": [
+     {
+      "control": "k",
+      "argument": "k",
+      "line": 9,
+      "output": "edges (the k nearest of each point)",
+      "drawn": "grey lines"
+     },
+     {
+      "control": "boost",
+      "argument": "boost",
+      "line": 9,
+      "output": "edge costs above 1.0",
+      "drawn": "not drawn directly; changes which edge the path uses"
+     },
+     {
+      "control": "k",
+      "side": "prior",
+      "argument": "k",
+      "line": 8,
+      "output": "edges",
+      "drawn": "grey lines"
+     }
+    ],
+    "steps": [
+     "graph"
+    ],
+    "not_run": "the shortest path (step 2) is not computed here",
+    "drawn": "points at their two values; lines are the edges returned"
+   },
+   "kind": "run",
+   "called": [
+    {
+     "impl": "author",
+     "name": "neighbour_graph()",
+     "file": "method.py",
+     "first": 4,
+     "last": 10
+    },
+    {
+     "impl": "older",
+     "name": "the plain kNN function",
+     "file": "older.py",
+     "first": 1,
+     "last": 9
+    }
+   ],
+   "sell": [
+    {
+     "file": "method.py",
+     "first": 9,
+     "last": 9,
+     "label": "edges longer than 1.0 cost boost times their length",
+     "step": "graph"
+    }
+   ]
+  }
+ ],
+ "overview": [
+  {
+   "id": "graph",
+   "name": "Neighbour graph",
+   "role": "join each point to its near points, with costly edges across gaps",
+   "input": "points",
+   "output": "weighted graph"
+  },
+  {
+   "id": "path",
+   "name": "Shortest path",
+   "role": "read the order along the cheapest path",
+   "input": "weighted graph",
+   "output": "ordering of the points"
+  }
+ ],
+ "datasets": [
+  {
+   "id": "nine",
+   "name": "nine fictional points",
+   "source": "fictional example shipped with the skill",
+   "identity": "9 points, listed in results/f1.json",
+   "preprocessing": "none",
+   "level": "L1"
+  },
+  {
+   "id": "synth",
+   "name": "nine fictional points (AI-created)",
+   "source": "make_example.py (fictional)",
+   "identity": "generated",
+   "preprocessing": "none",
+   "level": "AI",
+   "generator": "make_example.py (fictional)",
+   "truth": "two groups of points with an empty gap between them"
+  }
+ ],
+ "requests": [
+  {
+   "what": "the fictional lab measurements behind Fig.2",
+   "where": "(fictional) the journal's supplementary data page",
+   "serves": "Fig.2",
+   "enables": "an L2 run of the ordering on the measured points"
+  }
+ ],
+ "figures": [
+  {
+   "id": "fig1",
+   "number": 1,
+   "label": "Fig.1",
+   "title": "Ordering nine points",
+   "claim": {
+    "text": "With costly gap edges, the path follows the points and does not jump the gap (Fig. 1B).",
+    "source": "Sec. 2, p.4 (fictional)"
+   },
+   "plain": "The figure compares the path found with and without the boost on the same nine points.",
+   "figure": {
+    "paper_crop_absent": "fictional example: no paper figure",
+    "paper_locator": "Fig.1, p.3 (fictional)",
+    "encoding": "position = the two measured values; lines = graph edges"
+   },
+   "reads": [
+    {
+     "mark": "1",
+     "see": "the two ends of the gap",
+     "learn": "without the boost a short edge joins them",
+     "check": {
+      "step": "d1",
+      "preset": "default",
+      "look": "the edge across the gap",
+      "result": "confirmed: with boost 1.5 the gap edge costs 1.5 times its length"
+     }
+    },
+    {
+     "mark": "2",
+     "see": "the path in panel B goes around",
+     "learn": "the boost makes the gap edge more expensive than the detour",
+     "check": {
+      "step": "d1",
+      "preset": "default",
+      "look": "the edge across the gap",
+      "result": "confirmed: with boost 1.5 the gap edge costs 1.5 times its length"
+     }
+    }
+   ],
+   "trouble": "the boost is a fixed constant",
+   "handoff": "Fig.2 tests the ordering on measured points",
+   "points": [
+    {
+     "panel": "(B)",
+     "figure_point": "the path does not jump the gap",
+     "code_point": "edges longer than 1.0 cost boost times their length",
+     "step": "f1",
+     "focus": {
+      "author": [
+       7,
+       9
+      ],
+      "prior": [
+       6,
+       8
+      ]
+     }
+    }
+   ],
+   "reproduction": {
+    "level": "L1",
+    "step": "f1",
+    "corresponds": "Fig.1B: the same nine points and the same rule",
+    "not_transfer": "nothing: the example is the paper's own",
+    "role": "remake",
+    "panels": [
+     "Fig.1B"
+    ],
+    "compare": "which edge the path takes at the gap (marks 1–2)",
+    "panel_figure": {
+     "paper_crop_absent": "fictional example: no paper figure",
+     "paper_locator": "Fig.1B, p.3 (fictional)"
+    }
+   },
+   "presenter": {
+    "say": "With the boost the path follows the data; the gap edge is no longer the cheapest.",
+    "point": "marks 1 and 2",
+    "questions": [
+     {
+      "q": "Why 1.0?",
+      "a": "The paper does not say; it is a constant in the code (fictional)."
+     }
+    ],
+    "not_shown": "how the result depends on the threshold 1.0"
+   },
+   "note_labels": [
+    "sec:graph",
+    "eq:boost"
+   ],
+   "deck_pages": [
+    "R3"
+   ],
+   "demo": {
+    "step": "d1"
+   },
+   "difference": [
+    {
+     "steps": [
+      "graph"
+     ],
+     "where": "method.py L9",
+     "by": "note",
+     "text": "Only the weight of edges longer than 1.0 differs from the earlier code; with boost = 1 the two graphs and their paths are the same."
+    }
+   ],
+   "talk": {
+    "takeaway": "The cost of long edges keeps the path from skipping steps.",
+    "picture": "the path drawn with and without the cost",
+    "property": "robustness",
+    "panels": {
+     "show": [
+      "all"
+     ],
+     "rest": []
+    }
+   }
+  },
+  {
+   "id": "fig2",
+   "number": 2,
+   "label": "Fig.2",
+   "title": "Ordering measured points (experiment)",
+   "claim": {
+    "text": "The predicted order matches the measured order (Fig. 2).",
+    "source": "Sec. 3, p.6 (fictional)"
+   },
+   "plain": "An experiment checks the order predicted in Fig.1 on measured points.",
+   "figure": {
+    "paper_crop_absent": "fictional example: no paper figure",
+    "paper_locator": "Fig.2, p.6 (fictional)"
+   },
+   "reads": [
+    {
+     "mark": "1",
+     "see": "the measured order",
+     "learn": "it agrees with the predicted one",
+     "check": {
+      "paper_only": true,
+      "reason": "a wet-lab experiment; nothing to run"
+     }
+    }
+   ],
+   "trouble": "only one sample",
+   "handoff": "—",
+   "points": [
+    {
+     "panel": "(A)",
+     "figure_point": "the order is confirmed",
+     "code_point": "none: a wet-lab experiment",
+     "step": "n/a: no code; it tests the order of Fig.1"
+    }
+   ],
+   "reproduction": {
+    "level": "L4",
+    "reason": "an experiment without code; the order it tests is computed in Fig.1"
+   },
+   "presenter": {
+    "say": "The experiment agrees with the predicted order.",
+    "point": "mark 1",
+    "not_shown": "other samples"
+   },
+   "note_labels": [
+    "sec:graph"
+   ]
+  }
+ ],
+ "code_map": {
+  "entry": {
+   "impl": "author",
+   "name": "neighbour_graph()",
+   "file": "method.py",
+   "first": 4,
+   "last": 10
+  },
+  "blocks": [
+   {
+    "first": 4,
+    "last": 5,
+    "step": null,
+    "text": "signature and docstring"
+   },
+   {
+    "first": 6,
+    "last": 10,
+    "step": "graph",
+    "text": "join each point to its k nearest, boosting long edges"
+   }
+  ],
+  "extra": [
+   {
+    "impl": "author",
+    "name": "shortest_path()",
+    "file": "method.py",
+    "first": 13,
+    "last": 25,
+    "step": "path",
+    "note": "the next step is another function"
+   }
+  ]
+ },
+ "lineage": {
+  "intro": "One earlier family; the method keeps its graph and changes one rule.",
+  "families": [
+   {
+    "family": "neighbour graphs",
+    "good": "cheap; follow dense paths",
+    "weak": "a short edge across a gap shortcuts the path (the paper's view)",
+    "where": "Fig.1"
+   }
+  ],
+  "entries": [
+   {
+    "name": "Plain k-nearest-neighbour ordering",
+    "year": "fictional",
+    "relation": "inherited, baseline",
+    "made_for": "ordering points by shortest paths on a neighbour graph",
+    "weakness": "an edge across a gap makes the path skip steps",
+    "kept": "the k-nearest-neighbour graph and the shortest path; changed: edges longer than 1.0 cost boost times their length",
+    "verified": "fictional example: the earlier code (related/) was read; the shortcut appears in its run on the example data",
+    "note_labels": []
+   }
+  ]
+ }
+}

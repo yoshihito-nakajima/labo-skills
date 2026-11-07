@@ -1,0 +1,18 @@
+% Minimal use of talkstyle.sty. Build from the workspace root with labo-build (lualatex).
+% One source file with the pages, two thin roots (en / ja) that differ in the option only.
+\documentclass[aspectratio=169,11pt,t]{beamer}
+\usepackage[en]{.agents/skills/deck-from-references/assets/beamer/talkstyle}   % or [ja]
+\renewcommand{\talktabs}{\tab{1}{\S1 Intro}\tab{2}{\S2 Method}\tab{3}{\S3 Limits}}
+\renewcommand{\talkfooter}{Speaker / Short title}
+\begin{document}
+\begin{frame}[plain]\vspace{1.2cm}{\fontsize{22}{26}\selectfont\bfseries Title\par}\end{frame}
+\begin{frame}\frametitle{\T{Outline}{あらすじ}}\begin{itemize}\item \T{one line per step of the story}{物語の各段階を1行で}\end{itemize}\end{frame}
+\section{Intro}\talktag{\S1 Intro}
+\begin{frame}
+\frametitle{A claim or a question, on one line}
+\framesubtitle{the premise carried over from the previous page}
+\begin{tbox}{Done}\small what is settled\end{tbox}
+\srctag{Source, p.~3}
+\closing[Next: the question the next page answers.]{The claim just established, or what it does not say.}
+\end{frame}
+\end{document}

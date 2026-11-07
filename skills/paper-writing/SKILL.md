@@ -36,6 +36,9 @@ wording, sentence rhythm, transitions, register, and rhetorical pacing. The
 corpus informs style without turning every observed feature into a requirement;
 never copy distinctive wording or claims from an example. Keep the detailed
 selection and promotion process in [the style-corpus workflow](references/style-corpus.md).
+The corpus and its index/registration metadata are local-only; follow
+[source and corpus privacy](../labo-layout/references/reference-privacy.md).
+Keep source selection provenance in the local corpus, outside tracked papers.
 
 For substantive drafting/revision and requested terminology checks, apply the
 [terminology and notation audit](../reading-reference/references/terminology-audit.md)

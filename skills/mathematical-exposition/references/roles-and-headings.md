@@ -1,7 +1,27 @@
-# Keep the role skeleton visible in two-part headings
+# Plan with a role skeleton; show role labels only in reading notes
 
 Use for authored section/subsection headings in structured explanations. The
-owning workflow or agreed artifact outline supplies the role skeleton. This
+owning workflow or agreed artifact outline supplies the role skeleton.
+
+## Where role labels are visible
+
+The role skeleton (question, definition, obstacle, mechanism, proof route,
+limits, ...) is a planning device: it fixes which jobs the text must do and in
+what order. Whether role names appear in headings depends on the artifact:
+
+- **Visible two-part headings** (`role | concrete point`) are used only in
+  source-aligned reading notes owned by `reading-reference` (method notes,
+  paper-preparation PDFs and their bookmarks), where downstream tools such as
+  talk planning read these headings, or when the user explicitly asks for them.
+- **Everywhere else** — web expositions, HTML pages, reading companions, chat
+  answers, lecture notes, manuscripts and slides — keep the skeleton in the
+  plan and write **natural headings without role labels**. Do not write
+  `問い｜…`, `定義｜…`, `背景｜…`, `結論｜…`, `Background: …` or similar. A
+  heading is a short claim, question or name in the reader's words:
+  `観測直径とは何か`, `四点の空間で旧不等式が崩れる`, `幅をどこまで縮められるか`.
+  The section's role must be evident from its opening and body, not from a
+  label. Rules below about the "two parts" apply to reading notes; for natural
+  headings, the concrete content and the subject identity still apply. This
 contract does not impose headings on a short answer or paragraph, rename theorem
 labels or captions, or rewrite a source's titles and faithful translation.
 
@@ -44,13 +64,16 @@ is specified by [Applications to code](../../reading-reference/references/applic
 For other structured explanations, use the roles suited to the requested artifact;
 do not import computational roles into a proof or invent an implementation.
 
-Each role section needs a heading with two visible parts:
+In reading notes, each role section needs a heading with two visible parts:
 **structural role | concrete point of this section**. In Japanese, for example,
 `障害｜近傍が空の観測点では平均を定義できない` names both the stage and the
 specific difficulty. A colon or another clear separator is equivalent; the
 criterion is meaning, not a required glyph. A label such as "Supplement" records
 provenance, not the role. "Background" alone omits the point; a concrete title
 alone omits the role. A role followed by "explanation of this role" adds no point.
+Even there, write both halves in the reader's words, with no term the reader
+has not yet met. In every artifact, the headings read in order should tell the
+argument's story, as required by [reader pull](reader-pull.md#make-every-section-repeat-this-pattern-in-small).
 
 Keep role names and granularity stable within the artifact. The concrete half
 states what this particular section establishes, asks or does; it must not claim
@@ -84,7 +107,9 @@ its opening and body, and the adjacent ending/opening in reading order. Apply:
   another role does not repair a missing boundary. Is the named subject visible
   at the unit entrance, before its roles, and is each code block identified by
   method and implementation before it starts? Check each reading route.
-- **H2 Two parts:** Does the heading explicitly name both the structural role
+- **H2 Heading form:** Outside reading notes, does any heading carry a role
+  label (`問い｜`, `定義｜`, `Background:` ...)? That fails; rewrite it as a
+  natural claim/question/name. In reading notes: does the heading explicitly name both the structural role
   and a concrete point/task? Neither half alone, or a vacuous second half, passes.
   A subject name supplies identity at the owning level, not a substitute for
   these two parts; a concrete message cannot supply a missing subject name.

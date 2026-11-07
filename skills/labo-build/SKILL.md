@@ -16,6 +16,7 @@ facts or corrections from the user, or facts they ask to save, with source
 context. Apply this skill's normal verification rules.
 
 Read [build contract](references/build-contract.md) before running compilation.
+Book-derived courses under `local/materials/` (or a user-selected external root) use [reading-book](../reading-book/SKILL.md) and `scripts/book_materials.py`; do not pass their roots to the writing/reading CLI.
 Resolve `<labo-script>` to the absolute `../../scripts/labo.py` path relative
 to this skill's **real directory** (follow symlinks first). Use
 `python3 <labo-script> output build --paper <slug> [--engine pdflatex]`
@@ -38,6 +39,21 @@ Keep selectable PDFs directly in `output/`, with same-stem SyncTeX beside them.
 Every document root under the same project slug writes the same output pair, so
 the most recently built root is the one available from `output/`. Intermediate
 files stay beside each source in `.temp/`.
+
+After producing the current artifact, the build runs the shared
+[PDF navigation check](../mathematical-navigation/references/pdf-checks.md)
+and saves its report in the source's existing cache. Surface failures and
+incomplete checks separately from compilation; keep the produced artifacts and
+continue unrelated writing. Structural results do not certify rendering,
+viewer behavior, index coverage or mathematics. Use the shared procedure for
+changed-page inspection and representative viewer checks, rather than repeating
+every GUI click after each build.
+
+A failed build keeps the previous PDF in `output/`. Steps that rewrite the PDF after a
+successful build go through `--postprocess` so they are recorded. Before checking or
+reporting on that PDF, run `output verify-current` as described in the
+[build contract](references/build-contract.md#current-build-check); a check of a stale PDF
+is not a result.
 
 Do not use a global TeX build directory, commit generated PDFs or caches,
 or treat a successful build as a mathematical review. On failure inspect only

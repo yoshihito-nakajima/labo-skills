@@ -1,0 +1,93 @@
+% talkstyle.sty -- dark, navigation-first Beamer style for paper-reading talks.
+% Options: ja | en (language of \T and of the CJK font setup).
+% Use with: \documentclass[aspectratio=169,11pt,t]{beamer}   (16x9 cm page, text sized for it)
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{talkstyle}[2026/11/03 dark navigation-first talk style]
+\newif\iftalkja\talkjafalse
+\DeclareOption{ja}{\talkjatrue}\DeclareOption{en}{\talkjafalse}
+\ProcessOptions\relax
+\iftalkja\RequirePackage[ja]{.agents/skills/deck-from-references/assets/beamer/talkbase}\else\RequirePackage[en]{.agents/skills/deck-from-references/assets/beamer/talkbase}\fi
+% ---------- palette (dark navy, teal for structure, amber for contrast)
+\definecolor{tsbg}{HTML}{0E1B2A}\definecolor{tspanel}{HTML}{23384D}
+\definecolor{tsteal}{HTML}{5CCBC0}\definecolor{tsamber}{HTML}{E8A33D}
+\definecolor{tstext}{HTML}{ECF1F4}\definecolor{tsgrey}{HTML}{9AA8B6}
+\definecolor{tstrack}{HTML}{34465A}\definecolor{tscodebg}{HTML}{14283B}
+\setbeamercolor{background canvas}{bg=tsbg}\setbeamercolor{normal text}{fg=tstext,bg=tsbg}
+\setbeamercolor{structure}{fg=tsteal}
+\newcommand{\teal}[1]{{\color{tsteal}#1}}\newcommand{\amber}[1]{{\color{tsamber}#1}}
+\newcommand{\grey}[1]{{\color{tsgrey}#1}}
+\setbeamertemplate{navigation symbols}{}
+\geometry{paperwidth=17.6cm,paperheight=9.9cm}
+\setbeamersize{text margin left=0.9cm,text margin right=0.9cm}
+\newlength{\tsmargin}\setlength{\tsmargin}{0.9cm}
+\setbeamertemplate{itemize items}{\raisebox{0.15ex}{\color{tsteal}\fontsize{5}{5}\selectfont$\blacktriangleright$}}
+\setbeamertemplate{enumerate items}{\color{tsteal}\insertenumlabel.}
+\setbeamerfont{normal text}{size=\fontsize{11}{15.5}\selectfont}
+\setlength{\parskip}{0pt}
+
+% ---------- navigation header: section tabs + progress bar
+% \talktabs is a list of \tab{<n>}{<label>}; the tab of the current \section is teal.
+\newcommand{\talktabs}{}
+\newcommand{\tab}[2]{\ifnum\value{section}=#1 {\color{tsteal}\bfseries #2}\else{\color{tsgrey}#2}\fi\hspace{1.1em}}
+\newcommand{\talktotal}{\inserttotalframenumber}   % override with \renewcommand when a partial deck is built
+\newlength{\tsbar}\setlength{\tsbar}{\dimexpr\paperwidth-2\tsmargin\relax}
+\newcommand{\talkprogress}{%
+  \ifnum\value{framenumber}>\talktotal\relax\def\tsfill{\tsbar}\else
+  \edef\tsfill{\the\dimexpr\tsbar*\value{framenumber}/\talktotal\relax}\fi
+  \hbox{\color{tsteal}\rule{\tsfill}{1.5pt}\color{tstrack}\rule{\dimexpr\tsbar-\tsfill\relax}{1.5pt}}}
+\setbeamertemplate{headline}{\leavevmode\vbox{\vskip3pt
+  \hbox to\paperwidth{\hspace{\tsmargin}\parbox{\tsbar}{\raggedright\fontsize{6.5}{8}\selectfont\talktabs}}
+  \vskip2pt\hbox to\paperwidth{\hspace{\tsmargin}\talkprogress}\vskip2pt}}
+
+% ---------- frame title block: subsection tag / title (a claim or a question) / grey subtitle
+\newcommand{\talktag}[1]{\gdef\tstag{#1}}\gdef\tstag{}
+\setbeamertemplate{frametitle}{\vspace{1pt}%
+  {\fontsize{7.5}{9}\selectfont\color{tsteal}\tstag\par}\vspace{1pt}%
+  {\fontsize{15}{18}\selectfont\bfseries\color{tstext}\insertframetitle\par}%
+  \ifx\insertframesubtitle\@empty\else\vspace{1pt}{\fontsize{9.5}{12}\selectfont\color{tsgrey}\insertframesubtitle\par}\fi
+  \vspace{5pt}}
+
+% ---------- footer
+\newcommand{\talkfooter}{}
+\setbeamertemplate{footline}{\leavevmode\hbox to\paperwidth{\hspace{\tsmargin}%
+  \vbox{\hrule height 0.4pt width\tsbar \vskip2pt
+  \hbox to\tsbar{{\fontsize{6.5}{8}\selectfont\color{tsgrey}\talkfooter\hfill\insertframenumber}}\vskip3pt}}}
+
+% ---------- reusable pieces
+% source / locator tag, placed (right-aligned, grey) just before \closing
+\newcommand{\srctag}[1]{\vfill{\raggedleft\fontsize{7}{8.5}\selectfont\color{tsgrey}#1\par}\vspace{2pt}}
+% closing bar: one sentence (claim, caveat on the scope of a claim, or the next question); optional grey 2nd line
+\newcommand{\closing}[2][]{%
+  \begin{tcolorbox}[enhanced,frame hidden,colback=tsbg,coltext=tstext,borderline west={2pt}{0pt}{tsteal},boxrule=0pt,arc=0pt,left=6pt,top=1pt,bottom=1pt,before skip=2pt,after skip=0pt]
+  {\fontsize{10}{13}\selectfont #2\par}%
+  \if\relax\detokenize{#1}\relax\else{\fontsize{9.5}{12}\selectfont\color{tsgrey}#1\par}\fi
+  \end{tcolorbox}}
+% filled panel: \begin{tbox}[optional tcolorbox keys, e.g. equal height group=g]{title}
+\newtcolorbox{tbox}[2][]{enhanced,colback=tspanel,colframe=tspanel,coltext=tstext,coltitle=tsteal,
+  fonttitle=\bfseries\fontsize{10}{12}\selectfont,title={#2},boxrule=0pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,before skip=3pt,after skip=3pt,#1}
+% white card for figures taken from a paper (their backgrounds and labels are made for white paper)
+\newcommand{\figcard}[1]{\begin{tcolorbox}[enhanced,hbox,colback=white,colframe=white,boxrule=0pt,arc=2pt,left=2pt,right=2pt,top=2pt,bottom=2pt,before skip=2pt,after skip=2pt]#1\end{tcolorbox}}
+% small chip, e.g. \chip{supplementary experiment}
+\newcommand{\chip}[1]{{\color{tsamber}\fbox{\fontsize{7}{8.5}\selectfont\strut#1}}}
+% figure caption block: \figcap{title}{explanation}
+\newcommand{\figcap}[2]{{\fontsize{8.5}{11}\selectfont\color{tsteal}\textbf{#1}\ \color{tsgrey}#2\par}}
+% code listings
+\lstset{language=Python,basicstyle=\ttfamily\fontsize{8}{9.8}\selectfont\color{tstext},keywordstyle=\color{tsteal}\bfseries,
+  commentstyle=\color{tsgrey},stringstyle=\color{tsamber},showstringspaces=false,columns=fixed,keepspaces=true,
+  backgroundcolor=\color{tscodebg},frame=none,numbers=left,numberstyle=\tiny\color{tsgrey},xleftmargin=12pt,breaklines=true}
+% full-width code page: put the input/operation/output summary in the subtitle, one-line \closing
+\lstdefinestyle{codepage}{basicstyle=\ttfamily\fontsize{7.2}{8.6}\selectfont\color{tstext},xleftmargin=10pt,aboveskip=0pt,belowskip=0pt,escapeinside={(*@}{@*)},moredelim=[is][\color{tsgrey!55!tsbg}]{@!}{!@}}
+% numbered marker appended to a code line by extract_code.py, and the "look at" list beside the code
+\newcommand{\mk}[1]{\ \tikz[baseline=(mkn.base)]\node[circle,fill=tsamber,text=tsbg,inner sep=1pt,font=\fontsize{6}{6}\selectfont\bfseries](mkn){#1};}
+\newenvironment{lookat}{\begin{tbox}{\T{Look at}{見どころ}}\fontsize{7.6}{9.6}\selectfont}{\end{tbox}}
+\newcommand{\lookitem}[3]{\par\noindent\tikz[baseline=(lkn.base)]\node[circle,fill=tsamber,text=tsbg,inner sep=1pt,font=\fontsize{6}{6}\selectfont\bfseries](lkn){#1};\ \teal{#2}\ #3\par\vspace{0.5pt}}
+% roles (names say the intent): inherited = kept from the earlier method; fix = changed to overcome the
+% obstacle that motivates the subsection; aim = changed for another intended purpose (emphasized and explained);
+% tidy = bookkeeping (quiet); forward = a limit that leads to the next subsection. Not every role occurs on every page.
+\definecolor{tsfwd}{HTML}{E8707A}
+\def\rkI{inherited}\def\rkF{fix}\def\rkA{aim}
+\newcommand{\mkdraw}[2]{\tikz[baseline=(mkn.base)]\node[circle,inner sep=1pt,font=\fontsize{6}{6}\selectfont\bfseries,#1](mkn){#2};}
+\newcommand{\mkr}[2]{\def\mkcur{#1}\ \ifx\mkcur\rkI\mkdraw{draw=tsgrey,text=tsgrey}{#2}\else\ifx\mkcur\rkF\mkdraw{fill=tsamber,text=tsbg}{#2}\else\ifx\mkcur\rkA\mkdraw{fill=tsteal,text=tsbg}{#2}\else\mkdraw{fill=tsfwd,text=tsbg}{#2}\fi\fi\fi}
+\newcommand{\rolelab}[1]{{\fontsize{6.5}{8}\selectfont\bfseries\def\mkcur{#1}\ifx\mkcur\rkI\color{tsgrey}\T{KEPT}{従来のまま}\else\ifx\mkcur\rkF\color{tsamber}\T{FIXES THE OBSTACLE}{障害を克服}\else\ifx\mkcur\rkA\color{tsteal}\T{OTHER AIM}{別の狙い}\else\color{tsfwd}\T{LIMIT $\to$ NEXT}{残る限界 $\to$ 次}\fi\fi\fi}}
+\newcommand{\lookitemr}[4]{\par\noindent\mkr{#1}{#2}\ \rolelab{#1}\ \teal{#3}\ #4\par\vspace{0.5pt}}
+\endinput

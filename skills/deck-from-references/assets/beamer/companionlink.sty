@@ -1,0 +1,22 @@
+% Link slides to the companion page they come from, and main pages to appendix pages.
+% \fromunit{fig2,lineage:beta}  the companion units the page takes its claims from (checked by scripts/link_companion.py)
+% \nounit{reason}                a page with no counterpart (its content is added to the companion first)
+% \applabel{B3}                  marks an appendix page; \appref{B3} in the main part points to it
+\ProvidesPackage{companionlink}
+\newcommand{\fromunit}[1]{}
+\newcommand{\nounit}[1]{}
+\newcommand{\applabel}[1]{}
+\newcommand{\appref}[1]{{\scriptsize\textcolor{gray}{\ifdefined\T\T{$\rightarrow$ appendix #1}{$\rightarrow$ 付録 #1}\else$\rightarrow$ #1\fi}}}
+% \colorkey{...}  the one-line key of a figure: what its colour or size stands for, and what a high value means
+% \nocolorkey{reason}  a page whose figures need no key
+\newcommand{\colorkey}[1]{{\ifdefined\flowsize\flowsize{note}\else\small\fi\color{gray}#1\par}}
+\newcommand{\nocolorkey}[1]{}
+% \ph{...}  a phrase that never breaks inside; a line may break only after it (after a comma or a full stop).
+% Write running text as phrases that end in 、 or 。 : \ph{A：最初の駅、}\ph{B：乗り換えの駅、}\ph{C：終点。}
+\newcommand{\ph}[1]{\mbox{#1}\allowbreak}
+% \asexample{fig3,fig3:reading}  the companion figure units a page shows only as an EXAMPLE (an introduction showing a real output); they are
+% exempt from the figure order. \exampletag marks the figure on the page as an example (a small chip next to its label).
+\newcommand{\asexample}[1]{}
+% \exampletag[根拠] marks a figure shown as evidence; the default word is 例.
+\newcommand{\exampletag}[1][例]{{\ifdefined\flowsize\flowsize{cite}\else\scriptsize\fi\color{red}\fbox{\strut #1}}}
+\endinput

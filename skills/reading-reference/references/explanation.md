@@ -6,8 +6,8 @@
   concepts taught as needed. Mathematical expertise does not imply biological,
   statistical or software expertise. Honor a more specific audience.
 - **R8 Progressive depth** — Identify the named concept/method at its unit
-  entrance, then start with the question and an accurate concrete
-  picture, then deepen into the statement, proof/method and consequences. Bring
+  entrance, then start with the question, the plain-words conclusion and an
+  accurate concrete picture (see [reader pull](../../mathematical-exposition/references/reader-pull.md)), then deepen into the statement, proof/method and consequences. Bring
   in a prerequisite when its role becomes visible. A natural stopping point
   leaves the reader with a useful result, mechanism or newly usable tool.
   Avoid a front-loaded glossary or an unrelated textbook survey. For substantive
@@ -79,6 +79,10 @@
   operation explanations, dependencies, source identity and execution status.
   Link to the full local argument without requiring its wholesale repetition.
 - **R14 Usable navigation** — Keep source and local figure numbers distinct,
+  and apply [mathematical-navigation](../../mathematical-navigation/SKILL.md)
+  from the first draft of persistent mathematical notes. Preserve source locators
+  separately from local counters; register required indexes at the definitions
+  and formulas, and check actual PDF destinations as well as link colors. Then
   use descriptive equation/code labels and working links where supported, and
   test a route from explanation to evidence and back. Make the clickable extent
   and destination recognizable: name the work and location for a paper link,

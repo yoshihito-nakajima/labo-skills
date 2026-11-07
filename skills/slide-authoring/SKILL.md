@@ -15,6 +15,14 @@ personal facts there rather than in skill text; update only explicit durable
 facts or corrections from the user, or facts they ask to save, with source
 context. Apply this skill's normal verification and publication rules.
 
+To plan a talk that introduces a paper page by page, use
+[paper-talk-planning](../paper-talk-planning/SKILL.md); to build slides in the manner
+of example decks, with section, subsection and slide links, use
+[deck-from-references](../deck-from-references/SKILL.md). This skill keeps the
+audience, accuracy and pacing criteria for both. For the check that the background of each concept is on
+the pages and not overdone, see the
+[motivation review](../paper-talk-planning/references/motivation-review.md).
+
 When the user wants to edit a concrete deck, inspect a preview, and use their
 feedback to tune both the deck and its authoring skill, follow
 [`skill-tuning`](../skill-tuning/SKILL.md) for the iteration and checkpoint.

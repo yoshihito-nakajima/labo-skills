@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reading Book Math Review"
+  short_description: "Review course proofs and return bounded correction findings"
+  default_prompt: "Use $reading-book-math-review to check the assigned frozen course claims and return findings to the producer."

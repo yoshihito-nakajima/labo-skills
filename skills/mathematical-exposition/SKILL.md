@@ -32,6 +32,35 @@ Before drafting, identify what the reader should be able to reconstruct and
 which background results may be used as stated tools. Do not create a separate
 plan document for an ordinary explanation.
 
+For mathematical definitions, claims, proofs and calculations, apply
+[mathematical substance and proof detail](references/mathematical-substance.md).
+Purpose and intuition must accompany checkable mathematical content, not replace
+it. For lecture materials, this includes intermediate calculations, the reader
+threshold, and correcting source defects through their downstream uses.
+
+From the first draft, organize multi-stage proofs by their actual obligations.
+For persistent mathematical documents, use [mathematical-navigation](../mathematical-navigation/SKILL.md)
+alongside the proof-detail rules. Read the workspace author profile when available;
+carry explicit recurring preferences into drafting and checks, not only final polish.
+
+## Write for the reader who must be pulled through
+
+Every substantive explanation follows [reader pull](references/reader-pull.md):
+write for the hurried reader, the reader without the definitions and the reader
+who cannot fill gaps between lines. Put the conclusion, a picture, why it
+matters and the key idea on the first screen; give each section a plain opening
+that states its conclusion and a closing that raises the next question.
+Define terms as exactly as the paper, using only words already available, with
+example and purpose. Write every step's reason. Show the central idea from
+several genuinely different angles, connect each concept to those already on
+the page, and place figures where they do work. Keep the page self-contained:
+links and file paths support the text and never carry it, and repository
+paths or internal note names do not appear in reader-facing prose. The
+explanation is longer and gentler than the paper, never vaguer. These are jobs
+for the prose, not labels: write natural expository prose in which the content
+carries the structure, without template signposts such as 「結論：」 or
+「ポイントは」 (see [sound like a person](references/reader-pull.md#sound-like-a-person-not-a-template)).
+
 ## Build a usable route through the argument
 
 Make the question, claim, main obstacle and decisive move visible. Introduce
@@ -54,14 +83,23 @@ task. Recover an earlier dependency locally when needed. A reference or a
 phrase such as "next", "as above" or "below we implement" does not supply the
 missing connection. Explain what the new step yields for that same purpose.
 
-For structured explanations, follow [subject identity, role skeleton and two-part headings](references/roles-and-headings.md).
+Across sections and subsections, keep the chain explicit: each unit's opening names what
+it takes from earlier units and what it adds for its parent, and a parent closes with what
+its parts established. For a reading note the chain, the reader floor and the sentence-level
+gloss of claims that lean on prior results are in
+[unit chain and claim gloss](../reading-reference/references/unit-chain-and-claim-gloss.md).
+
+For structured explanations, follow [subject identity, role skeleton and headings](references/roles-and-headings.md).
 Identify the named method or concept before its background; identify the method
 and implementation before a code block. A content-specific message does not
 replace that subject name.
 Fix the role sections and their order from the owning workflow or agreed outline.
-Each added section heading shows **role | concrete point**, so the reader sees
-both the stable skeleton and what this section will say. Keep source titles and
-faithful translation intact; apply this structure to the added explanation.
+The skeleton guides what each section must do. Visible **role | concrete point**
+headings belong only to source-aligned reading notes (or an explicit request);
+in web pages, HTML, chat, lectures and manuscripts, write natural claim- or
+question-shaped headings with no role label such as 「問い｜」 or 「定義｜」.
+Keep source titles and faithful translation intact; apply this structure to the
+added explanation.
 
 Preserve those role boundaries while carrying the prose across them. Combine
 unnecessary subdivisions within a role, not different required roles into one
@@ -113,6 +151,20 @@ Bounded questions and purely theoretical arguments retain their scope; the
 reading skill owns source checks.
 
 ## Check the result
+
+Check the mathematical argument and its teachability separately under
+[the substance checks](references/mathematical-substance.md#工程を通じた確認).
+A sound plan, fluent prose or complete headings do not establish either.
+
+For substantial written artifacts (web pages, HTML, reading companions,
+lecture and reading notes, long explanations), do not hand over a first draft:
+after the self-checks below, run the [exposition-review](../exposition-review/SKILL.md)
+loop with independent flow and critique reviewers. Short chat answers are exempt.
+
+Run the [readability audit P1--P11](references/reader-pull.md#readability-audit)
+on the actual text: hurried-reader first screen, headings alone, section
+openings alone, undefined terms, gaps, next question, angles, connections,
+figures, the no-links test and natural prose. Repair failures before delivery.
 
 For structured explanations, run the [heading audit H1--H5](references/roles-and-headings.md#audit-the-headings-against-the-body):
 check role boundaries/order, both title parts, fulfillment by the body, progression

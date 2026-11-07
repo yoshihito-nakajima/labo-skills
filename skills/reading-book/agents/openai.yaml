@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reading Book"
+  short_description: "Write detailed local-only mathematical courses from books"
+  default_prompt: "Use $reading-book to start or resume a detailed mathematical course from an inbox book."

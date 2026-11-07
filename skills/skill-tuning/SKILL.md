@@ -43,11 +43,25 @@ Find the smallest recurring decision the current skill leaves unclear. Update
 the existing skill that owns that decision when possible; create a separate
 skill only for a reusable workflow gap with a distinct trigger. Generalize the
 lesson without turning one artifact's style preference into a universal rule.
+For the skill change, follow [reviewable skill design](../labo-self-improve/references/skill-design.md)
+to keep the responsibility cohesive and the necessary caller edits focused.
 
 Apply the adjusted skill to one bounded, visible part of the artifact. Preserve
 the source's mathematical and factual claims unless the user asked to change
 them. Keep the edit small enough that the user can say what worked, what went
 too far, and what should change next.
+
+Bound the subject, not the owning skill's essential explanation. A small trial
+must still demonstrate the mechanism or decision being tested, with its necessary
+evidence and usable navigation. Before revising, retain a compact map of the
+owning artifact's required units/roles and their existing locations, using its
+current outline or handoff. Include obligations missing from the current draft.
+After the edit, compare retained structure and actual content as well as the new
+feedback: a locally successful change must not silently change the product or
+remove its source-reading/completion stages. Use the owning skill's structural
+contract; do not invent a second competing skeleton here.
+Apply the owning skill's content checks before
+render checks; a clean layout does not make an incomplete explanation reviewable.
 
 Build the requested preview into the named output location and inspect the
 render for build failure, clipping, missing content and obvious layout defects.

@@ -1,0 +1,29 @@
+[
+ {
+  "id": "F01",
+  "sev": "minor",
+  "status": "confirmed",
+  "short": "Lemma 3 omits that a_n lies in [0,1]",
+  "steps": [
+   "S3"
+  ],
+  "from": [
+   "counterexample hunt"
+  ],
+  "detail": "Same point found independently.",
+  "evidence": "Same computation: a_1 = a_2 = 2."
+ },
+ {
+  "id": "F02",
+  "sev": "major",
+  "status": "suspected",
+  "short": "The block condition may already be classical",
+  "steps": [
+   "S4"
+  ],
+  "from": [
+   "prior-art attack"
+  ],
+  "detail": "A related literature states block-sum conditions; not checked against the exact statement."
+ }
+]

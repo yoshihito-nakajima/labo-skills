@@ -182,6 +182,24 @@ class SubmoduleRuntimeTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("--workspace", result.stderr)
 
+    def test_fresh_paper_corpus_is_ignored_from_unrelated_cwd(self):
+        self.assertFalse((self.workspace / "writing").exists())
+        result = self.invoke(self.unrelated, "layout", "new", "paper", "fresh-paper")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        corpus = self.workspace / "writing/.corpus"
+        (corpus / "later-source.pdf").write_bytes(b"synthetic later source")
+        (corpus / "index.md").write_text("synthetic private registration")
+        (corpus / "selections/fresh-paper").mkdir(parents=True)
+        (corpus / "selections/fresh-paper/corpus.toml").write_text('source = "synthetic"')
+        for name in ("index.md", "later-source.pdf", "selections/fresh-paper/corpus.toml"):
+            result = subprocess.run(["git", "-C", str(self.workspace), "check-ignore", "-q", "--",
+                                     "writing/.corpus/" + name], capture_output=True)
+            self.assertEqual(result.returncode, 0, name)
+        self.git(self.workspace, "add", ".")
+        self.assertEqual(self.git(self.workspace, "ls-files", "--", "writing/.corpus"), "")
+        self.assertEqual(self.git(self.mount, "status", "--porcelain"), "")
+        self.assertFalse((self.unrelated / "writing").exists())
+
     def test_layout_creation_uses_dependency_mount_without_host_runtime_copies(self):
         self.assertTrue((self.mount / "skills/labo-layout/SKILL.md").is_file())
         result = self.invoke(self.unrelated, "layout", "init")

@@ -27,9 +27,11 @@ blind submodule `update --remote` as the adoption strategy. Validate the
 affected skills or tools and inspect the resulting diff for private research
 material before sharing anything.
 
-Treat the policy fork and parent gitlink as distinct updates. Advance the
-parent pin only to the selected policy commit; before sharing that parent
-commit, make sure the policy commit is available from the fork recorded in
-`.gitmodules`. Pushes and pull requests follow the user's request: do not push
-or open a PR merely because upstream was fetched. A selected upstream change
-does not imply that every upstream commit belongs in the fork.
+Follow the [publication boundary](../labo-git/SKILL.md#publication-boundary).
+Treat policy adoption, policy push/PR and local parent gitlink recording as
+independent operations. Advance the parent pin only to the selected policy
+commit when adoption is requested; retain that record locally. Do not push the
+parent or create a parent PR. Fork pushes and upstream PRs operate only in the
+policy Git and follow the user's request, not merely an upstream fetch. A
+selected upstream change does not imply that every upstream commit belongs
+in the fork.

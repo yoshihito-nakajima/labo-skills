@@ -1,0 +1,183 @@
+{
+ "title": "Damped iteration (fictional fixture)",
+ "subtitle": "A made-up manuscript used to test the review-page tools.",
+ "summary_html": "<div class=\"card key\"><p class=\"verdict\">Verdict: short paper or preprint</p><ul><li>The key step is the block-sum lemma (S4).</li><li>No fatal finding; one suspected novelty concern.</li><li>The closest prior work was not read.</li></ul></div>",
+ "intro_html": "<p>Convergence of <span class=\"m\">x_{n+1}=(1-h_n)x_n+h_nf(x_n)</span> for a contraction <span class=\"m\">f</span> under a block condition on the steps.</p>",
+ "key_ideas_html": "<p><b>The key idea</b>: only block sums of the step sizes matter, so steps may vanish.</p>",
+ "groups": [
+  [
+   "Tools",
+   [
+    "S1",
+    "S2",
+    "S3"
+   ]
+  ],
+  [
+   "Key lemma",
+   [
+    "S4"
+   ]
+  ],
+  [
+   "Conclusion",
+   [
+    "S5",
+    "S6"
+   ]
+  ]
+ ],
+ "step_review": {
+  "S2": {
+   "risk": "none found",
+   "evidence": "hand check"
+  },
+  "S3": {
+   "risk": "none found",
+   "evidence": "hand check"
+  },
+  "S4": {
+   "risk": "novelty unverified",
+   "evidence": "hand check; numeric trial over random step sequences"
+  },
+  "S5": {
+   "risk": "none found",
+   "evidence": "hand check"
+  },
+  "S1": {
+   "risk": "none",
+   "evidence": "standard"
+  },
+  "S6": {
+   "risk": "none",
+   "evidence": "standard"
+  }
+ },
+ "panel": [
+  {
+   "name": "line-by-line",
+   "who": "author's assistant",
+   "scope": "all steps",
+   "result": "no inconsistency"
+  },
+  {
+   "name": "prior-art attacker",
+   "who": "fresh agent",
+   "scope": "two sources; one unavailable",
+   "result": "no overlap in the one read; one unread"
+  }
+ ],
+ "findings": [
+  {
+   "id": "F01",
+   "sev": "minor",
+   "status": "confirmed",
+   "short": "S3 should state a_n in [0,1] where it is used",
+   "steps": [
+    "S3"
+   ],
+   "from": [
+    "line-by-line"
+   ],
+   "detail": "<p>The lemma is stated for arbitrary a_n but used only for a_n in [0,1].</p>",
+   "ruling": "Presentation only."
+  },
+  {
+   "id": "F02",
+   "sev": "major",
+   "status": "suspected",
+   "short": "The block form may already appear in the literature on stochastic approximation",
+   "steps": [
+    "S4"
+   ],
+   "from": [
+    "prior-art attacker"
+   ],
+   "detail": "<p>A standard condition in related iterations is stated on block sums; whether it covers this exact statement is unchecked.</p>",
+   "ruling": ""
+  }
+ ],
+ "review_conclusion": "No gap found within the scope shown; one suspected novelty concern remains.",
+ "my_checks": [
+  "Random step sequences with vanishing steps: the product bound held in every trial."
+ ],
+ "prior": [
+  {
+   "name": "Fictional survey A",
+   "op": "same iteration",
+   "hyp": "needs a tail lower bound on the steps",
+   "overlap": "none for the block condition",
+   "state": "read in full"
+  },
+  {
+   "name": "Fictional article B",
+   "op": "related iteration",
+   "hyp": "(not read)",
+   "overlap": "(not read)",
+   "state": "unavailable"
+  }
+ ],
+ "prior_hole": "Fictional article B was not available; novelty of S4 cannot be called strong until it is read.",
+ "uncited": [
+  "A fictional monograph on stochastic approximation (suspected, not checked)"
+ ],
+ "admitted": [
+  "The paper does not claim the product bound itself."
+ ],
+ "indicator": {
+  "verdict": "short_or_preprint",
+  "verdict_why": "No confirmed fatal finding and the difference from the read prior work is stated, but the closest work is unread.",
+  "facts": {
+   "review_done": true,
+   "fatal_confirmed": 0,
+   "expert_or_formal_check": false,
+   "closest_prior_unread": true,
+   "sources_limited": true,
+   "delta_stated": true,
+   "attack_survived": false
+  },
+  "axes": [
+   {
+    "key": "correctness",
+    "level": "mid",
+    "why": "Hand check and a numeric trial; no expert or formal check."
+   },
+   {
+    "key": "novelty",
+    "level": "mid",
+    "why": "No overlap in the source read; the closest work is unread."
+   },
+   {
+    "key": "delta",
+    "level": "mid",
+    "why": "The block form versus a tail lower bound is stated concretely."
+   },
+   {
+    "key": "strength",
+    "level": "weak",
+    "why": "A small extension of a classical statement."
+   },
+   {
+    "key": "significance",
+    "level": "weak",
+    "why": "No application beyond the toy setting."
+   },
+   {
+    "key": "literature",
+    "level": "weak",
+    "why": "Two sources, one unavailable."
+   }
+  ],
+  "changers": [
+   "Read fictional article B.",
+   "Add an application where vanishing steps occur.",
+   "Have an expert check S4."
+  ]
+ },
+ "glossary": [
+  [
+   "block",
+   "a run of m consecutive steps"
+  ]
+ ]
+}

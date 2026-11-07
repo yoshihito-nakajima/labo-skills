@@ -1,6 +1,6 @@
 ---
 name: research-router
-description: Route mathematical research tasks to the appropriate labo skill and require a brief consultation on request understanding and the next action.
+description: Route mathematical research tasks to the appropriate labo skill and check request understanding and the next action using available consultation.
 ---
 
 # Research routing
@@ -52,27 +52,17 @@ personal facts there rather than in skill text; update only explicit durable
 facts or corrections from the user, or facts they ask to save, with source
 context. Apply the selected skill's normal verification rules.
 
-Before the first delegation, inspect the host's configured roles and native
-invocation interface. Reuse their explicit role/model/effort assignments and
-check that the needed roles are callable. Record the current assignment and
-invocation provenance under the [eligibility rule](references/editing-capability.md).
-A provider catalogue alone does not establish host availability. Keep unknown
-metadata unknown; an established parent assignment need not be rediscovered
-by its worker.
+Before delegation, inspect the actual callable interface and relevant local roles.
+Use an available matching adapter or a bounded general-purpose assignment; another
+host's preset is not a requirement. Default/inherited selection is valid. Keep
+concrete model choices out of portable instructions and task handoffs. Missing
+presets or runtime metadata alone are not reasons to stop. Follow
+[task assignment](references/editing-capability.md) and the
+[invocation contract](references/subagent-invocation.md). Actual host setup is a
+separate task, not a routine prerequisite for writing.
 
-Before making any subagent call, including the required consultation, follow
-the [subagent invocation contract](references/subagent-invocation.md) for
-thread isolation, assignment packets, and independent-review boundaries.
-
-Route by the responsibility the task requires, using the configured roles.
-Use existing explicit model/effort selections rather than ranking model
-families or asking workers to judge their general mathematical ability.
-Creating or revising those selections belongs to `agent-host-setup`, with user
-constraints and current host availability as inputs. Apply the eligibility
-rule to work you keep, and hand off work outside your assigned role. If the
-needed role is unavailable, report the completed scope and missing role.
-
-For each user request, follow the [required consultation](references/consultation.md).
+For each user request, follow the [consultation and its availability fallback](references/consultation.md).
+Slides are built in stages, with the user's reaction at each gate: see [staged build of slides](../deck-from-references/references/staged-build.md).
 
 1. Identify the **artifact and reader**: research story, Lean, manuscript,
    slide, reading note, reference, website, or repo policy.
@@ -82,20 +72,24 @@ For each user request, follow the [required consultation](references/consultatio
    research lifecycle and story → `research-management`; mathematical paper
    drafting or revision → `paper-writing`; mathematical paper review →
    `paper-referee`; paper compilation → `labo-build`; slides →
-   `slide-authoring`; research positioning, source collection, paper/book
+   `slide-authoring` (talk plan for a paper → `paper-talk-planning`; slides in the
+   manner of example decks → `deck-from-references`); a private interactive HTML companion to a method
+   paper's reading note → `reading-companion`; research positioning, source collection, paper/book
    explanation and reading notes → `reading-reference`; website →
-   `website-publishing`; continuous Japanese reading translations →
+   `website-publishing`; adversarial review of a finished explanation, page or
+   note (flow and passage-level critique) → `exposition-review`; continuous Japanese reading translations →
    [japanese-translation](../japanese-translation/SKILL.md);
    actual Codex/Claude host settings and subagent roles →
    [agent-host-setup](../agent-host-setup/SKILL.md); skill improvements in the user's fork →
-   `labo-self-improve`; selected upstream
+   `labo-self-improve`; Git boundaries and push setup →
+   [labo-git](../labo-git/SKILL.md); selected upstream
    contributions → `labo-pr`; selective upstream adoption into the fork →
    `labo-sync`.
-4. Beyond the required consultation, if task-specific delegation is useful,
+4. After the scope check, if task-specific delegation is useful,
    formulate a short task-specific assignment *from the selected skill* and
    follow the [subagent invocation contract](references/subagent-invocation.md).
-   Host role presets supply the operational role/model/effort assignment;
-   the selected skill and current packet control its scope. Use the
+   Host role presets are optional; the selected skill and current packet control
+   responsibility and scope. Use the
    [mathematical role contract](references/mathematical-roles.md) for decomposition,
    proving and verification. Nested workers share the root's finite depth and
    descendant concurrency budget.
@@ -110,7 +104,8 @@ For each user request, follow the [required consultation](references/consultatio
      research result or decisive proof dependency. Routine explanations and
      clearly marked tentative work follow their own assigned scope.
 
-   Reconstructing missing arguments uses the proof role, even in a summary.
+   Reconstructing missing arguments uses the proof responsibility, even in a summary;
+   the authorized producer may do it sequentially when delegation is unavailable.
    Follow [concrete escalation triggers](references/editing-capability.md) when
    assumptions, proof steps, examples or source support reveal an obstacle.
 5. Keep the user's `AGENTS.md` independent. Do not edit it as part of routing.
@@ -119,6 +114,12 @@ For paper-introduction drafting, restructuring or narrative assessment, also
 use [paper-introduction](../paper-introduction/SKILL.md). It owns discovery and
 telling order, while `paper-writing` owns manuscript edits and `reading-reference`
 owns the positioning investigation. A report-only request remains report-only.
+
+To stress-test a proof with several independent adversarial viewpoints, use
+[proof-adversarial-review](../proof-adversarial-review/SKILL.md); to see which steps are key, what the
+review found, how the result differs from prior work and whether it looks like a paper, on one
+private page, use [reading-proof-review](../reading-proof-review/SKILL.md). Both apply to the user's
+own manuscript or to a published paper, and both are report-only.
 
 For whole-paper architecture or structural reassessment, use
 [paper-structure](../paper-structure/SKILL.md). It maps section roles and
@@ -143,5 +144,13 @@ The artifact's skill still owns writing or review; `reading-reference` owns the
 investigation and reusable memo. Initial blind readings precede memo access;
 routine edits and report-only tasks keep the protocol's scope boundaries.
 
+GitHub operations follow [labo-git's publication boundary](../labo-git/SKILL.md#publication-boundary):
+by default only the independent policy Git is eligible for push or PR;
+everything outside it remains local.
+
 The research plan supplies human context; a skill supplies the operational
 rules. Neither is an excuse to expose private material in public changes.
+
+GitHub operations follow [labo-git's publication boundary](../labo-git/SKILL.md#publication-boundary):
+by default only the independent policy Git is eligible for push or PR;
+everything outside it remains local.

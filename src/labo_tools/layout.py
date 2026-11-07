@@ -17,6 +17,9 @@ WRITING_GUIDE_FILES = (
     "writing/.rules/README.md",
 )
 IGNORE_PATTERNS = (
+    "/local/",
+    "/reference/",
+    "/writing/.corpus/",
     "/inbox/*", "!/inbox/.gitkeep",
     "output/**", "!output/.gitkeep", "**/.temp/", "*.synctex", "*.synctex.gz",
 )
@@ -68,6 +71,19 @@ def _path(workspace: Path, relative: str, *, directory: bool = False) -> Path:
     return path
 
 
+def _ignore_update(workspace: Path, required: tuple[str, ...]) -> tuple[Path, bytes]:
+    """Preflight an append-only ignore update before any layout writes."""
+    ignore = _path(workspace, ".gitignore")
+    original = ignore.read_bytes() if ignore.exists() else b""
+    patterns = original.decode("utf-8").splitlines()
+    missing = [line for line in required if line not in patterns]
+    suffix = b""
+    if missing:
+        suffix = b"\n" if original and not original.endswith(b"\n") else b""
+        suffix += ("\n".join(missing) + "\n").encode("utf-8")
+    return ignore, suffix
+
+
 def init_layout(workspace: Path, *, dry_run: bool = False) -> list[str]:
     """Add missing workspace directories, writing guides, and workspace ignores."""
     workspace = _workspace(workspace)
@@ -78,14 +94,7 @@ def init_layout(workspace: Path, *, dry_run: bool = False) -> list[str]:
     writing_directories, writing_files = _writing_layout(workspace)
     directories.extend(writing_directories)
     agents = _path(workspace, "AGENTS.md")
-    ignore = _path(workspace, ".gitignore")
-    original = ignore.read_bytes() if ignore.exists() else b""
-    patterns = original.decode("utf-8").splitlines()
-    missing = [line for line in IGNORE_PATTERNS if line not in patterns]
-    suffix = b""
-    if missing:
-        suffix = (b"\n" if original and not original.endswith(b"\n") else b"")
-        suffix += ("\n".join(missing) + "\n").encode("utf-8")
+    ignore, suffix = _ignore_update(workspace, IGNORE_PATTERNS)
     changes = [f"create {name}/" for name, path in directories if not path.exists()]
     changes.extend(f"create {name}" for name, path, _ in writing_files if not path.exists())
     if not agents.exists():
@@ -94,6 +103,9 @@ def init_layout(workspace: Path, *, dry_run: bool = False) -> list[str]:
         changes.append("append workspace patterns to .gitignore" if ignore.exists() else "create .gitignore")
     if not dry_run:
         workspace.mkdir(parents=True, exist_ok=True)
+        if suffix:
+            with ignore.open("ab") as stream:
+                stream.write(suffix)
         for _, path in directories:
             path.mkdir(parents=True, exist_ok=True)
         for _, path, content in writing_files:
@@ -103,9 +115,6 @@ def init_layout(workspace: Path, *, dry_run: bool = False) -> list[str]:
         if not agents.exists():
             with agents.open("xb"):
                 pass
-        if suffix:
-            with ignore.open("ab") as stream:
-                stream.write(suffix)
     return changes
 
 
@@ -152,7 +161,11 @@ def new_item(
         files = {"reference.md": (ASSETS / "reference.md").read_text(encoding="utf-8")}
         writing_directories, writing_files = [], []
 
+    required_ignores = ("/writing/.corpus/",) if kind == "paper" else (("/reference/",) if kind == "reference" else ())
+    ignore, suffix = _ignore_update(workspace, required_ignores) if required_ignores else (None, b"")
     changes = [f"create {relative}/"]
+    if suffix:
+        changes.append("append local archive exclusion to .gitignore" if ignore.exists() else "create .gitignore")
     changes += [f"create {name}/" for name, path in writing_directories if not path.exists()]
     changes += [f"create {name}" for name, path, _ in writing_files if not path.exists()]
     changes += [f"create {relative}/{name}/" for name in directories]
@@ -160,6 +173,10 @@ def new_item(
     if kind == "research":
         changes += [f"create {relative}/exploration/", f"create {relative}/exploration/tree.json"]
     if not dry_run:
+        workspace.mkdir(parents=True, exist_ok=True)
+        if suffix:
+            with ignore.open("ab") as stream:
+                stream.write(suffix)
         for _, path in writing_directories:
             path.mkdir(parents=True, exist_ok=True)
         for _, path, content in writing_files:

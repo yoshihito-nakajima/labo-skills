@@ -15,6 +15,9 @@ from labo_tools.paper import PaperError, map_openings, read_section  # noqa: E40
 
 class PaperBuildTests(unittest.TestCase):
     def setUp(self):
+        audit = patch("labo_tools.build.check_navigation")
+        self.audit = audit.start()
+        self.addCleanup(audit.stop)
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)
         self.root = Path(temp.name).resolve()
@@ -134,6 +137,12 @@ class PaperBuildTests(unittest.TestCase):
         self.assertTrue((self.root / "output" / "story-paper.pdf").is_file())
         self.assertFalse((self.root / "output" / "story-paper").exists())
         self.assertEqual(run.call_count, 1)
+
+        self.audit.assert_called_once_with(
+            self.root / "output/story-paper.pdf", self.paper / ".temp", "story-paper",
+            self.paper / ".temp/story-paper.aux",
+            source=self.paper / "main.tex",
+        )
 
     @patch("labo_tools.build.subprocess.run")
     def test_build_recovers_missing_synctex_with_one_forced_rebuild(self, run):

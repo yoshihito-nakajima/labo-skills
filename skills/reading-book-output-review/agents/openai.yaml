@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reading Book Output Review"
+  short_description: "Review frozen course indexes, layout and PDF navigation"
+  default_prompt: "Use $reading-book-output-review to review the assigned course PDF and matching sources, returning corrections to the producer."

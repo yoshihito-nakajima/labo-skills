@@ -2,8 +2,6 @@
 name: math-verifier
 description: Independently check a frozen mathematical proof against its exact statement
   and permitted primary sources, reporting located gaps or checked scope.
-model: claude-opus-5-5
-effort: high
 tools:
 - Read
 - Glob

@@ -5,7 +5,11 @@ chat answer needs the relevant checks, not a standing review panel. Apply `R`
 IDs to located findings, with severity, source/output evidence and a minimum
 repair. Do not invent a defect quota or mark human understanding as achieved.
 
-- **R25 Coverage** — Derive expected in-scope units from the source before
+- **R25 Coverage** — First apply the [structure preservation check](reading-structure.md#check-the-structure-before-checking-the-latest-improvement):
+  compare the pre-edit source/role map to actual bodies, hierarchy and source-return
+  blocks. Check retained obligations separately from the latest requested change.
+  A bounded preview and a newly labelled optional view cannot silently remove
+  required main-route roles. Then derive expected in-scope units from the source before
   consulting the writer's outline or coverage claims. Compare expected versus
   acquired/inspected material, then expected versus actually explained units.
   Missing required material stays visible. A filename, citation, figure asset
@@ -178,7 +182,19 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   recoverable concise passages before repairs. Withhold sources, author intent
   and prior reports. A reader primed by notes cannot establish a deck's standalone
   readability. Preserve initial difficulty separately from later source rescue.
+- **R28a Provenance wording** — `scripts/provenance_lint.py` reports no self-attribution in
+  the deliverable's sources, code comments and generated records (quoted sources excluded
+  by path); see [Sources, R5a](source-rules.md).
 - **R29 Rendered output** — Check the current built version, not a stale PDF.
+  Confirm it with `output verify-current` of [labo-build](../../labo-build/references/build-contract.md#current-build-check)
+  before running any check on the PDF; after a failed build, report the failure.
+  For PDFs, use the shared
+  [navigation-check procedure](../../mathematical-navigation/references/pdf-checks.md):
+  run the offline structural check over the full current PDF, then use changes
+  and their impact to select rendering and representative viewer checks. Keep
+  structural, rendered-page and actual viewer evidence distinct. A structural
+  diff does not establish unchanged rendering; reuse prior visual evidence only
+  for previously inspected pages with identical renders under the same settings.
   Inspect every page/slide for a complete visual review; otherwise disclose the
   inspected subset. Test equations/glyphs, readable labels, cropping, figure
   placement, listings and navigation at real reading scale. Check that the
@@ -211,9 +227,15 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   and return links. Open external paper/code destinations and inspect whether
   they reach the intended supporting passage or implementation version/function.
   A live homepage, redirect to unrelated content or HTTP 200 is insufficient.
-  Record unsupported page anchors and access failures explicitly. Inspect actual PDF
-  annotations/destinations or follow the rendered links; TeX/Markdown markup
-  alone cannot establish that the generated links exist or reach the right unit.
+  Record unsupported page anchors and access failures explicitly. The shared
+  checker inventories external routes without opening or executing them; access
+  and semantic destination checks remain separate work. Inspect actual PDF
+  annotations/destinations through the shared checker, then inspect the intended
+  landing content and representative viewer behavior. TeX/Markdown markup alone
+  cannot establish that generated links exist or reach the right unit. Record
+  unresolved or unsupported actions as failed or incomplete coverage, not silent
+  success. Do not repeat an unchanged GUI route merely to duplicate existing
+  evidence; recheck changed routes, affected targets and viewer-dependent behavior.
   Check that file links/attachments remain usable in the delivered bundle, not
   only at the author's absolute workspace paths. Record untested destinations
   or viewer restrictions as limits, rather than claiming the route works.
@@ -227,8 +249,11 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   checks. For a substantial artifact, default to one full evidence-based review,
   one consolidated repair pass, then one targeted recheck of changed claims,
   dependencies and rendered pages. Do not start another full review panel
-  automatically. A pass is saturated when it adds no new material, actionable
-  finding: a material finding would change a central claim or proof, source
+  automatically. For PDF navigation, retain the inexpensive full structural
+  check on each build while targeting repeated visual and viewer work under
+  the shared procedure. Passing structural checks does not close outstanding
+  visual, semantic or coverage findings. A pass is saturated when it adds no new
+  material, actionable finding: a material finding would change a central claim or proof, source
   fidelity or required coverage, the reader's ability to follow a decisive
   argument, or the requested deliverable's usability. Resolve every earlier
   material finding as corrected, disproved with evidence, or explicitly
@@ -248,6 +273,41 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   an unqualified "verified" or mark the requested explanation complete while
   required primary evidence or corresponding implementations remain missing;
   disclosure records the gap rather than waiving it.
+- **R31 Coverage records and sentence reading** — Run `scripts/check_coverage.py` on the
+  note's coverage data and report its output, including open entries; a pass shows the
+  records are complete, not that the content is right. Then check the content the records
+  point to. (a) Resources: every must-read supplement is actually displayed or explained at
+  the main-text call site, with locator; an `unobtained` entry shows the places tried and the
+  request, and the failure was reported with free alternatives; an AI-created stand-in exists only
+  with a recorded per-resource permission, is labelled and shown beside an open entry
+  ([ledger](resource-ledger.md)). (b) Lineage: for sampled entries compare the four
+  statements (purpose, place, inherited, changed) with the primary passage, and, where code
+  exists, the side-by-side difference with the stated execution ([lineage](lineage-and-comparison.md)).
+  (c) Chain: at each unit boundary read only the preceding unit's end and the next unit's
+  opening and name the need being taken up; at each parent end find the summary of what the
+  subsections established. (d) Sentences: sample `cite`/`property`/`show` sentences from the
+  delivered text, take the reader floor, and test whether the object, what is known, the
+  exact claim and its benefit can be recovered without leaving the note
+  ([claim gloss](unit-chain-and-claim-gloss.md)). A sentence that leans on a prior result
+  and leaves the reader to ask "what is that, what is known, why does it matter" fails.
+  Locate failures at the sentence, not at the section.
+- **R32 Figure readiness** — For a method paper, judge whether the reader could present each
+  main-text figure, and whether a [companion page](../../reading-companion/SKILL.md) could be
+  built for it. For every main-text figure, and every supplementary figure the main text cites
+  where understanding a main figure depends on it, check in the note: (a) what the figure
+  claims (the main-text sentence that cites it and the caption, with locators) and how to read
+  each panel (axes, colours, sizes, the marks to look at); (b) the computation behind it: step,
+  function, lines and parameter values with where they are stated, and, where the figure or
+  the claim compares methods, the earlier method's code; (c) the data and the
+  [reproduction level](methods.md#reproducing-the-papers-figures) reached, with the run's
+  correspondence to the panel; (d) what the figure does not show; (e) where the figure's
+  difference comes from (steps and lines, marked as the paper's statement or the note's reading);
+  (f) for the whole note, the lineage overview, the code-block notes (what each block does, where
+  it comes from, how it differs) and the values table that a companion takes over. Report a table, one row per
+  figure: ready, ready at a lower level, or blocked, with the missing part named. Put every
+  missing item into the [request list](resource-ledger.md#request-list) and give it to the user
+  with the review. Supplementary figures the main text does not need for understanding are not
+  required here.
 
 Delegate by the evidence needed, with a short task-specific packet and bounded
 paths; no named agent persona or fixed model is required. A source-aware auditor

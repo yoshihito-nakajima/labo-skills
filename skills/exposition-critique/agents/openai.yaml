@@ -1,0 +1,4 @@
+interface:
+  display_name: "Exposition Critique"
+  short_description: "Adversarially point out located defects in a frozen exposition"
+  default_prompt: "Use $exposition-critique to read the frozen exposition as an adversarial reader and return quoted, located findings with minimal repairs."

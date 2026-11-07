@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from dataclasses import dataclass
+from datetime import datetime, timezone
+import hashlib
+import json
 import os
 from pathlib import Path
 import re
@@ -13,6 +16,7 @@ import sys
 from typing import Iterator
 
 from .locking import exclusive_lock
+from .navigation import check_navigation
 from .paper import PaperError, paper_folder
 
 
@@ -201,6 +205,106 @@ def _has_synctex(output: Path, stem: str) -> bool:
     )
 
 
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write_build_stamp(cache: Path, output_stem: str, source: Path, status: str,
+                      pdf: Path | None = None, error: str | None = None) -> Path:
+    """Record the outcome of the latest build beside its cache.
+
+    A failed build keeps the previously published PDF in output/, so checks that
+    read that PDF must first confirm, through this record, that it is the result
+    of the latest successful build of the same source.
+    """
+    cache.mkdir(parents=True, exist_ok=True)
+    record = {
+        "status": status,
+        "source": str(source),
+        "pdf": str(pdf) if pdf else None,
+        "pdf_sha256": _sha256(pdf) if pdf and status == "ok" else None,
+        "error": error,
+        "finished_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    stamp = cache / f"{output_stem}.build.json"
+    stamp.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    return stamp
+
+
+def _target_stamp(workspace: Path, paper: str | None, source: Path | None) -> tuple[Path, Path, str]:
+    workspace = workspace.resolve()
+    if source is not None:
+        _command, _cwd, cache, output, _stem = source_build_command(workspace, source, None)
+        source_path = (source if source.is_absolute() else workspace / source).resolve()
+        output_stem = source_path.relative_to(workspace).parts[1]
+    elif paper is not None:
+        _command, _cwd, cache, output = build_command(workspace, paper, "pdflatex")
+        output_stem = paper
+    else:
+        raise PaperError("give --paper or --source")
+    return cache / f"{output_stem}.build.json", output / f"{output_stem}.pdf", output_stem
+
+
+def record_postprocess(workspace: Path, step: str, paper: str | None = None, source: Path | None = None) -> str:
+    """Accept a documented post-processing step that rewrote the PDF of a successful build."""
+    stamp, pdf, output_stem = _target_stamp(workspace, paper, source)
+    if not stamp.is_file():
+        raise PaperError(f"no build record at {stamp}; build first")
+    record = json.loads(stamp.read_text(encoding="utf-8"))
+    if record.get("status") != "ok":
+        raise PaperError("the latest build failed; post-processing cannot make its PDF current")
+    if not _nonempty_file(pdf):
+        raise PaperError(f"output/{output_stem}.pdf is missing")
+    record.setdefault("postprocessed", []).append({
+        "step": step, "before_sha256": record.get("pdf_sha256"), "after_sha256": _sha256(pdf),
+        "at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    })
+    record["pdf_sha256"] = _sha256(pdf)
+    stamp.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    return f"recorded post-processing '{step}' of output/{output_stem}.pdf"
+
+
+def run_postprocess(workspace: Path, steps: list[str], paper: str | None = None,
+                    source: Path | None = None) -> list[str]:
+    """Run post-processing commands after a successful build and record each one.
+
+    Each step is split like a shell command but run without a shell, from the workspace.
+    A failing step marks the build as failed, so verify-current refuses the PDF.
+    """
+    import shlex
+    stamp, _pdf, _stem = _target_stamp(workspace, paper, source)
+    messages = []
+    for step in steps:
+        try:
+            subprocess.run(shlex.split(step), cwd=workspace.resolve(), check=True)
+        except (OSError, subprocess.CalledProcessError) as exc:
+            record = json.loads(stamp.read_text(encoding="utf-8")) if stamp.is_file() else {}
+            record.update(status="failed", error=f"post-processing failed: {step}: {exc}")
+            stamp.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+            raise PaperError(f"post-processing failed: {step}") from exc
+        messages.append(record_postprocess(workspace, step, paper=paper, source=source))
+    return messages
+
+
+def verify_current(workspace: Path, paper: str | None = None, source: Path | None = None) -> tuple[bool, str]:
+    """True only if the latest build of this target succeeded and output/ still holds its PDF."""
+    stamp, pdf, output_stem = _target_stamp(workspace, paper, source)
+    if not stamp.is_file():
+        return False, f"no build record at {stamp}; build first"
+    record = json.loads(stamp.read_text(encoding="utf-8"))
+    expected_source = ((source if source.is_absolute() else workspace / source).resolve()
+                       if source is not None else (paper_folder(workspace.resolve(), paper) / "main.tex").resolve())
+    if record.get("source") != str(expected_source):
+        return False, "build record belongs to a different source; build this source first"
+    if record.get("status") != "ok":
+        return False, f"latest build failed ({record.get('error')}); output/{output_stem}.pdf is stale"
+    if not _nonempty_file(pdf):
+        return False, f"output/{output_stem}.pdf is missing"
+    if _sha256(pdf) != record.get("pdf_sha256"):
+        return False, f"output/{output_stem}.pdf differs from the latest successful build"
+    return True, f"output/{output_stem}.pdf is the latest successful build ({record.get('finished_at')})"
+
+
 def build_command(workspace: Path, paper: str, engine: str) -> tuple[list[str], Path, Path, Path]:
     if engine not in ENGINE_FLAGS:
         raise PaperError(f"unsupported engine: {engine}")
@@ -249,7 +353,13 @@ def run_build(workspace: Path, paper: str, engine: str, dry_run: bool) -> list[s
     if not dry_run:
         cache.mkdir(parents=True, exist_ok=True)
         output.mkdir(parents=True, exist_ok=True)
-        _compile(command, cwd, output, paper)
+        try:
+            _compile(command, cwd, output, paper)
+        except PaperError as exc:
+            write_build_stamp(cache, paper, cwd / "main.tex", "failed", error=str(exc))
+            raise
+        write_build_stamp(cache, paper, cwd / "main.tex", "ok", output / f"{paper}.pdf")
+        check_navigation(output / f"{paper}.pdf", cache, paper, cache / f"{paper}.aux", source=cwd / "main.tex")
     return command
 
 
@@ -310,13 +420,19 @@ def run_source_build(
         cache.mkdir(parents=True, exist_ok=True)
         output.mkdir(parents=True, exist_ok=True)
         generated = output if any(arg == f"-outdir={output}" for arg in command) else cache
-        _compile(command, cwd, generated, stem)
-        if generated != output:
-            # Publish the pair only after compilation and both artifact checks.
-            for suffix in (".pdf", ".synctex.gz", ".synctex"):
-                artifact = generated / f"{stem}{suffix}"
-                if _nonempty_file(artifact):
-                    shutil.copy2(artifact, output / f"{output_stem}{suffix}")
-            if not _nonempty_file(output / f"{output_stem}.pdf") or not _has_synctex(output, output_stem):
-                raise PaperError("published output is missing its PDF or SyncTeX")
+        try:
+            _compile(command, cwd, generated, stem)
+            if generated != output:
+                # Publish the pair only after compilation and both artifact checks.
+                for suffix in (".pdf", ".synctex.gz", ".synctex"):
+                    artifact = generated / f"{stem}{suffix}"
+                    if _nonempty_file(artifact):
+                        shutil.copy2(artifact, output / f"{output_stem}{suffix}")
+                if not _nonempty_file(output / f"{output_stem}.pdf") or not _has_synctex(output, output_stem):
+                    raise PaperError("published output is missing its PDF or SyncTeX")
+        except PaperError as exc:
+            write_build_stamp(cache, output_stem, source_path.resolve(), "failed", error=str(exc))
+            raise
+        write_build_stamp(cache, output_stem, source_path.resolve(), "ok", output / f"{output_stem}.pdf")
+        check_navigation(output / f"{output_stem}.pdf", cache, stem, cache / f"{stem}.aux", source=source_path.resolve())
     return command, output_stem

@@ -36,7 +36,29 @@ continues to own source identity, reading coverage and deliverable checks.
 
 Read only the references needed for the task:
 
+- [Reading structure](references/reading-structure.md): mandatory before outlining
+  or revising substantial reading material and bounded previews; source hierarchy,
+  retained role sections, source return, optional views and before/after checks.
+- [Roots and lenses](references/roots-and-lenses.md): methods sharing a root but seen
+  through different lenses; what to collect while investigating the sources, the
+  background card, its data format checked by `scripts/check_cards.py`, and how derived
+  talks use it.
 - [Sources](references/source-rules.md): acquisition, versions and coverage.
+- [Literature intake](references/literature-intake.md): the supplement, cited works, code and data of a
+  paper: depth, open routes only, the proposal to the user, substitutes only after confirmation.
+- [Resource ledger](references/resource-ledger.md): inventory of everything the paper
+  consists of, the main-text → supplement reading route, must-read supplements, and what
+  to do with material that cannot be obtained (report it; no AI-created stand-in without the
+  user's per-resource permission).
+- [Method-paper profile](references/method-paper-profile.md): the parts of a detailed note for a
+  paper whose contribution is a method with code (life science, information science), with a
+  skeleton in `assets/method-note/`; not a template for proof-centred mathematical papers.
+- [Lineage and comparison](references/lineage-and-comparison.md): inventory of inherited,
+  compared, criticised, encompassing/encompassed, origin and earlier-version works, and the
+  level at which each is treated, down to code differences.
+- [Unit chain and claim gloss](references/unit-chain-and-claim-gloss.md): needs/produces
+  between sections, the argument spine, the reader floor, and the sentence-level gloss for
+  sentences that rely on prior results or assert properties.
 - [Terminology and notation audit](references/terminology-audit.md): compare
   manuscript object types, names and conventions against actual same-role
   corpus definitions and primary-source pages; distinguish semantic defects,
@@ -53,6 +75,9 @@ Read only the references needed for the task:
   or empirical reasoning; use only the applicable branches.
 - [Review](references/review.md): checking coverage, fidelity, understanding
   and rendered deliverables.
+- [PDF navigation checks](../mathematical-navigation/references/pdf-checks.md):
+  shared structural checks, changed-page rendering and representative viewer
+  checks for PDFs; distinct from source fidelity and explanatory coverage.
 - [Research-program synthesis](references/research-program-synthesis.md):
   explaining a local research program across plans, proof records, literature
   and Lean evidence.
@@ -73,6 +98,14 @@ a positioning investigation does not itself request full-paper translation,
 implementation reproduction or manuscript edits.
 
 ## Purpose and completion contract
+
+For substantial reading, first fix the source-unit and required role-section map
+under [Reading structure](references/reading-structure.md). Keep it through revisions
+and inspect it before checking the latest local feedback. The structure reference
+owns the outline; paper preparation owns passage fidelity; application-to-code and
+methods own method content; review checks the delivered result. A bounded preview
+still completes its selected source unit through the target original/translation.
+
 
 Prepare the reader to reconstruct the paper's reasoning and explain it in a
 presentation, especially why its methods answer its questions. Method
@@ -206,7 +239,10 @@ when unavailable, and explain each added language's design and verification.
 6. Deliver useful checked units as they become available, with actual content
    and remaining gaps. Continue the rest of the requested scope; an interim
    explanation is not completion of the whole book or paper.
-7. Check the explanation against the sources and the reader's ability to use
+7. Before calling substantial material complete, keep the coverage records
+   (resource ledger, lineage inventory, unit chain, claim gloss) as one data file and run
+   `scripts/check_coverage.py` on it; open entries and record gaps block completion.
+   Check the explanation against the sources and the reader's ability to use
    it. For substantial deliverables, apply the review reference. Report actual
    checks, source versions, covered units and unresolved dependencies.
    Separate primary-source checks, implementation inspection/execution and
@@ -244,6 +280,11 @@ Produce the requested formats and language. For PDFs, build from the notes'
 own TeX root with `labo-build`'s `output build --source reading/<slug>/<root>.tex`
 workflow; it places the PDF and SyncTeX in `output/<slug>.*`, overwrites that
 pair on later builds from the same project, and prunes old output files. The
-viewer stays closed unless `--open` is supplied. Inspect the rendering. Use
-`slide-authoring` for requested decks, retaining this skill's source checks.
+viewer stays closed unless `--open` is supplied. The build runs the shared
+[PDF navigation check](../mathematical-navigation/references/pdf-checks.md).
+Record its status separately from rendering and actual viewer checks under R29;
+use the shared change-aware procedure instead of repeating every GUI click.
+Inspect the rendering and preserve source/content checks even when the structural
+report passes. Use `slide-authoring` for requested decks, retaining this skill's
+source checks.
 Preparing notes does not authorize publication or author contact.

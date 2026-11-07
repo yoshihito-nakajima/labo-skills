@@ -33,11 +33,23 @@ existing site format and generator; no specific backend is required.
    already shaped the context, produce a public-version exposition in a fresh
    context limited to the selected public sources; if unavailable, expose that
    limit and check every added claim against the permitted edition.
-3. Write for the intended reader: question, meaningful result, objects and
-   decisive idea, then limitations and a route to the exact source. Keep
+3. Write for the intended reader under
+   [reader pull](../mathematical-exposition/references/reader-pull.md): the
+   conclusion, a picture, why it matters and the key idea first; then each
+   section with a plain opening, gap-free definitions and steps, figures that
+   do work, and a closing that leads on; limitations and a route to the exact
+   source last. Headings are natural claims or questions, without role labels
+   such as 「問い｜」 or 「定義｜」. The page must read fully without following
+   any link, and repository paths or `.md` names never appear on it. Keep
    pedagogical reconstruction distinct from what the source states. For a
    substantial paper reading or proof reconstruction, use `reading-reference`.
-4. Build/preview with the site's own tools. Check mathematical rendering,
+4. Before treating a drafted or substantially revised exposition as ready,
+   run the [exposition-review](../exposition-review/SKILL.md) loop on the
+   rendered page: independent flow review, then adversarial critique, triage
+   and re-review. A page only its producer has read is a draft. Run
+   `scripts/check_citations.py` on every changed page against its previous
+   version; no rewrite may leave a dangling citation or drop a reference entry.
+   Build/preview with the site's own tools. Check mathematical rendering,
    diagrams, links and narrow/wide layouts on the actual result. Review the
    selected release files and diff, including assets and linked documents.
 5. Publish when authorized for that content and destination, using the existing

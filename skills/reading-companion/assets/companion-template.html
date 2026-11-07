@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading companion</title>
+<!-- reading-companion template: one self-contained file, no external resources. Private. -->
+<style>
+:root{--bg:#fbfbf8;--fg:#1f2328;--muted:#5d6670;--line:#d8dce0;--panel:#f1f3f5;--accent:#1f6f6b;--warm:#b5651d;--code:#f6f8fa;--soft:#eaf4f3;
+  --same:#2b8a3e;--same-bg:#e8f5ec;--changed:#d9480f;--changed-bg:#fff0e3;--only:#868e96;--only-bg:#eef0f2}
+*{box-sizing:border-box}[hidden]{display:none !important}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.7 -apple-system,"Hiragino Sans","Noto Sans JP","Segoe UI",sans-serif}
+header,main,footer{max-width:1240px;margin:0 auto;padding:0 20px}
+h1{font-size:1.5rem;margin:20px 0 4px}h2{font-size:1.28rem;margin:44px 0 8px;border-bottom:2px solid var(--accent);padding-bottom:4px}
+h2.part{font-size:1.1rem;color:#fff;background:var(--accent);border:0;border-radius:6px;padding:6px 12px;margin-top:56px}
+h3{font-size:1.02rem;margin:22px 0 6px;color:var(--accent)}h4{margin:6px 0;font-size:.95rem}
+a{color:var(--accent)}
+.muted{color:var(--muted)}.small{font-size:.86rem}
+.chip{display:inline-block;font-size:.72rem;border:1px solid var(--warm);color:var(--warm);border-radius:3px;padding:0 5px;margin-left:6px;vertical-align:middle}
+.lv{display:inline-block;font-size:.75rem;border-radius:3px;padding:0 6px;margin-left:6px;color:#fff;background:var(--accent);vertical-align:middle}.lv.L3{background:var(--warm)}.lv.L4{background:var(--only)}
+.panel{background:var(--panel);border-radius:6px;padding:10px 14px;margin:8px 0}
+.picture{background:var(--soft);border-left:4px solid var(--accent);border-radius:6px;padding:12px 16px;margin:10px 0}
+.claim{background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:10px 16px;margin:10px 0}
+.claim blockquote{margin:4px 0;font-style:italic}
+.recap{background:#fff8e8;border-left:4px solid var(--warm);border-radius:6px;padding:10px 16px;margin:14px 0}
+.recap ol{margin:4px 0 0 0;padding-left:.4em;list-style:none}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}.grid2>div{min-width:0}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.map{display:flex;flex-wrap:wrap;align-items:stretch;gap:4px;margin:10px 0}
+.map .io{font-size:.82rem;color:var(--muted);align-self:center;max-width:150px}
+.map .arrow{align-self:center;color:var(--muted)}
+.map .step{border:1px solid var(--line);background:#fff;border-radius:6px;padding:6px 9px;max-width:170px;font-size:.84rem;line-height:1.45}
+.map .step b{display:block;font-size:.88rem}
+.map .step.built{border-color:var(--accent)}
+.map .step.here{background:var(--accent);color:#fff;border-color:var(--accent)}.map .step.here a{color:#fff}
+.map .step .nb{font-size:.72rem;color:var(--muted)}
+.map.mini .step{max-width:none;padding:3px 8px}.map.mini .step span.r{display:none}
+.formula{font-family:"STIX Two Text","Times New Roman",serif;font-size:1.05rem;white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 16px;margin:6px 0}
+.example{background:#fff;border:1px dashed var(--line);border-radius:6px;padding:8px 16px;margin:6px 0}
+.point{border:1px solid var(--line);border-radius:6px;background:#fff;padding:8px 12px;margin:10px 0}
+.point .head{margin-bottom:6px}.point .pn{display:inline-block;background:var(--panel);border-radius:3px;padding:0 6px;margin-right:6px;font-weight:600}
+pre.code{background:var(--code);border:1px solid var(--line);border-radius:6px;padding:8px 0;overflow:auto;font:12.5px/1.5 Menlo,Consolas,monospace;margin:6px 0}
+pre.code .ln{display:block;padding:0 10px;white-space:pre}
+pre.code .no{display:inline-block;width:3.2em;color:#9aa3ab;user-select:none}
+pre.code .cmp-same{background:var(--same-bg)}pre.code .cmp-changed{background:var(--changed-bg)}pre.code .cmp-only{background:var(--only-bg)}
+pre.code .role{border-left:4px solid var(--accent)}
+pre.code .rolelab,pre.code .cmplab{display:block;white-space:normal;margin-left:3.2em;font-weight:600;font-family:-apple-system,"Hiragino Sans",sans-serif;font-size:.8rem}
+pre.code .rolelab{color:var(--accent)}
+pre.code .tok{background:#ffd27a;border-radius:2px;outline:1px solid var(--warm)}
+pre.code .val{display:block;color:var(--warm);font-weight:600;margin-left:3.2em;white-space:normal}
+pre.code details.fold summary{padding:0 10px;color:var(--muted);font-family:-apple-system,"Hiragino Sans",sans-serif;font-size:.82rem}
+.rel{display:inline-block;border-radius:3px;padding:0 6px;font-size:.78rem;color:#fff}.rel.same{background:var(--same)}.rel.changed{background:var(--changed)}.rel.only{background:var(--only)}
+.legend{font-size:.82rem;margin:4px 0}.legend span{margin-right:10px}
+.controls label{display:block;margin:6px 0 2px;font-size:.9rem}
+.controls input[type=range]{width:100%}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.presets button{border:1px solid var(--warm);background:#fff;color:var(--warm);border-radius:14px;padding:3px 11px;cursor:pointer;font-size:.86rem}
+.presets button.on{background:var(--warm);color:#fff}
+.expect{border:2px solid var(--warm);border-radius:6px;padding:6px 10px;margin:6px 0;font-size:.9rem;background:#fffaf2}
+.run{border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:#fff}
+svg.plot{width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:6px}
+figure{margin:8px 0 0}figure img{max-width:100%;border:1px solid var(--line);border-radius:6px;background:#fff}
+figcaption{font-size:.84rem;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}th,td{border-bottom:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:top}
+th{white-space:nowrap}
+.prov{font-size:.78rem;color:var(--muted)}
+details summary{cursor:pointer;color:var(--accent)}
+details.supp{border:1px solid var(--line);border-radius:6px;padding:4px 10px;margin:8px 0;background:#fff}
+.roleline{background:var(--soft);border-left:4px solid var(--accent);border-radius:6px;padding:6px 12px;margin:6px 0;font-size:.92rem}
+.panelfig figure img{max-width:420px}
+.controls label.set{background:#fff3c4;border-radius:4px}
+.der{color:var(--accent);font-weight:600}
+.presets button .pv{font-size:.78rem;opacity:.85}
+.extrarun{border-top:2px dashed var(--line);margin-top:16px;padding-top:8px}
+.cmblock{border-radius:4px;padding:4px 10px;margin:6px 0}.cmlab{font-weight:600;font-size:.88rem}.roleline.demo{border-left-color:var(--warm);background:#fff6e8}.chk{margin-top:3px}.chk button{border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:12px;padding:0 9px;cursor:pointer}
+.runcard{border:1px solid var(--accent);border-radius:6px;background:#fff;padding:8px 12px;margin:8px 0}.runcard>div{margin:6px 0}
+.calls{margin:2px 0;padding-left:1.4em}.calls code{font-size:.82rem;background:var(--code);padding:0 4px;border-radius:3px}
+pre.code .cmphead{display:block;white-space:normal;margin:4px 0 0 3.2em;padding:3px 8px;border-left:4px solid var(--only);background:#fff;font-family:-apple-system,"Hiragino Sans",sans-serif;font-size:.8rem;line-height:1.5}
+pre.code .cmphead.same{border-left-color:var(--same)}pre.code .cmphead.changed{border-left-color:var(--changed)}
+pre.code .sell{background:#fff3b0;border-left:5px solid #f08c00}pre.code .selllab{display:block;white-space:normal;margin-left:3.2em;font-weight:700;color:#d9480f;font-family:-apple-system,"Hiragino Sans",sans-serif;font-size:.8rem}
+.lincard{border:1px solid var(--line);border-left:4px solid var(--warm);border-radius:6px;background:#fff;padding:8px 12px;margin:8px 0}.lincard.ref{border-left-color:var(--only)}
+.lincard dl{display:grid;grid-template-columns:max-content 1fr;gap:2px 10px;margin:4px 0}.lincard dt{font-weight:600;color:var(--muted);font-size:.86rem}.lincard dd{margin:0}
+.diffbox{border:2px solid var(--changed);border-radius:6px;background:#fff;padding:8px 12px;margin:10px 0}.diffbox li{margin:4px 0}
+.stepchip{display:inline-block;border-radius:3px;padding:0 6px;color:#fff;font-size:.78rem;margin-right:3px}
+.by{display:inline-block;font-size:.72rem;border-radius:3px;padding:0 5px;color:#fff}.by.author{background:var(--accent)}.by.earlier{background:var(--warm)}.by.AI{background:#868e96}
+</style>
+</head>
+<body>
+<header id="top"></header>
+<main id="main"></main>
+<footer class="small muted" id="foot"></footer>
+<script>
+const DATA = /*__COMPANION_DATA__*/null;
+</script>
+<script>
+(function(){
+const D = DATA; if(!D){document.body.textContent='No data: build this page with build_companion.py.';return;}
+const ja = (D.lang||'ja')==='ja';
+const T = ja ? {intro:'はじめに：何を見ているのか',picture:'何を測り、何を見たいのか',question:'この論文の問い',context:'文脈',terms:'用語',claims:'論文の主張',
+  hub:'対応表：本文の図の売り ↔ コードの売り',fig:'図',figpoint:'図の売り',codepoint:'コードの売り',earlier:'既存の方法',level:'再現',steps:'手順の流れ',
+  input:'入力',output:'出力',notbuilt:'未作成',where:'現在地',recv:'受け取るもの',hand:'渡すもの',usedby:'この手順を使う図',
+  main:'本文の図（主線）',claim:'この図の主張',reading:'読み方',see:'見る',learn:'分かる',trouble:'困りごと',handoff:'次へ',points:'図の売り ↔ コードの売り',
+  run:'動かす',corr:'対応する主張',notr:'移らないこと',dataset:'データ',code:'コード',presenter:'発表メモ',say:'言うこと',pointat:'指す所',qs:'想定質問',notshown:'この図が示さないこと',
+  suppfig:'補足図',links:'詳しくは',note:'詳細版',deck:'デッキ',tostep:'補足でこの手順を 1 から読む',l4:'動かせない理由',seereq:'依頼リスト',
+  supp:'補足：手順を 1 から',fbg:'なぜ要るか',fq:'この節の問い',idea:'考え方（言葉で）',fterms:'この節の言葉と記号',formula:'式',example:'具体例',fprior:'既存の方法では',fsell:'売り（論文の記述）',
+  recap:'コードを読む前に：目的と考え方の再掲',codes:'コード（左：既存の方法、右：著者）',cmp:'同じ所・違う所',sideprior:'既存の方法',sideauthor:'著者コード',
+  presets:'見どころ（押すと値が変わる）',ppresets:'既存の方法の見どころ',expect:'見るところ',link:'既存の方法のつまみを、この方法と同じ位置に連動させる',
+  paperfig:'論文の図',rd:'読み',limits:'この節が示さないこと',
+  same:'同じ（受け継いだ）',changed:'変えた',only:'片方だけ',aonly:'著者だけ',ponly:'既存だけ',
+  sources:'使ったもの',repo:'リポジトリ',commit:'commit',license:'ライセンス',files:'使ったファイル',dsname:'データ',dssource:'入手先',dsid:'身元',dsprep:'前処理',usedfor:'使った節',
+  figs:'論文の図（切り抜き）',requests:'依頼リスト（取ってきてほしいもの）',what:'何を',wherefrom:'どこから',serves:'どの図に',enables:'できるようになること',none:'なし',
+  params:'パラメータの表',method:'方法',name:'名前',def:'既定値',stated:'記載',gridc:'格子',effect:'効き方',line:'行',added:'* 効き方を見せるために加えた値（推奨値ではない）',
+  paperw:'論文',codeonly:'コードのみ',pagenotshown:'このページが示さないこと',gloss:'用語索引',defined:'定義の場所',prov:'出所',current:'いまの値',na:'該当なし',fold:'行を畳んでいます',
+  pending:'未作成',readiness:'準備状況',lv1:'論文と同じデータ',lv2:'同じデータを取り直したもの',lv3:'代わりのデータ',lv4:'動かせない',
+  remake:'論文の図の作り直し',codeblocks:'動かしている手順のコード（全体のコード地図の該当ブロック）',datactl:'データの性質（コードの引数ではない）',demo:'つまみで確かめる（AI 作成の合成データ。コードは著者・既存手法のものをそのまま使う）',truth:'この合成データの正解',primer:'図の読み方の準備（この後の図を読むために）',primerlearn:'木から分かること',mark:'記号・大きさ・色',meaning:'意味',usedin:'使う図',calledsum:'この実行が呼ぶ関数の全体（★＝図の売り、橙の枠＝つまみの行）',selllab:'売り',valnote:'論文の図との値の違い',codemap:'手法の全体のコード（手順ごとに色分け）',codemapnote:'この頁の各節は、この中のどのブロックを動かしているかを示す',here:'ここを動かしている',checkbtn:'確かめる',checked:'確かめた結果',paperonly:'論文のみ',checkdemo:'つまみで確かめる',runtime:'実行時間',scaledown:'論文より少ない所',overbudget:'時間の基準超過',runsteps:'この図で動かしている手順（濃い色）',notrun:'ここでは動かしていないもの',calls:'実行したもの',flow:'つまみから図まで',output:'変わる出力',drawn:'図での描き方',reshown:'該当コード（再掲。つまみの行といまの値）',noknob:'この図につまみはない（実行の設定は上の「実行したもの」に書いた値で固定）。',byauthor:'著者のコード',byearlier:'既存手法のコード',byai:'AI が書いた実行用のコード',unob:'入手を諦めたもの',tried:'試した所',instead:'代わりに使うもの',compare:'比べるところ',forcode:'コードの理解用（論文の図にはない）',knob:'画面のつまみ',arg:'コードの引数',symbol:'論文の記号',symtab:'つまみ・コード・論文の対応',
+  summary:'論文の要旨（Summary と Introduction を平たく）',lineage:'既存手法の系譜：何のために作られ、どこが弱かったか',linnote:'コードの比較（下の各図）は、ここに書いた弱みへの答えとして読む。',families:'論文による既存手法の分け方',fam:'族',good:'得意',weak:'不得意（論文の言い分）',fwhere:'論文で比べる所',madefor:'何のために作られたか',weakness:'論文の言う弱み',kept:'この手法が受け継いだもの・変えたもの',verified:'原典で確かめたこと',refrow:'参考（コードには現れない系譜）',after:'補助：論文の後の展開（論文の主張ではない）',difference:'図の差の出どころ（コードのどこが効いているか）',bypaper:'論文の記述',bynote:'詳細版の読み',byspeaker:'このページの読み',remakeref:'参考：実データでの作り直し（つまみなし。論文の図と見比べる用）',does:'何をするか',lin:'由来',diff:'違いと効き目',runsyn:'動かす（合成データ。著者と既存手法のコードをそのまま、同じデータ・同じつまみで）',
+  privacy:'私用のページ（公開しない）。'}
+ : {intro:'Introduction: what we are looking at',picture:'What is measured and what we want to see',question:'Question of the paper',context:'Context',terms:'Terms',claims:'Claims of the paper',
+  hub:'Map: figure selling points ↔ code selling points',fig:'Figure',figpoint:'Figure selling point',codepoint:'Code selling point',earlier:'Earlier method',level:'Reproduced',steps:'Steps of the method',
+  input:'Input',output:'Output',notbuilt:'not built',where:'Where we are',recv:'Receives',hand:'Hands on',usedby:'Figures using this step',
+  main:'Main-text figures (main line)',claim:'What the figure claims',reading:'How to read it',see:'See',learn:'Learn',trouble:'Trouble',handoff:'Next',points:'Figure selling point ↔ code selling point',
+  run:'Run it',corr:'Corresponds to',notr:'Does not transfer',dataset:'Data',code:'Code',presenter:"Presenter's notes",say:'Say',pointat:'Point at',qs:'Likely questions',notshown:'Not shown by the figure',
+  suppfig:'Supplementary figures',links:'Read more',note:'Detailed note',deck:'Deck',tostep:'Read this step from the first line (supplement)',l4:'Why it cannot be run',seereq:'request list',
+  supp:'Supplement: the code from step 1',fbg:'Why it is needed',fq:'Question of this unit',idea:'Idea in words',fterms:'Terms and symbols',formula:'Formula',example:'Worked example',fprior:'What existed before',fsell:'Selling point (paper)',
+  recap:'Before the code: purpose and idea again',codes:"Code (left: earlier method, right: authors')",cmp:'Same and different',sideprior:'Earlier method',sideauthor:"Authors' code",
+  presets:'What to look at (press to set values)',ppresets:'Earlier method: what to look at',expect:'Look at',link:"Move the earlier method's controls with this method's",
+  paperfig:'Paper figure',rd:'Reading',limits:'Not shown here',
+  same:'same (kept)',changed:'changed',only:'only in one',aonly:'authors only',ponly:'earlier only',
+  sources:'Sources used',repo:'Repository',commit:'commit',license:'Licence',files:'Files used',dsname:'Data',dssource:'Source',dsid:'Identity',dsprep:'Preprocessing',usedfor:'Used in',
+  figs:'Paper figures (crops)',requests:'Request list (not obtained)',what:'What',wherefrom:'Where',serves:'For',enables:'Enables',none:'none',
+  params:'Parameters',method:'Method',name:'Name',def:'Default',stated:'Stated in',gridc:'Grid',effect:'Effect',line:'Line',added:'* added to show the effect (not a recommended value)',
+  paperw:'paper',codeonly:'code only',pagenotshown:'What this page does not show',gloss:'Glossary index',defined:'Defined in',prov:'Provenance',current:'current',na:'n/a',fold:'lines folded',
+  pending:'not built yet',readiness:'Readiness',lv1:"the paper's data",lv2:'the same data, obtained again',lv3:'substitute data',lv4:'not run',
+  remake:"Remake of the paper's figure",codeblocks:'Code of the steps run (blocks of the whole-code map)',datactl:'property of the data (not a code argument)',demo:'Check by hand (AI-created synthetic data; authors and earlier code unchanged)',truth:'Truth of this synthetic data',primer:'Before the figures: how to read the output',primerlearn:'What one can learn from it',mark:'Mark, size, colour',meaning:'Meaning',usedin:'Used in',calledsum:'Whole code of the functions this run calls (★ = the figure\'s selling point, orange = control lines)',selllab:'selling point',valnote:"Values compared with the paper's figure",codemap:'The whole code of the method (coloured by step)',codemapnote:'Each unit shows which block it runs',here:'run here',checkbtn:'Check',checked:'Observed',paperonly:'paper only',checkdemo:'Check by hand',runtime:'runtime',scaledown:'smaller than the paper',overbudget:'over time budget',runsteps:'Steps this figure runs (dark)',notrun:'Not run here',calls:'What was run',flow:'From control to drawing',output:'Output changed',drawn:'Drawn as',reshown:'The code again (control lines, current values)',noknob:'No controls in this figure (the run uses the values listed under What was run).',byauthor:"authors' code",byearlier:"earlier method's code",byai:'AI-written driver',unob:'Given up',tried:'Places tried',instead:'Used instead',compare:'Compare',forcode:'For reading the code (not a figure of the paper)',knob:'Control',arg:"Code's argument",symbol:"Paper's symbol",symtab:'Controls, code and paper',
+  summary:"The paper's Summary and Introduction in plain words",lineage:'Lineage of earlier methods: what each was for, where it is weak',linnote:'The code comparisons below read as answers to these weaknesses.',families:"The paper's families of earlier methods",fam:'Family',good:'Good at',weak:"Weak at (the paper's view)",fwhere:'Compared in',madefor:'Made for',weakness:'Weakness the paper names',kept:'Kept / changed by this method',verified:'What checking the source found',refrow:'reference (a lineage the code does not show)',after:"Auxiliary: later developments (not the paper's claims)",difference:'Where the difference comes from (which code matters)',bypaper:'paper',bynote:"note's reading",byspeaker:"this page's reading",remakeref:"Reference: remake on real data (no controls; for comparing with the paper's figure)",does:'Does',lin:'From',diff:'Difference and effect',runsyn:"Run it (synthetic data; authors' and earlier code unchanged, same data and controls)",
+  privacy:'Private page (not for publication).'};
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const para = s => esc(s).split(/\n\s*\n/).map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+const el = (tag, attrs, html) => {const e=document.createElement(tag); for(const k in (attrs||{})) e.setAttribute(k, attrs[k]); if(html!=null) e.innerHTML=html; return e;};
+const noteLink = n => D.note.pdf ? `<a href="${esc(D.note.pdf)}#page=${n.page}">${esc(T.note)} ${esc(n.text)} (p.${n.page})</a>` : `${esc(T.note)} ${esc(n.text)} (p.${n.page})`;
+const linksHTML = (u) => `${(u.note_links||[]).map(noteLink).join(' · ')}${(u.deck_pages||[]).length?` · ${T.deck}: ${u.deck_pages.map(esc).join(', ')}`:''}`;
+const figHTML = fg => !fg ? '' : `<figure>${fg.paper_crop_data?`<img alt="paper figure" src="${fg.paper_crop_data}">`:''}<figcaption>${T.paperfig}: ${esc(fg.paper_locator)}${fg.paper_crop_data?' (cut out of the source, unaltered)':' — '+esc(fg.paper_crop_absent||'')}${fg.encoding?' · '+esc(fg.encoding):''}</figcaption></figure>`;
+const termTable = ts => `<table>${(ts||[]).map(t=>`<tr><th>${esc(t.term)}</th><td>${esc(t.meaning)}</td></tr>`).join('')}</table>`;
+const lvWords = (lv, name) => ({L1:T.lv1, L2:T.lv2, L3:T.lv3, L4:T.lv4}[lv]||lv) + (name&&lv!=='L4'?`: ${name}`:'');
+const lvChip = (lv, name) => `<span class="lv ${esc(lv)}">${esc(lvWords(lv, name))}</span>`;
+const relClass = r => r==='same'?'same':r==='changed'?'changed':'only';
+const relLabel = r => ({same:T.same,changed:T.changed,'author-only':T.aonly,'prior-only':T.ponly}[r]||r);
+const letter = i => 'ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛ'[i] || `(${i+1})`;
+const gridIndex = (p, v) => (p.grid||[]).findIndex(x => x===v || (typeof x==='number' && typeof v==='number' && Math.abs(x-v)<1e-12));
+const circ = n => '①②③④⑤⑥⑦⑧⑨⑩'[n] || `(${n+1})`;
+const steps = D.overview||[]; const featOf={}, featById={}; D.features.forEach(f=>{featOf[f.step]=f; featById[f.id]=f;});
+const figsUsing = fid => D.figures.filter(g=>(g.points||[]).some(p=>p.step===fid)||((g.reproduction||{}).step===fid));
+function mapHTML(here, mini){ const hs=Array.isArray(here)?here:[here];
+  const box = st => {const f=featOf[st.id]; const name=f?`<a href="#${esc(f.id)}">${esc(st.name)}</a>`:esc(st.name);
+    return `<div class="step${f?' built':''}${hs.includes(st.id)?' here':''}"><b>${name}</b><span class="r">${esc(st.role)}</span>${f?'':`<span class="nb"> （${T.notbuilt}）</span>`}</div>`;};
+  const first=steps[0]||{}, last=steps[steps.length-1]||{};
+  return `<div class="map${mini?' mini':''}">${mini?'':`<div class="io">${T.input}: ${esc(first.input)}</div><div class="arrow">→</div>`}${steps.map(box).join('<div class="arrow">→</div>')}${mini?'':`<div class="arrow">→</div><div class="io">${T.output}: ${esc(last.output)}</div>`}</div>`;}
+
+// ---- plotting: generic points/edges/marks; a project may replace this block (keep drawFeature's signature)
+function bounds(f){let xs=[],ys=[];['author','prior'].forEach(s=>{const r=(f.results||{})[s]||{};Object.values(r).forEach(g=>(g.points||[]).forEach(p=>{xs.push(p[0]);ys.push(p[1]);}));});
+  if(!xs.length) return [0,1,0,1]; const pad=(a,b)=>{const d=(b-a)||1;return [a-d*0.05,b+d*0.05];};
+  return [...pad(Math.min(...xs),Math.max(...xs)),...pad(Math.min(...ys),Math.max(...ys))];}
+function colour(t){t=Math.max(0,Math.min(1,t)); const a=[49,54,149],b=[255,255,191],c=[165,0,38];
+  const m=(u,v,s)=>Math.round(u+(v-u)*s); const [p,q,s]=t<.5?[a,b,t*2]:[b,c,(t-.5)*2]; return `rgb(${m(p[0],q[0],s)},${m(p[1],q[1],s)},${m(p[2],q[2],s)})`;}
+// host: the run column (has [data-plot], [data-plot2], [data-status]); g: the grid point's result; prev: the previous one; mode: 'author' | 'prior'
+function drawFeature(host, f, g, prev, mode){
+  const svg=host.querySelector('[data-plot]');
+  if(!g){svg.innerHTML='';return;}
+  const [x0,x1,y0,y1]=bounds(f), W=520,H=380, k=Math.min((W-40)/(x1-x0),(H-40)/(y1-y0)), ox=(W-(x1-x0)*k)/2, oy=(H-(y1-y0)*k)/2, X=x=>ox+(x-x0)*k, Y=y=>H-oy-(y-y0)*k;  // same scale on both axes
+  const pts=g.points||[]; const vs=pts.filter(p=>p.length>2).map(p=>p[2]); const vmin=Math.min(...vs), vmax=Math.max(...vs);
+  let s=`<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/>`;
+  (g.edges||[]).forEach(([i,j])=>{const p=pts[i],q=pts[j]; if(p&&q) s+=`<line x1="${X(p[0])}" y1="${Y(p[1])}" x2="${X(q[0])}" y2="${Y(q[1])}" stroke="#9aa3ab" stroke-width="1"/>`;});
+  pts.forEach(p=>{const c=p.length>2&&vmax>vmin?colour((p[2]-vmin)/(vmax-vmin)):'#1f6f6b'; s+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="2.6" fill="${c}"/>`;});
+  (g.marks||[]).forEach((i,k)=>{const p=pts[i]; if(p) s+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="7" fill="none" stroke="#b5651d" stroke-width="2"/><text x="${X(p[0])+9}" y="${Y(p[1])-8}" font-size="12" fill="#b5651d">${k+1}</text>`;});
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.innerHTML=s;}
+// ---- end plotting
+
+// ---- code: comparison colours, role blocks, folds, parameter tokens; range limits the lines shown
+function codeBlock(c, values, cmp, side, range){
+  const lines=c.text.split('\n'); const byLine={}; (c.params||[]).forEach(p=>{(byLine[p.line]=byLine[p.line]||[]).push(p);});
+  const roles=side==='author'?(c.roles||[]):[], folds=range?[]:(c.fold||[]), pairs=(cmp||[]).map((e,i)=>[i,e]).filter(([i,e])=>Array.isArray(e[side]));
+  const lineHTML = no => {const t=lines[no-c.first]; let h=esc(t); const ps=byLine[no]||[];
+    ps.forEach(p=>{const tk=esc(p.token); h=h.replace(tk,`<span class="tok">${tk}</span>`);});
+    const pr=pairs.find(([i,e])=>e[side][0]<=no&&no<=e[side][1]); const pl=pairs.find(([i,e])=>e[side][0]===no);
+    const ri=roles.findIndex(r=>r.first<=no&&no<=r.last); const rl=roles.findIndex(r=>r.first===no);
+    const val=ps.map(p=>`${esc(p.name)} = ${esc(values?values[p.name]:p.default_str)} <span class="muted">(default ${esc(p.default_str)})</span>`).join('; ');
+    const sl=(c.sell||[]).find(s=>s.first<=no&&no<=s.last), sf=(c.sell||[]).find(s=>s.first===no);
+    const cls=['ln']; if(pr) cls.push('cmp-'+relClass(pr[1].relation)); if(ri>=0) cls.push('role'); if(sl) cls.push('sell');
+    const ph=pl?`<span class="cmphead ${relClass(pl[1].relation)}"><b style="color:var(--${relClass(pl[1].relation)})">${letter(pl[0])} ${esc(relLabel(pl[1].relation))}</b>${pl[1].does?` <b>${T.does}</b>: ${esc(pl[1].does)}`:''}${pl[1].lineage?`<br><b>${T.lin}</b>: ${esc(pl[1].lineage)}`:''}${pl[1].text?`<br><b>${T.diff}</b>: ${esc(pl[1].text)}`:''}</span>`:'';
+    return `${ph}<span class="${cls.join(' ')}">${sf?`<span class="selllab">★ ${T.selllab}: ${esc(sf.label)}</span>`:''}${rl>=0?`<span class="rolelab">${circ(rl)} ${esc(roles[rl].text)}</span>`:''}<span class="no">${no}</span>${h}${ps.length?`<span class="val">← ${T.current}: ${val}</span>`:''}</span>`;};
+  const a=range?Math.max(range[0],c.first):c.first, b=range?Math.min(range[1],c.last):c.last;
+  let out='', no=a;
+  while(no<=b){const fd=folds.find(([x,y])=>x===no);
+    if(fd){let inner=''; for(let k=fd[0];k<=fd[1];k++) inner+=lineHTML(k); out+=`<details class="fold"><summary>L${fd[0]}–${fd[1]} ${T.fold}</summary>${inner}</details>`; no=fd[1]+1;}
+    else {out+=lineHTML(no); no++;}}
+  return out;}
+const codeMeta = c => `<div class="prov">${esc(c.impl_name||c.impl)} · ${c.url?`<a href="${esc(c.url)}">${esc(c.repo)}</a>`:esc(c.repo)} @ ${esc(c.commit)} · ${esc(c.file)} L${c.first}–${c.last} · ${esc(c.license)}${c.source?' · '+esc(c.source):''}</div>`;
+const legend = () => `<div class="legend"><span class="rel same">${T.same}</span><span class="rel changed">${T.changed}</span><span class="rel only">${T.only}</span></div>`;
+function cmpTable(f){const cmp=f.comparison||[]; if(!cmp.length) return '';
+  return `${legend()}<table><tr><th></th><th>${T.sideprior}</th><th>${T.sideauthor}</th><th></th><th>${T.does}</th><th>${T.lin}</th><th>${T.diff}</th></tr>${cmp.map((e,i)=>`<tr><td>${letter(i)}</td><td>${e.prior?`L${e.prior[0]}–${e.prior[1]}`:'—'}</td><td>${e.author?`L${e.author[0]}–${e.author[1]}`:'—'}</td><td><span class="rel ${relClass(e.relation)}">${esc(relLabel(e.relation))}</span>${e.role?` <span class="muted small">${esc(e.role)}</span>`:''}</td><td>${esc(e.does||'')}</td><td>${esc(e.lineage||'')}</td><td>${esc(e.text)}</td></tr>`).join('')}</table>`;}
+
+// ---- one run panel (both methods on the same input); views = code blocks to refresh with the values
+// role = {role:'remake'|'code', panels, compare, panel_figure, shows}; lv = {level, name} of the data used
+function roleHTML(role, lv){if(!role||!role.role) return '';
+  if(role.role==='remake') return `<div class="roleline"><b>${T.remake}</b>: ${esc((role.panels||[]).join('・'))}（${esc(lvWords(lv.level,lv.name))}）<br><b>${T.compare}</b>: ${esc(role.compare)}</div>${role.panel_figure?`<div class="panelfig">${figHTML(role.panel_figure)}</div>`:''}`;
+  if(role.role==='demo') return `<div class="roleline demo"><b>${T.demo}</b>: ${esc(role.shows)}<br><b>${T.truth}</b>: ${esc(role.truth)}${role.values_note?`<br><b>${T.valnote}</b>: ${esc(role.values_note)}`:''}</div>`;
+  return `<div class="roleline"><b>${T.forcode}</b>: ${esc(role.shows)}（${esc(lvWords(lv.level,lv.name))}）</div>`;}
+window.__runs=window.__runs||{};
+function buildRun(box, f, views, role){
+  const ac=f.codes.author_code||{}, pc=f.codes.prior_code||{}, R=f.results||{}; const hasPrior=!!(R.prior&&pc.text);
+  const A=(ac.params||[]), Pp=(pc.params||[]); const ia={}, ip={};
+  A.forEach(p=>ia[p.name]=p.grid_str.indexOf(p.default_str)); Pp.forEach(p=>ip[p.name]=p.grid_str.indexOf(p.default_str));
+  const di=f.dataset_info||{};
+  box.innerHTML=`${roleHTML(role||f.run_role, {level:di.level, name:di.name})}${runCardHTML(f)}<div class="presets" data-presets></div><div class="expect" data-expect hidden></div>
+   ${hasPrior&&pc.link?`<label class="small"><input type="checkbox" data-link> ${T.link}</label>`:''}
+   <div class="grid2">${hasPrior?`<div class="run" data-col="prior"><h4>${T.sideprior}: ${esc(pc.impl)} <span class="chip">earlier-method run</span></h4><div class="presets" data-ppresets></div><div class="controls" data-pcontrols></div><div class="small" data-status></div><svg class="plot" data-plot></svg><svg class="plot" data-plot2 hidden style="margin-top:6px"></svg></div>`:''}
+   <div class="run" data-col="author"><h4>${T.sideauthor}: ${esc(ac.impl)} <span class="chip">${esc(R.provenance||'')}</span></h4><div class="controls" data-acontrols></div><div class="small" data-status></div><svg class="plot" data-plot></svg><svg class="plot" data-plot2 hidden style="margin-top:6px"></svg></div></div>
+   <details class="supp"><summary>${T.prov}</summary><div class="prov">${esc(R.provenance||'')} · ${esc(R.script||'')} · commit ${esc(R.commit||'')} · ${esc(R.data||'')}${R.seed!=null?' · seed '+esc(R.seed):''}${R.runtime_seconds!=null?' · '+T.runtime+' '+Math.round(R.runtime_seconds)+' s':''}${R.scale_down?' · '+T.scaledown+': '+esc(R.scale_down):''}${R.over_budget?' · '+T.overbudget+': '+esc(R.over_budget):''}</div></details>`;
+  const colA=box.querySelector('[data-col=author]'), colP=box.querySelector('[data-col=prior]'), ex=box.querySelector('[data-expect]'), lk=box.querySelector('[data-link]');
+  const key=(ps,ix)=>ps.length?ps.map(p=>`${p.name}=${p.grid_str[ix[p.name]]}`).join('|'):'default';
+  let prevA=null, prevP=null; const ctl={}, der={}, labs={};
+  function derived(ps, g, side){ps.forEach(p=>{const d=p.derives, sp=der[side+p.name]; if(d&&sp) sp.textContent=g&&g[d.key]!==undefined?`→ ${d.name} = ${g[d.key]}`:'';});}
+  function render(){const va={}, vp={}; A.forEach(p=>va[p.name]=p.grid_str[ia[p.name]]); Pp.forEach(p=>vp[p.name]=p.grid_str[ip[p.name]]);
+    (views||[]).forEach(v=>{v.el.innerHTML=codeBlock(v.code, v.side==='author'?va:vp, f.comparison, v.side, v.range);});
+    box.querySelectorAll('[data-called]').forEach(e=>{const [side,ix]=e.getAttribute('data-called').split(':'), c=(f.called||[])[+ix], ps=(side==='author'?ac:pc).params||[];
+      const cc=Object.assign({}, c, {params:ps.filter(p=>c.file===(side==='author'?ac:pc).file&&p.line>=c.first&&p.line<=c.last), sell:(f.sell||[]).filter(s=>s.file.split('/').pop()===c.file.split('/').pop()&&s.first>=c.first&&s.last<=c.last)});
+      e.innerHTML=codeBlock(cc, side==='author'?va:vp, null, side);});
+    box.querySelectorAll('[data-rc]').forEach(e=>{const side=e.getAttribute('data-rc'), c=side==='author'?ac:pc; e.innerHTML=codeLines(c, flowLines(f, side), side==='author'?va:vp, f.comparison, side);});
+    const ga=(R.author||{})[key(A,ia)]; drawFeature(colA,f,ga,prevA,'author'); prevA=ga; derived(A, ga, 'a');
+    if(colP){const gp=(R.prior||{})[key(Pp,ip)]; drawFeature(colP,f,gp,prevP,'prior'); prevP=gp; derived(Pp, gp, 'p');}}
+  const unset=()=>{Object.values(labs).forEach(l=>l.classList.remove('set')); box.querySelectorAll('.presets button').forEach(b=>b.classList.remove('on')); ex.hidden=true;};
+  function slider(ps, ix, host, side){ps.forEach((p,k)=>{const lab=el('label',{}), inp=el('input',{type:'range',min:0,max:p.grid_str.length-1,step:1,value:ix[p.name]});
+    lab.innerHTML=`<b>${esc(p.label||p.name)}</b> = <b data-v></b> <span class="der" data-der></span> <span class="muted small">(${p.data?T.datactl:(p.stated_in==='paper'?T.paperw:T.codeonly)}; ${esc(p.effect)})</span>`;
+    der[side+p.name]=lab.querySelector('[data-der]'); labs[side+p.name]=lab;
+    const upd=()=>{lab.querySelector('[data-v]').textContent=p.grid_str[ix[p.name]]; inp.value=ix[p.name];};
+    ctl[side+p.name]=upd;
+    inp.oninput=()=>{ix[p.name]=+inp.value; upd(); if(side==='a'&&lk&&lk.checked) follow(); unset(); render();};
+    host.appendChild(lab); host.appendChild(inp); upd();});}
+  function follow(){Pp.forEach((p,k)=>{const a=A[k]; if(a){ip[p.name]=Math.min(ia[a.name],p.grid_str.length-1); ctl['p'+p.name]();}});}
+  slider(A, ia, box.querySelector('[data-acontrols]'), 'a'); if(colP) slider(Pp, ip, box.querySelector('[data-pcontrols]'), 'p');
+  if(lk) lk.onchange=()=>{if(lk.checked){follow(); render();}};
+  function presets(list, ps, ix, host, side, title){if(!(list||[]).length||!host) return;
+    host.insertAdjacentHTML('beforebegin',`<div class="small muted">${title}</div>`);
+    list.forEach(pr=>{const vals=ps.filter(p=>pr.values[p.name]!==undefined).map(p=>{const k=gridIndex(p, pr.values[p.name]); return `${p.name} ${k>=0?p.grid_str[k]:pr.values[p.name]}`;}).join('・');   // the grid's own spelling (1.0, not 1)
+      const b=el('button',{},`${esc(pr.label)}<span class="pv">（${esc(vals)}）</span>`); b.onclick=()=>{
+      unset();
+      ps.forEach(p=>{if(pr.values[p.name]!==undefined){const k=gridIndex(p, pr.values[p.name]); if(k>=0){ix[p.name]=k; ctl[side+p.name](); labs[side+p.name].classList.add('set');}}});
+      if(side==='a'&&lk&&lk.checked) follow();
+      b.classList.add('on'); ex.hidden=false; ex.innerHTML=`<b>${T.expect}</b>（${esc(pr.label)}：${esc(vals)}）: ${esc(pr.expect)}`; render();};
+      host.appendChild(b);});}
+  presets(f.presets, A, ia, box.querySelector('[data-presets]'), 'a', T.presets);
+  presets(f.prior_presets, Pp, ip, box.querySelector('[data-ppresets]'), 'p', T.ppresets);
+  if(lk&&(role||f.run_role||{}).role==='demo'){lk.checked=true; follow();}   // a synthetic experiment compares the two methods at the same setting
+  render();
+  window.__runs[f.id]={box:box, press:label=>{const bs=[...box.querySelectorAll('.presets button')]; const b=bs.find(x=>x.textContent.startsWith(label)); if(b){b.click(); return true;} return false;}};}
+// ---- run card: where in the method, calls (whose code), control → argument → line → output → drawn, code re-shown
+const flowLines = (f, side) => [...new Set(((f.run_card||{}).flow||[]).filter(x=>(x.side||'author')===side).map(x=>x.line))].sort((a,b)=>a-b);
+function codeLines(c, lines, values, cmp, side){ if(!c||!c.text||!lines.length) return '';
+  let out='', prev=null; lines.forEach(n=>{ if(prev!==null && n>prev+1) out+=`<span class="ln muted">      ⋮</span>`; out+=codeBlock(c, values, cmp, side, [n,n]); prev=n;}); return out;}
+function runCardHTML(f){ const rc=f.run_card||{}; if(!rc.calls) return '';
+  const by = b => `<span class="by ${esc(b)}">${b==='author'?T.byauthor:b==='earlier'?T.byearlier:T.byai}</span>`;
+  const ac=f.codes.author_code||{}, pc=f.codes.prior_code||{};
+  const cmLinks=D.code_map?`<div class="small"><b>${T.codeblocks}</b>: ${(rc.steps||[]).map(id=>{const st=steps.find(s=>s.id===id); return `<a href="#cm-step-${esc(id)}" style="color:${stepColor(id)};font-weight:600">${st?esc(st.name):esc(id)}</a>`;}).join(' · ')}</div>`:'';
+  return `<div class="runcard"><div><b>${T.where}</b>：${T.runsteps}${mapHTML(rc.steps||[],true)}${cmLinks}<span class="small muted">${T.notrun}: ${esc(rc.not_run)}</span></div>
+   <div><b>${T.calls}</b><ol class="calls">${(rc.calls||[]).map(c=>`<li>${by(c.by)} <code>${esc(c.code)}</code> <span class="small muted">${esc(c.where)}${c.times?' · '+esc(c.times):''}</span></li>`).join('')}</ol></div>
+   ${(rc.flow||[]).length?`<div><b>${T.flow}</b><table class="small"><tr><th>${T.knob}</th><th>${T.arg}</th><th>${T.line}</th><th>${T.output}</th><th>${T.drawn}</th></tr>${(rc.flow||[]).map(x=>`<tr><td>${esc(x.control)}${(x.side||'author')==='prior'?` <span class="muted">(${esc(pc.impl||'')})</span>`:''}</td><td><code>${esc(x.argument)}</code></td><td>L${esc(x.line)}</td><td>${esc(x.output)}</td><td>${esc(x.drawn)}</td></tr>`).join('')}</table></div>`:`<div class="small muted">${T.noknob}</div>`}
+   ${flowLines(f,'author').length||flowLines(f,'prior').length?`<div><b>${T.reshown}</b><div class="grid2">${flowLines(f,'prior').length&&pc.text?`<div>${codeMeta(pc)}<pre class="code" data-rc="prior"></pre></div>`:''}${flowLines(f,'author').length?`<div>${codeMeta(ac)}<pre class="code" data-rc="author"></pre></div>`:''}</div></div>`:''}
+   ${(f.called||[]).length?`<details class="supp"><summary>${T.calledsum}</summary><div class="grid2">${['prior','author'].map(side=>{const items=(f.called||[]).map((c,i)=>[c,i]).filter(([c])=>(c.impl==='author')===(side==='author')); return items.length?`<div>${items.map(([c,i])=>`<div class="small"><b>${esc(c.name)}</b></div>${codeMeta(c)}<pre class="code" data-called="${side}:${i}"></pre>`).join('')}</div>`:'';}).join('')}</div></details>`:''}
+   ${rc.drawn?`<div class="small"><b>${T.drawn}</b>: ${esc(rc.drawn)}</div>`:''}</div>`;}
+function symbolTable(f){const rows=[]; [['author_code',T.sideauthor],['prior_code',T.sideprior]].forEach(([slot,who])=>{const c=f.codes[slot]||{};
+    (c.params||[]).forEach(p=>rows.push(`<tr><td>${esc(p.label||p.name)}</td><td><code>${esc(p.name)}</code> <span class="muted small">${esc(c.file)}:${p.line}</span></td><td>${p.derives?esc(p.derives.name):'—'}</td><td>${esc(who)}</td></tr>`));});
+  return rows.length?`<table class="small"><tr><th>${T.knob}</th><th>${T.arg}</th><th>${T.symbol}</th><th>${T.method}</th></tr>${rows.join('')}</table>`:'';}
+
+// ---- the whole code of the entry function, coloured by step
+const STEPCOL=['#1f77b4','#2ca02c','#ff7f0e','#9467bd','#d62728','#8c564b','#17becf'];
+const stepColor = id => { const i=steps.findIndex(s=>s.id===id); return i<0?'#adb5bd':STEPCOL[i%STEPCOL.length]; };
+function codeMapHTML(){ const cm=D.code_map; if(!cm) return '';
+  const e=cm.entry, L=e.text.split('\n'); const blocks=cm.blocks||[];
+  let html='';
+  blocks.forEach(b=>{ const col=stepColor(b.step), st=steps.find(s=>s.id===b.step);
+    let inner=''; for(let k=b.first;k<=b.last;k++) inner+=`<span class="ln"><span class="no">${k}</span>${esc(L[k-e.first])}</span>`;
+    html+=`<div class="cmblock" id="cm-${b.first}" style="border-left:6px solid ${col};background:${col}14"><span id="cm-step-${b.step}"></span><div class="cmlab" style="color:${col}">${st?esc(st.name):'（整える部分）'}　<span class="muted">L${b.first}–${b.last}</span>　${esc(b.text)}</div><details ${b.step?'open':''}><summary class="small">コードを開く／閉じる</summary><pre class="code">${inner}</pre></details></div>`; });
+  const ex=(cm.extra||[]).map(x=>{const col=stepColor(x.step), st=steps.find(s=>s.id===x.step);
+    return `<div class="cmblock" id="cm-extra-${x.first}" style="border-left:6px solid ${col};background:${col}14"><span id="cm-step-${x.step}"></span><div class="cmlab" style="color:${col}">${st?esc(st.name):''}　${esc(x.name)}　<span class="muted">${esc(x.file)} L${x.first}–${x.last}</span>　${esc(x.note||'')}</div><details open><summary class="small">コードを開く／閉じる</summary><pre class="code">${x.text.split('\n').map((t,i)=>`<span class="ln"><span class="no">${x.first+i}</span>${esc(t)}</span>`).join('')}</pre></details></div>`;}).join('');
+  return `<h3>${T.codemap}</h3><div class="small muted">${esc(e.name)}（${esc(e.file)} L${e.first}–${e.last}、${esc(e.impl_name||'')} @ ${esc(e.commit||'')}、${esc(e.license||'')}）。${T.codemapnote}</div>${html}${ex}`; }
+
+// ---- lineage: families of earlier methods, one card per earlier work, later developments (folded)
+function lineageHTML(){ const L=D.lineage; if(!L) return '';
+  const fam=(L.families||[]).length?`<h4>${T.families}</h4><table class="small"><tr><th>${T.fam}</th><th>${T.good}</th><th>${T.weak}</th><th>${T.fwhere}</th></tr>${L.families.map(f=>`<tr><td>${esc(f.family)}</td><td>${esc(f.good)}</td><td>${esc(f.weak)}</td><td>${esc(f.where||'')}</td></tr>`).join('')}</table>`:'';
+  const card=e=>`<div class="lincard${e.reference?' ref':''}"><b>${esc(e.name)}</b>${e.year?` <span class="muted">(${esc(e.year)})</span>`:''}${e.relation?` <span class="chip">${esc(e.relation)}</span>`:''}${e.reference?` <span class="muted small">${T.refrow}</span>`:''}
+    <dl><dt>${T.madefor}</dt><dd>${esc(e.made_for)}</dd>${e.weakness?`<dt>${T.weakness}</dt><dd>${esc(e.weakness)}</dd>`:''}<dt>${T.kept}</dt><dd>${esc(e.kept)}</dd><dt>${T.verified}</dt><dd>${esc(e.verified)}</dd></dl>
+    ${(e.note_links||[]).length?`<div class="small">${e.note_links.map(noteLink).join(' · ')}</div>`:''}</div>`;
+  const main=(L.entries||[]).filter(e=>!e.reference), ref=(L.entries||[]).filter(e=>e.reference);
+  const aft=(L.after||[]).length?`<details class="supp"><summary>${T.after}</summary>${L.intro_after?para(L.intro_after):''}${L.after.map(a=>`<div class="lincard ref"><b>${esc(a.name)}</b>${a.year?` <span class="muted">(${esc(a.year)})</span>`:''}<div>${esc(a.point)}</div><div class="prov">${esc(a.source)}</div></div>`).join('')}</details>`:'';
+  return `<h3>${T.lineage}</h3>${L.intro?para(L.intro):''}${fam}${main.map(card).join('')}${ref.length?`<details class="supp" open><summary>${T.refrow}</summary>${ref.map(card).join('')}</details>`:''}${aft}<p class="small muted">${T.linnote}</p>`;}
+function differenceHTML(g){ const ds=g.difference||[]; if(!ds.length) return '';
+  const by=b=>({paper:T.bypaper,note:T.bynote,speaker:T.byspeaker}[b]||b);
+  return `<div class="diffbox"><b>${T.difference}</b><ol>${ds.map(x=>`<li>${(x.steps||[]).map(id=>{const st=steps.find(s=>s.id===id); return `<a class="stepchip" style="background:${stepColor(id)}" href="#cm-step-${esc(id)}">${st?esc(st.name):esc(id)}</a>`;}).join('')} <code class="small">${esc(x.where)}</code><br>${esc(x.text)} <span class="prov">[${esc(by(x.by))}]</span></li>`).join('')}</ol></div>`;}
+
+// ---- primer: how to read the output and the figures that follow
+function primerHTML(pr){ if(!pr||typeof pr==='string') return '';
+  const fl=ids=>(ids||[]).map(id=>{const g=D.figures.find(x=>x.id===id); return g?`<a href="#${esc(g.id)}">${esc(g.label)}</a>`:esc(id);}).join(', ');
+  return `<h3>${T.primer}</h3><div class="picture">${para(pr.object)}</div>${termTable(pr.parts)}<p><b>${T.primerlearn}</b>: ${esc(pr.learn)}</p>
+  <table class="small"><tr><th>${T.mark}</th><th>${T.meaning}</th><th>${T.usedin}</th></tr>${(pr.encodings||[]).map(e=>`<tr><td>${esc(e.mark)}</td><td>${esc(e.meaning)}</td><td>${fl(e.figures)}</td></tr>`).join('')}</table>`;}
+
+// ---- header: introduction and the map
+const top=document.getElementById('top'); const bg=D.background||{};
+top.innerHTML=`<h1>${esc(D.title)}</h1><div class="muted small">${esc((D.paper||{}).citation||'')}</div>
+<h2>${T.intro}</h2>
+<div class="picture"><b>${T.picture}</b>${para(bg.picture)}${figHTML(bg.figure)}</div>
+<div class="panel"><b>${T.question}</b>: ${esc(bg.question)}</div>
+${bg.summary?`<h3>${T.summary}</h3>${para(bg.summary)}`:''}
+<h3>${T.context}</h3>${para(bg.context)}
+${lineageHTML()}
+<h3>${T.terms}</h3>${termTable(bg.terms)}
+${primerHTML(bg.primer)}
+${(D.claims||[]).length?`<h3>${T.claims}</h3><ul>${D.claims.map(c=>`<li>${esc(c.text)} <span class="prov">[paper: ${esc(c.source)}]</span></li>`).join('')}</ul>`:''}
+<h2>${T.hub}</h2>
+<table><tr><th>${T.fig}</th><th>${T.figpoint}</th><th>${T.codepoint}</th><th>${T.earlier}</th><th>${T.level}</th></tr>
+${D.figures.map(g=>{const pts=g.points||[]; const rep=g.reproduction||{};
+  return `<tr><td><a href="#${esc(g.id)}">${esc(g.label)}</a><br><span class="small">${esc(g.title)}</span></td>
+  <td>${g.pending?`<span class="muted">${T.pending}: ${esc(g.pending)}</span>`:pts.length?pts.map(p=>`<div><span class="muted small">${esc(p.panel)}</span> ${esc(p.figure_point)}</div>`).join(''):`<span class="muted">${T.na}</span>`}</td>
+  <td>${pts.map(p=>{const f=featById[p.step]; return `<div>${esc(p.code_point)}${f?` <a class="small" href="#${esc(f.id)}">→ ${esc(f.title)}</a>`:''}</div>`;}).join('')}</td>
+  <td>${[...new Set(pts.map(p=>{const f=featById[p.step]; return f&&f.codes.prior_code&&f.codes.prior_code.impl||'';}).filter(x=>x))].map(esc).join(', ')||'—'}</td>
+  <td>${lvChip(rep.level, ((featById[rep.step]||{}).dataset_info||{}).name)}</td></tr>`;}).join('')}</table>
+<h3>${T.steps}</h3>${mapHTML(null,false)}`;
+
+const main=document.getElementById('main');
+// ---- main line: figure units
+main.appendChild(el('h2',{class:'part'},esc(T.main)));
+D.figures.forEach(g=>{
+  if(g.pending){const sec=el('section',{id:g.id}); const rep=g.reproduction||{};
+    sec.innerHTML=`<h2>${esc(g.label)}　${esc(g.title)} ${lvChip(rep.level)}</h2><div class="panel"><b>${T.pending}</b>: ${esc(g.pending)}${g.readiness?`<br><b>${T.readiness}</b>: ${esc(g.readiness)}`:''}</div>${(g.note_links||[]).length||(g.deck_pages||[]).length?`<p>${linksHTML(g)}</p>`:''}`;
+    main.appendChild(sec); return;}
+  const sec=el('section',{id:g.id}); const rep=g.reproduction||{}; const pr=g.presenter||{}; const fr=featById[rep.step];
+  // the run with controls is the main run; a remake without controls folds below the synthetic run as a reference
+  const foldRemake=!!(g.demo&&fr);
+  sec.innerHTML=`<h2>${esc(g.label)}　${esc(g.title)} ${lvChip(rep.level)}</h2>
+  <div class="claim"><b>${T.claim}</b><blockquote>${esc(g.claim.text)}</blockquote><span class="prov">[paper: ${esc(g.claim.source)}]</span>${para(g.plain)}</div>
+  <h3>${T.reading}</h3><div class="grid2"><div>${figHTML(g.figure)}</div><div><ol>${(g.reads||[]).map((r,ri)=>`<li value="${esc(r.mark)}"><b>${T.see}</b>: ${esc(r.see)}<br>→ <b>${T.learn}</b>: ${esc(r.learn)}${r.source?` <span class="prov">[${esc(r.source)}]</span>`:''}${r.check?(r.check.paper_only?`<div class="chk small muted">${T.paperonly}: ${esc(r.check.reason)}</div>`:`<div class="chk small"><button data-chk="${ri}">${T.checkbtn}：${esc(r.check.preset)}</button> ${esc(r.check.look)}<br><b>${T.checked}</b>: ${esc(r.check.result)}</div>`):''}</li>`).join('')}</ol>
+    <p><b>${T.trouble}</b>: ${esc(g.trouble)}</p><p><b>${T.handoff}</b>: ${esc(g.handoff)}</p></div></div>
+  <h3>${T.points}</h3><div data-points></div>
+  ${differenceHTML(g)}
+  ${foldRemake&&g.demo?`<h3>${T.runsyn}</h3><div data-demo></div>`:''}
+  ${rep.level==='L4'?`<h3>${T.run}</h3><div class="panel"><b>${T.l4}</b>: ${esc(rep.reason)} <a href="#sources">→ ${T.seereq}</a></div>`:
+   `${foldRemake?`<details class="supp"><summary>${T.remakeref}</summary>`:`<h3>${T.run}</h3>`}<div data-run></div><div class="panel small"><b>${T.corr}</b>: ${esc(rep.corresponds)}<br><b>${T.notr}</b>: ${esc(rep.not_transfer)}<br><b>${T.code}</b>: ${fr?esc(fr.codes.author_code.repo)+' @ '+esc(fr.codes.author_code.commit):''}</div>${fr?`<details class="supp"><summary>${T.symtab}</summary>${symbolTable(fr)}</details>`:''}${foldRemake?'</details>':''}`}
+  ${!foldRemake&&g.demo?`<h3>${T.checkdemo}</h3><div data-demo></div>`:''}
+  <h3>${T.presenter}</h3><ul><li><b>${T.say}</b>: ${esc(pr.say)}</li><li><b>${T.pointat}</b>: ${esc(pr.point)}</li><li><b>${T.notshown}</b>: ${esc(pr.not_shown)}</li></ul>
+  ${(pr.questions||[]).length?`<details class="supp"><summary>${T.qs}</summary><dl>${pr.questions.map(q=>`<dt><b>Q.</b> ${esc(q.q)}</dt><dd>${esc(q.a)}</dd>`).join('')}</dl></details>`:''}
+  ${(g.supplementary||[]).length?`<h3>${T.suppfig}</h3>${g.supplementary.map(s=>`<div class="panel small"><b>${esc(s.label)}</b> (${esc(s.cited_at)}): ${esc(s.why)}${figHTML(s.figure)}</div>`).join('')}`:''}
+  <h3>${T.links}</h3><p>${linksHTML(g)}</p>`;
+  main.appendChild(sec);
+  const pdiv=sec.querySelector('[data-points]'); const views=[];
+  (g.points||[]).forEach(p=>{const f=featById[p.step]; const d=el('div',{class:'point'});
+    d.innerHTML=`<div class="head"><span class="pn">${esc(p.panel)}</span><b>${T.figpoint}</b>: ${esc(p.figure_point)}<br>⇄ <b>${T.codepoint}</b>: ${esc(p.code_point)}${f?` <a class="small" href="#${esc(f.id)}">→ ${T.tostep}</a>`:` <span class="muted small">${esc(String(p.step||'').slice(4))}</span>`}</div>`;
+    if(f&&p.focus){const fc=p.focus, ac=f.codes.author_code, pc=f.codes.prior_code||{};
+      d.insertAdjacentHTML('beforeend',`${legend()}<div class="grid2">${fc.prior&&pc.text?`<div>${codeMeta(pc)}<pre class="code" data-v="p"></pre></div>`:''}${fc.author?`<div>${codeMeta(ac)}<pre class="code" data-v="a"></pre></div>`:''}</div>`);
+      const pv=d.querySelector('[data-v=p]'), av=d.querySelector('[data-v=a]'); const vs=[];
+      if(pv) vs.push({el:pv, code:pc, side:'prior', range:fc.prior}); if(av) vs.push({el:av, code:ac, side:'author', range:fc.author});
+      // code of the step that is run below follows the controls; other steps' code is shown at default values
+      if(f===fr) views.push(...vs); else vs.forEach(v=>{v.el.innerHTML=codeBlock(v.code,null,f.comparison,v.side,v.range);});}
+    pdiv.appendChild(d);});
+  const rbox=sec.querySelector('[data-run]'); if(rbox&&fr) buildRun(rbox, fr, views, rep);
+  if(g.demo){const df=featById[g.demo.step], dbox=sec.querySelector('[data-demo]'); if(df&&dbox) buildRun(dbox, df, [], df.run_role);}
+  sec.querySelectorAll('button[data-chk]').forEach(btn=>btn.onclick=()=>{const ck=(g.reads||[])[+btn.getAttribute('data-chk')].check; const rr=window.__runs[ck.step]; if(rr){rr.press(ck.preset); rr.box.scrollIntoView({behavior:'smooth',block:'start'});}});
+  (rep.extra_steps||[]).forEach(x=>{const xf=featById[x.step]; if(!xf||!rbox) return; const box=el('div',{class:'extrarun'}); rbox.after(box); buildRun(box, xf, [], x);});
+});
+
+// ---- supplement: step units
+main.appendChild(el('h2',{class:'part'},esc(T.supp)));
+if(D.code_map){const cm=el('section',{id:'codemap'}); cm.innerHTML=codeMapHTML(); main.appendChild(cm);}
+const allParams=[];
+D.features.filter(f=>f.kind!=='run').forEach(f=>{
+  const sec=el('section',{id:f.id}); const ac=f.codes.author_code||{}, pc=f.codes.prior_code||{};
+  const st=steps.find(s=>s.id===f.step)||{}; const fm=f.formula, ex=f.example; const used=figsUsing(f.id);
+  sec.innerHTML=`<h2>${esc(f.title)}</h2>
+  <div class="panel small"><b>${T.where}</b>${mapHTML(f.step,true)}${T.recv}: ${esc(st.input)} → ${T.hand}: ${esc(st.output)}${used.length?`<br>${T.usedby}: ${used.map(g=>`<a href="#${esc(g.id)}">${esc(g.label)}</a>`).join(', ')}`:''}</div>
+  <h3>${T.fbg}</h3>${para(f.background)}
+  <div class="panel"><b>${T.fq}</b>: ${esc(f.question)}</div>
+  <h3>${T.idea}</h3>${para(f.idea)}
+  <h3>${T.fterms}</h3>${termTable(f.terms)}
+  <h3>${T.formula}</h3>${typeof fm==='string'?`<p class="muted">${T.na}: ${esc(fm.slice(4))}</p>`:`<div class="formula">${esc(fm.text)}</div><div class="prov">[${esc(fm.source)}]</div>${fm.note?para(fm.note):''}`}
+  <h3>${T.example}</h3><div class="example">${Array.isArray(ex)?`<ol>${ex.map(e=>`<li>${esc(e)}</li>`).join('')}</ol>`:para(ex)}${f.example_source?`<div class="prov">${T.prov}: ${esc(f.example_source)}</div>`:''}</div>
+  <h3>${T.fprior}</h3>${pc.na?`<p class="muted">${T.na}: ${esc(pc.na.slice(4))}</p>`:para(pc.failure)}
+  <h3>${T.fsell}</h3><p>${esc(f.selling_point.text)} <span class="prov">[paper: ${esc(f.selling_point.source)}]</span></p>
+  <div class="recap"><b>${T.recap}</b>${para(f.recap)}${(ac.roles||[]).length?`<ol>${ac.roles.map((r,i)=>`<li>${circ(i)} L${r.first}–${r.last}: ${esc(r.text)}</li>`).join('')}</ol>`:''}</div>
+  ${pc.text?`<h3>${T.cmp}</h3>${cmpTable(f)}`:''}
+  <h3>${T.symtab}</h3>${symbolTable(f)}
+  <h3>${pc.text?T.codes:T.sideauthor}</h3><div class="grid2">${pc.text?`<div>${codeMeta(pc)}<pre class="code" data-v="p"></pre></div>`:''}<div>${codeMeta(ac)}<pre class="code" data-v="a"></pre></div></div>
+  <h3>${T.run}</h3><div data-run></div>
+  ${figHTML(f.figure)}${(f.figure.marks||[]).length?`<ol class="small">${f.figure.marks.map(m=>`<li>${esc(m.text)}</li>`).join('')}</ol>`:''}
+  <h3>${T.rd}</h3><ul><li><b>${T.see}</b>: ${esc(f.reading.see)}</li><li><b>${T.learn}</b>: ${esc(f.reading.learn)}</li><li><b>${T.trouble}</b>: ${esc(f.reading.trouble)}</li></ul>
+  <h3>${T.links}</h3><p>${linksHTML(f)}</p>
+  <h3>${T.limits}</h3>${para(f.limits)}`;
+  main.appendChild(sec);
+  const views=[]; const pv=sec.querySelector('[data-v=p]'), av=sec.querySelector('[data-v=a]');
+  if(pv) views.push({el:pv, code:pc, side:'prior'}); if(av) views.push({el:av, code:ac, side:'author'});
+  buildRun(sec.querySelector('[data-run]'), f, views);
+  (ac.params||[]).forEach(p=>allParams.push([f,p,ac])); (pc.params||[]).forEach(p=>allParams.push([f,p,pc]));
+});
+
+// ---- sources, parameters, limits, glossary
+const gl=[...(bg.terms||[]).map(t=>[t,null]), ...D.features.flatMap(f=>(f.terms||[]).map(t=>[t,f]))];
+const used=did=>D.features.filter(f=>f.dataset===did).map(f=>`<a href="#${esc(f.id)}">${esc(f.title)}</a>`).join(', ');
+const isAdded=(p,k)=>(p.added||[]).some(v=>gridIndex(p,v)===k);
+const tail=el('section',{id:'sources'});
+tail.innerHTML=`<h2 class="part">${T.sources}</h2>
+<h3>${T.code}</h3><table><tr><th>${T.method}</th><th>${T.repo}</th><th>${T.commit}</th><th>${T.license}</th></tr>${Object.values(D.methods).map(m=>`<tr><td>${esc(m.name)}</td><td>${m.url?`<a href="${esc(m.url)}">${esc(m.repo)}</a>`:esc(m.repo)}</td><td><code>${esc(m.commit)}</code></td><td>${esc(m.license)}</td></tr>`).join('')}</table>
+<h3>${T.dataset}</h3><table><tr><th>${T.dsname}</th><th>${T.dssource}</th><th>${T.dsid}</th><th>${T.dsprep}</th><th>${T.level}</th><th>${T.usedfor}</th></tr>${(D.datasets||[]).map(d=>`<tr><td>${esc(d.name)}</td><td>${esc(d.source)}</td><td>${esc(d.identity)}</td><td>${esc(d.preprocessing||'')}</td><td>${lvChip(d.level)}</td><td>${used(d.id)}</td></tr>`).join('')}</table>
+<h3>${T.figs}</h3><ul>${D.figures.map(g=>`<li><a href="#${esc(g.id)}">${esc(g.label)}</a>: ${esc((g.figure||{}).paper_locator)}</li>`).join('')}</ul>
+${(D.unobtained||[]).length?`<h3>${T.unob}</h3><table><tr><th>${T.what}</th><th>${T.tried}</th><th>${T.instead}</th></tr>${D.unobtained.map(u=>`<tr><td>${esc(u.what)}</td><td>${esc(u.tried)}</td><td>${esc(u.instead)}</td></tr>`).join('')}</table>`:''}
+<h3>${T.requests}</h3>${(D.requests||[]).length?`<table><tr><th>${T.what}</th><th>${T.wherefrom}</th><th>${T.serves}</th><th>${T.enables}</th></tr>${D.requests.map(r=>`<tr><td>${esc(r.what)}</td><td>${esc(r.where)}</td><td>${esc(r.serves)}</td><td>${esc(r.enables)}</td></tr>`).join('')}</table>`:`<p class="muted">${T.none}</p>`}
+<h2>${T.params}</h2><table><tr><th>${T.name}</th><th>${T.method}</th><th>${T.def}</th><th>${T.stated}</th><th>${T.gridc}</th><th>${T.effect}</th><th>${T.line}</th></tr>${allParams.map(([f,p,c])=>`<tr><td><a href="#${esc(f.id)}">${esc(p.name)}</a></td><td>${esc(c.impl)}</td><td>${esc(p.default_str)}</td><td>${p.stated_in==='paper'?T.paperw:T.codeonly}</td><td>${p.grid_str.map((g,k)=>esc(g)+(isAdded(p,k)?'*':'')).join(', ')}</td><td>${esc(p.effect)}</td><td>${esc(c.file)}:${p.line}</td></tr>`).join('')}</table><p class="small muted">${T.added}</p>
+<h2>${T.pagenotshown}</h2><ul>${D.figures.filter(g=>!g.pending).map(g=>`<li><a href="#${esc(g.id)}">${esc(g.label)}</a>: ${esc((g.presenter||{}).not_shown)}</li>`).join('')}${D.features.map(f=>`<li><a href="#${esc(f.id)}">${esc(f.title)}</a>: ${esc(f.limits)}</li>`).join('')}</ul>
+<h2>${T.gloss}</h2><table><tr><th>${T.terms}</th><th></th><th>${T.defined}</th></tr>${gl.map(([t,f])=>`<tr><th>${esc(t.term)}</th><td>${esc(t.meaning)}</td><td>${f?`<a href="#${esc(f.id)}">${esc(f.title)}</a>`:`<a href="#top">${T.intro}</a>`}</td></tr>`).join('')}</table>`;
+main.appendChild(tail);
+document.getElementById('foot').innerHTML=`<p>${T.privacy}</p>`;
+})();
+</script>
+</body>
+</html>

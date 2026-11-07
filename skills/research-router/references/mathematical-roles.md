@@ -1,16 +1,13 @@
-# Mathematical delegation roles
+# Mathematical responsibilities across hosts
 
-Use the host's configured decomposition, proof and verification roles for the
-corresponding work. Apply [assignment and provenance](editing-capability.md)
-without asking each worker to assess its general mathematical competence.
-Record the role configuration or explicit assignment source and native
-model/effort selection. Luna remains evidence/coordination only in this fork.
-The assignment permits the work; its correctness still needs proof and checks.
-Use separate fresh verification before adopting newly established decisive
-mathematical claims as research results or decisive proof dependencies,
-following the owning skill's review rules and the adoption scope in the linked
-routing rule. When the necessary role is absent,
-return the established scope and remaining obligations to the parent.
+Decomposition, proof and verification describe work, not required preset names or
+model families. Apply [task assignment](editing-capability.md). When native delegation
+is available, use a matching callable adapter or a fresh general-purpose worker with
+the exact role instructions. Otherwise a producer may decompose and prove sequentially
+in its current authorized assignment. Missing adapter files, model controls or metadata
+do not stop source-based writing. Never present sequential self-check as independent
+verification. New decisive research-result adoption retains the separate fresh review
+requirement; if unavailable, hold that adoption and continue unaffected work.
 
 ## Packet shared by all roles
 
@@ -40,34 +37,22 @@ The role bodies and descriptions live in these skills:
 
 The owning artifact skill still controls sources, write scope, formal evidence
 and review requirements. Reuse the completed consultation for this assignment;
-missing provenance, consultation or critical packet fields return to the parent
-for resolution rather than triggering recursive advisors or a replacement role.
+an unavailable advisor uses the consultation fallback. Missing substantive packet
+fields (statement, hypotheses, sources or permissions) must be resolved; unknown
+runtime model metadata is not a missing mathematical premise.
 
 ## Host entry boundaries
 
-Codex setup registers project `.codex/agents` adapters with explicit native
-model/effort and a short instruction to read the matching role skill. Read that
-skill as instructions in the existing delegated thread. Claude-specific skill
-frontmatter does not select a Codex model or create a Codex child.
+The three SKILL.md files are portable instruction bodies, with no native fork,
+model or effort frontmatter. Loading one does not create a child or establish
+independence. Use it in the current assignment, or pass it to a fresh worker when
+a separate role is needed and available. Do not invoke another copy merely to
+activate instructions already loaded.
 
-In Claude Code, direct `/math-… <packet>` skill execution uses `context: fork`
-and the built-in `general-purpose` agent to start one fresh child with the
-skill body as its task. The skill's native `model`/`effort` fields apply there.
-Supply the bounded packet after the slash name. These bodies use no argument
-placeholder; Claude appends the invocation arguments to the skill prompt as
-documented in [argument passing](https://code.claude.com/docs/en/skills#pass-arguments-to-skills).
-Native `agents/math-….md` adapters instead preload the same body through
-`skills: [math-…]`, with their own explicit model/effort/tools. A preloaded
-skill's fork configuration does not request another invocation: execute the
-current assignment in the existing child. Do not reinvoke the same skill or
-spawn a replacement merely to activate its instructions. Include direct skill
-children in the parent's remaining depth and shared slot accounting as well.
-
-Keep automatic skill invocation enabled so native preload can load the role.
-If host policy disables or hides it, report the missing preload; an empty
-adapter is not the full role. The native verifier has a read-only tool list;
-the direct general-purpose skill path has a behavioral read-only requirement
-and must not be described as having the same technical restriction.
-
-Other harnesses use their own actual delegation and model controls. Detect
-host capabilities rather than treating every non-Codex harness as Claude Code.
+Host adapters may register the skills, tool limits and context controls supported
+by that host. Treat bundled adapters for another host as optional examples, not
+requirements. Shared adapters omit fixed model choices and use native selection
+behavior; installation-specific overrides stay in the consuming configuration.
+Use [agent-host-setup](../../agent-host-setup/SKILL.md) only for an actual setup task.
+Check loading, fresh context, permissions and live execution separately. A read-only
+instruction is not a technical tool restriction; neither is proof certification.

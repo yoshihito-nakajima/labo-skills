@@ -17,7 +17,7 @@ ROLES = {
 }
 
 
-def render_roles(workspace: Path, host: str, model: str, effort: str,
+def render_roles(workspace: Path, host: str, model: str | None = None, effort: str | None = None,
                  policy_root: Path | None = None) -> dict[Path, str]:
     workspace = workspace.resolve()
     policy_root = (policy_root or Path(__file__).resolve().parents[3]).resolve()
@@ -32,12 +32,10 @@ def render_roles(workspace: Path, host: str, model: str, effort: str,
         if (workspace / ".claude").resolve() != policy_root:
             raise ValueError("Claude needs the policy at .claude or a whole-directory .claude alias to it")
         relative = ".claude"
-    if not model.strip() or "\n" in model:
-        raise ValueError("supply one explicitly selected callable model")
-    if "luna" in model.lower():
-        raise ValueError("Luna is restricted to evidence/coordination in this fork")
+    if model is not None and (not model.strip() or "\n" in model or "\r" in model):
+        raise ValueError("runtime model override must be a nonempty single line")
     allowed = {"low", "medium", "high", "xhigh", "max", "ultra"}
-    if effort not in allowed or (host == "claude" and effort == "ultra"):
+    if effort is not None and (effort not in allowed or (host == "claude" and effort == "ultra")):
         raise ValueError("unsupported effort spelling; verify support for the selected model")
     files = {}
     for name, tools in ROLES.items():
@@ -56,15 +54,22 @@ def render_roles(workspace: Path, host: str, model: str, effort: str,
             prompt = (f"Read {relative}/skills/{name}/SKILL.md and execute the current bounded assignment "
                       "using that skill. You are already the delegated agent; load it as instructions "
                       "instead of invoking a fork or spawning a replacement merely to activate it.")
-            values = {"name": name, "description": description, "model": model,
-                      "model_reasoning_effort": effort, "developer_instructions": prompt}
+            values = {"name": name, "description": description, "developer_instructions": prompt}
+            if model is not None:
+                values["model"] = model
+            if effort is not None:
+                values["model_reasoning_effort"] = effort
             content = "".join(f"{key} = {json.dumps(value, ensure_ascii=False)}\n"
                               for key, value in values.items())
             tomllib.loads(content)
             files[workspace / ".codex/agents" / f"{name}.toml"] = content
         elif host == "claude":
-            front = {"name": name, "description": description, "model": model,
-                     "effort": effort, "tools": tools, "skills": [name]}
+            front = {"name": name, "description": description}
+            if model is not None:
+                front["model"] = model
+            if effort is not None:
+                front["effort"] = effort
+            front.update({"tools": tools, "skills": [name]})
             prompt = (f"Execute the current bounded assignment using the already-preloaded {name} "
                       "instructions. You are already the delegated agent; do not invoke the skill again.")
             content = "---\n" + yaml.safe_dump(front, sort_keys=False) + "---\n\n" + prompt + "\n"
@@ -97,8 +102,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("--host", choices=("codex", "claude"), required=True)
-    parser.add_argument("--model", required=True)
-    parser.add_argument("--effort", required=True)
+    parser.add_argument("--model", help="optional host-supported runtime override")
+    parser.add_argument("--effort", help="optional host-supported runtime override")
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args()
     try:

@@ -13,86 +13,16 @@ applies when explanatory or presentation-preparation materials are requested.
 
 ## Source-aligned reading structure
 
-Retain the target paper's section and subsection numbers, titles' meaning, order
-and hierarchy as the reading backbone. Keep translation, local explanation,
-application context and corresponding implementation within that source unit.
-Do not flatten original subsections into paragraphs or move their substance to
-a later generic supplement. Clearly label added commentary or subordinate boxes
-without changing or impersonating the source hierarchy. Keep source and
-added equation/figure numbers distinguishable. For a bounded request, retain the
-original numbers of the selected sections rather than renumbering them from one.
-
-At each named-method/concept unit entrance, identify its established name and
-abbreviation before the background, following
-[subject identity and role headings](../../mathematical-exposition/references/roles-and-headings.md#name-the-subject-before-its-roles).
-Retain an existing informative source title; add an identified subject line when
-its title alone does not name the object being explained.
-
-Under the source hierarchy, preserve the added role sections of the method
-contract or agreed outline. For computational methods, use the fixed skeleton in
-[Applications to code](application-to-code.md), once per method rather than per
-excerpt. Each role heading shows [role | concrete point](../../mathematical-exposition/references/roles-and-headings.md),
-and its opening carries forward the preceding argument under
-[adjacent-passage continuity](../../mathematical-exposition/SKILL.md#carry-the-argument-across-adjacent-passages).
-Consolidate unnecessary divisions within a role while keeping the role boundaries.
-In PDFs expose both parts of these headings in the source-aligned bookmark tree
-under [R14](explanation.md). Distinguish bookmarks from the visible contents and
-ordinary hyperlinks; inspect actual titles and landing content.
-
-The main route completes each source unit before advancing to the next. Optional
-collections follow [document sequence and view scope](#keep-section-progression-and-purpose-specific-views-distinct).
-They provide a different use of selected material, not a duplicate of the whole
-document. Keep the source section as the local owner of its explanation; a later
-collection or link cannot replace content required in that main unit.
-
-Account for the in-scope original text and provide a faithful translation into
-the requested language (Japanese for Japanese reading materials). Present the
-original passage and its translation in a clearly corresponding form, with exact
-source locations; do not silently omit difficult passages or replace translation
-with a summary. Preserve qualifications, assumptions, notation and uncertainty.
-Label an ambiguity or suspected error rather than silently correcting the author.
-Separate original text, translation and added interpretation. A source attachment
-or a link alone does not replace the requested original-text/translation coverage.
-
-In the preparatory explanation, explain what each passage is saying, its role
-in the argument and how it connects to adjacent passages. Explain mathematical
-objects, hypotheses and decisive steps where used. For each figure/table,
-provide its caption translation and explain the quantities, conditions, visible
-patterns, supported inference and limits. Show the relevant visual at a readable
-scale; merely paraphrasing its caption is insufficient.
+Before drafting or revising, follow [Reading structure](reading-structure.md):
+freeze the selected source-unit and role-section map, keep source hierarchy, and
+retain the local return to the named target work. That reference owns structure;
+this file owns passage coverage, source/translation fidelity and reading evidence.
 
 ## Prepare the reader, then return to the source
 
-For explanatory reading material, unless a different order is requested, complete
-this sequence inside each owning source section/subsection:
-**background and connected explanation → implementation/comparison and relevant
-status records → explanation-to-source correspondence → original and faithful
-translation**. Retaining the source hierarchy does not require exposing the
-unprepared reader to its original passage first. Keep source sections in their
-original order and keep each section's original text and translation internally
-intact; do not collect several subsections' originals at the end of a chapter or
-move them to a generic appendix. Translation-only or explicitly interleaved
-formats retain their requested order.
-
-Build the eventual reading task throughout the explanation: introduce the objects,
-question and difficulty before operations, and identify the decisive steps the
-reader will recognize in the source. Do not rely on an unread original to make an
-opening or transition intelligible. Immediately before the original, give a short
-correspondence from the explanation's objects, equations, code or findings to the
-source's exact paragraphs, equation/algorithm steps or figures. Include consequential
-notation changes, omissions or limitations, and distinguish added examples and
-implementations from what the target source itself says. An outline recap or
-"now read the paper" does not provide this correspondence. Then let the reader
-read the complete in-scope source unit, followed by its faithful translation.
-The bridge must not replace either text or silently repair the source. In the
-main route, the translation closes this account and the next source unit follows.
-
-Use explicit subordinate role headings for the correspondence and original/translation
-stages, consistent with the agreed outline, and test their built destinations.
-Apply this return to the main target source within its owning unit. Supporting
-literature has its own local excerpt/translation pairs under
-[supporting-source reading](#make-supporting-literature-readable); do not defer
-those pairs to the target paper's source-return block.
+Use the [preparation-to-source sequence](reading-structure.md#prepare-the-reader-then-return-to-the-source)
+and its explicit correspondence and target-original/translation sections. Supporting
+literature pairs below have a different role and cannot replace that return.
 
 ## Identify and group original/translation units
 
@@ -118,6 +48,13 @@ citation's scope and every source switch; grouping links does not permit losing
 point-of-use evidence or replacing missing displayed content with a link.
 
 ## Make supporting literature readable
+
+For a paper whose contribution is a method with code, the [method-paper profile](method-paper-profile.md) lists the parts of the note and their owners.
+
+Which works this covers is decided by the [lineage and comparison inventory](lineage-and-comparison.md):
+every inherited, compared, criticised, encompassing, encompassed, earlier-version and
+origin relationship is inventoried and treated at the level given there. Supplements are
+inventoried and read under the [resource ledger](resource-ledger.md).
 
 In substantial explanatory reading material, include the inspected passages from
 other works that supply the definitions, assumptions, method design, application
@@ -153,77 +90,10 @@ faithful translation, or claiming the requested paired coverage is complete.
 
 ## Keep section progression and purpose-specific views distinct
 
-In the main reading route, finish a source section/subsection with its original
-and faithful translation, then advance to the next in-scope source unit. Do not
-restart the same unit's background, implementation or complete account between
-that translation and the next section. Short return/navigation links are useful;
-a second full explanation at that boundary interrupts the source progression.
-
-Do not add or retain a complete duplicate merely to supply a second reading
-route. Remove an unchanged reprint from the rendered structure when revising
-under this contract; preserve its underlying material. Honor an explicit request
-for a duplicate as an exception, with its scope labelled. Otherwise, add an
-optional collection only when it serves a distinct reader task. For example:
-
-- A background/explanation view omits the target paper's original/translation
-  blocks and lets the reader follow the explanatory argument continuously. Select
-  code according to that view's scope. Retain definitions, hypotheses, necessary
-  equations, visuals/captions, supporting-literature pairs and limitations for
-  the claims still made. Repair transitions and references left by extraction.
-- A code collection groups implementations for lookup or execution. Keep method
-  and implementation identities, input/output contracts, required helpers/data,
-  dependencies, entry commands, provenance/reuse terms and actual execution
-  status. Include enough operation explanation and mathematics correspondence to
-  use the code accurately; link to the fuller application and argument. It need
-  not repeat all background, primary passages or translations from the main text.
-
-These are examples, not two required additional parts. A clearly labelled index
-may serve lookup; it is not an independently readable explanation or executable
-code collection. A genuinely new appendix states its contribution. State each
-view's purpose, included scope and prerequisites at its entrance, and supply
-navigation to corresponding main units. Put same-PDF collections after the main
-sequence, or produce separate files when requested. Keep the main source order
-intact; optional collections may use a task-appropriate order with source mappings.
-
-Derive views from shared maintained content where practical; do not maintain
-independent prose/code copies that can drift. Test the selected content and its
-dependencies, not equality to the whole main text. Retained claims, source
-locators, implementations, status and qualifications must agree across views.
-Completeness is relative to each declared task, not identical coverage everywhere.
-
-Require substantive citations throughout each reading route. At the passage
-that uses a source, identify which claim, equation, figure, code operation or
-comparison it supports, with an inspected page/section/equation/figure locator;
-for code use the fixed version and file/function/lines as appropriate. Place
-citations where their scope is clear while reading, repeating them when a new
-passage or route would otherwise lose that connection. Do not invent unverified
-locators. A link to a final list, a single source note at a section's end, or a
-post-code provenance row does not by itself cite intervening mathematical or
-comparative claims. Cite the relevant literature in those passages too. Preserve
-the distinction between source claims and the notes' own derivations.
-
-Place the common bibliography at the document's end, after any optional
-collections. Each view retains attribution for the content it uses; separately
-delivered files need usable references and links in their own delivery context.
-References, code files and raw assets may be shared. The final list does not
-replace attribution beside claims and code. Preserve source citation identities
-while including the additional literature and implementation sources actually used.
-
-For example, an optional explanation view can follow two main units:
-
-```text
-Main reading route
-  Source unit A: subject name → preparation → source correspondence → original/translation
-  Source unit B: subject name → preparation → source correspondence → original/translation
-Background/explanation collection (only if useful or requested)
-  A then B: connected explanations with their required supporting evidence
-  Target-paper original/translation blocks omitted; references repaired
-References (one common final list)
-```
-
-For computational units, preparation retains the agreed background, obstacle,
-method/implementation, fit/limits, comparison and status roles. This document
-sequence does not impose code or an empirical application on proof-only units.
+Follow [document sequence and optional views](reading-structure.md#keep-section-progression-and-purpose-specific-views-distinct).
+That reference owns view scope, main-route progression and bibliography placement.
+A request to improve a code or quotation block does not change the reading product
+into an explanation-only view or authorize dropping its target-source return.
 
 ## Method understanding with literature evidence
 
@@ -231,6 +101,12 @@ For every in-scope method, make the question, required properties, decisive
 design, fit/limits and consequential relationships recoverable. This also
 applies to noncomputational methods; their reasoning need not be numerical or
 empirical.
+
+While reading the method literature, collect each method's lens (what it attends to and
+what it is good and bad at), its root's shared example, its specific example and its
+limit example, with their sources, under [roots and lenses](roots-and-lenses.md#collect-them-while-investigating-the-sources);
+then list the questions the paper leaves open and search for them as in
+[let the card decide what to search](roots-and-lenses.md#let-the-card-decide-what-to-search).
 
 For computational methods, follow [Applications to code](application-to-code.md).
 Within each section/subsection, connect the actual application problem, need and
@@ -381,6 +257,10 @@ Before declaring the agreed unit complete, check the actual delivered artifact:
 - Read each view against its declared task, then compare shared claims, exact
   locators, status labels, limits and return links. Check for orphaned references
   and assumptions after filtering; do not demand full-main-text duplication.
+
+- Coverage records (resource ledger, lineage inventory, unit chain, claim gloss) are kept as
+  data and `scripts/check_coverage.py` passes, with every open entry either resolved or
+  accepted in writing by the user. A stand-in exists only with the user's per-resource permission, is labelled AI-created, and does not close an entry.
 
 Missing required translation, explanation, primary evidence, code or navigation
 remains incomplete work even when disclosed. Deliver useful checked units and

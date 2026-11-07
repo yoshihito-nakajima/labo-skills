@@ -1,0 +1,32 @@
+{
+ "S1": {
+  "l1": "A <span class=\"m\">q</span>-contraction on a complete metric space has a unique fixed point <span class=\"m\">x^*</span> (Banach).",
+  "l2": "",
+  "l3": ""
+ },
+ "S2": {
+  "l1": "<span class=\"m\">|x_{n+1}-x^*|\\le(1-h_n(1-q))|x_n-x^*|</span>.",
+  "l2": "<p>Write <span class=\"m\">x_{n+1}-x^*=(1-h_n)(x_n-x^*)+h_n(f(x_n)-f(x^*))</span> and use the contraction bound on the second term.</p>",
+  "l3": "<p>Since <span class=\"m\">h_n\\in[0,1]</span>, the triangle inequality gives <span class=\"m\">(1-h_n)|x_n-x^*|+h_nq|x_n-x^*|</span>.</p>"
+ },
+ "S3": {
+  "l1": "<span class=\"m\">\\prod(1-a_n)\\le\\exp(-\\sum a_n)</span> for <span class=\"m\">a_n\\in[0,1]</span>.",
+  "l2": "",
+  "l3": ""
+ },
+ "S4": {
+  "l1": "<b>Key lemma.</b> If each block of <span class=\"m\">m</span> steps has <span class=\"m\">h</span>-sum at least <span class=\"m\">\\delta</span>, the product over a block is at most <span class=\"m\">e^{-(1-q)\\delta}</span>.",
+  "l2": "<p>Apply S3 inside each block with <span class=\"m\">a_n=h_n(1-q)</span>. The blocks multiply, so the product over <span class=\"m\">k</span> blocks is at most <span class=\"m\">e^{-k(1-q)\\delta}</span>.</p><p>Individual steps may vanish; only the block sums matter.</p>",
+  "l3": "<div class=\"d\">\\prod_{n\\in B}(1-h_n(1-q))\\le\\exp\\Bigl(-(1-q)\\sum_{n\\in B}h_n\\Bigr)\\le e^{-(1-q)\\delta}</div><p>Steps before the first full block contribute a factor at most 1.</p>"
+ },
+ "S5": {
+  "l1": "By S2 the error is bounded by the product of factors; S4 sends that product to 0.",
+  "l2": "<p>Iterate S2 from index 0; group the factors into blocks and apply S4.</p>",
+  "l3": ""
+ },
+ "S6": {
+  "l1": "With <span class=\"m\">h_n=1/n</span> the sum diverges like <span class=\"m\">\\log n</span>, so S3 gives a polynomial rate.",
+  "l2": "",
+  "l3": ""
+ }
+}

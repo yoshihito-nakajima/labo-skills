@@ -25,7 +25,8 @@ publishing the user's requirements. This does not prove role execution.
 
 For the standalone schema supported by Codex 0.164.0, project roles live in
 `.codex/agents/*.toml`, each with `name`, `description`, and
-`developer_instructions`. Set `model` and `model_reasoning_effort` together.
+`developer_instructions`. When explicit runtime overrides are needed, set only fields supported by the host.
+Omit them to use host defaults; do not put concrete selections in portable handoffs.
 Role fields take precedence over resolved spawn/default settings; verify the
 effective selection. Preserve the root's model and permissions. Older releases
 may use a different role/config schema; use their supported schema rather than

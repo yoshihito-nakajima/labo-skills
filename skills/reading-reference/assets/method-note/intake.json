@@ -1,0 +1,11 @@
+{"paper": "Doe (2001), fictional",
+ "entries": [
+  {"id": "supp1", "work": "Doe 2001, supplementary text", "kind": "supplement", "relation": "supplement", "need": "must", "depth": 0, "led_by": "paper",
+   "why": "the parameter values the main text cites", "unlocks": "the values table", "access": "open", "status": "obtained",
+   "tried": [{"place": "journal supplementary link", "outcome": "ok"}], "stored_at": "reference/doe-2001-supp/", "identity": {"sha256": "0000", "retrieved": "2026-11-05"}},
+  {"id": "roe99", "work": "Roe 1999 (earlier method)", "kind": "reference", "relation": "baseline", "need": "must", "depth": 1, "led_by": "paper",
+   "why": "the earlier method's code and its stated weakness", "unlocks": "the lineage card and the code comparison", "access": "publisher-login", "status": "needs-user",
+   "tried": [{"place": "publisher page", "outcome": "redirects to login (not followed)"}], "where_likely": "author's repository or an open preprint"},
+  {"id": "lee05", "work": "Lee 2005", "kind": "reference", "relation": "criticised", "need": "useful", "depth": 2, "led_by": "roe99",
+   "why": "the source of a cited weakness", "access": "paywalled", "status": "alternate-proposed", "tried": [{"place": "publisher", "outcome": "paywalled"}],
+   "alternate": {"what": "Lee 2006 open review", "why": "states the same weakness", "free": true, "confirmed_by_user": false}}]}

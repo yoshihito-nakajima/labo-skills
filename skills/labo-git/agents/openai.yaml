@@ -1,0 +1,4 @@
+interface:
+  display_name: "Labo Git boundaries"
+  short_description: "Keep research local and prepare reviewed skill contributions"
+  default_prompt: "Use $labo-git to configure local research Git and a reviewed skills-only PR workflow."

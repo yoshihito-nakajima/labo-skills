@@ -18,12 +18,23 @@ context. Apply this skill's normal verification rules.
 Use for requests such as 「研究室を初期化して」「inboxのこれで研究したい」
 or 「この資料・原稿はどこに置く？」. Read the [directory contract](references/layout.md).
 For creation commands and their effects, read [workspace creation](references/creation.md).
+For reference placement and Git operations, also follow
+[source and corpus privacy](references/reference-privacy.md). Both `reference/`
+and `writing/.corpus/`, including corpus registration metadata, stay outside
+the parent Git; any local history has no remotes and all pushes are prohibited.
+GitHub operations follow [labo-git's publication boundary](../labo-git/SKILL.md#publication-boundary):
+only the independent policy Git is eligible for push/PR by default; everything
+else remains local. Trackability for local history never grants upload permission.
 
 Resolve the workspace from the loaded policy submodule's Git superproject,
 or use the user's explicit destination. Resolve `scripts/labo.py` from this
 skill's real directory (`../../scripts/labo.py`), not from the shell's cwd.
 Inspect the relevant existing paths before writing; the directory need not
 be named `labo`. A placement question alone needs an answer, not scaffolding.
+For a layout-display request, show the [complete workspace skeleton](references/layout.md)
+including workspace-internal `local/` and its separate materials Git boundary. Inspect existing paths and distinguish the actual
+layout from illustrative or absent branches. Display-only work does not create
+directories, move files, or change Git settings.
 
 ## Initialize
 
@@ -83,10 +94,13 @@ For an inbox-based research request:
 
 Use `layout new paper` or `layout new reference` when a new item is needed.
 Creating a paper also initializes the shared writing corpus and rules guides
-when they are missing. Create reading notes under `reading/`, formalizations
+when they are missing and appends `/writing/.corpus/` to the parent ignore
+rules even without a prior `layout init`. Reference creation likewise ensures
+`/reference/` is ignored. Create reading notes under `reading/`, formalizations
 under `lean/`, and optional website/profile material only when those tasks
 arise. The directory contract explains their relationships; output slugs need
 not match programs.
+For book-derived courses, use the workspace-internal local-only materials layout owned by [reading-book](../reading-book/SKILL.md); ordinary reading notes still use `reading/`. When creating or relocating such a course, follow its [local navigation rule](../reading-book/references/layout.md#workspace-からの案内) so the workspace has an entry to the local materials and output.
 Layout creation supplies paths and templates, not mathematical validation or
 permission to publish. Read the owning skill when doing the substantive work.
 

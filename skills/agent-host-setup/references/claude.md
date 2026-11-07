@@ -24,8 +24,7 @@ role formats; reconcile their examples with the installed CLI and current
 official docs. Older fixed model lists are not current availability evidence.
 
 Project roles live in `.claude/agents/*.md` with YAML frontmatter. `model` and
-`effort` select native behavior where supported. Current aliases such as `opus`
-resolve dynamically: check real host events or API model usage rather than
+`effort` select native behavior where supported. Native aliases resolve dynamically: check real host events or API model usage rather than
 claiming an exact resolved ID from the alias. A supported option or model alias
 does not by itself prove account access. Preserve primary `model`/`effortLevel`.
 
@@ -36,23 +35,19 @@ needed. Check a fresh host roster before claiming successful discovery.
 Codex-only use at `.agents` leaves `.claude` absent.
 
 The mathematical role bodies/descriptions live once in `skills/math-…/SKILL.md`.
-Direct `/math-… <packet>` execution uses Claude's `context: fork`, built-in
-`general-purpose`, and native skill model/effort fields. Claude appends arguments
-when the body has no argument placeholder. Native adapters instead set
-`skills: [math-…]` to inject the body at startup; they supply model/effort/tools
-and a short instruction to execute the current task, without invoking the skill
-again. `disable-model-invocation: true` prevents preload and is not suitable
-for these shared role skills. Missing or disabled preloads produce a warning
-and are skipped, so check the role body actually loaded.
+Their frontmatter is portable and contains no model, effort or fork request. Native
+adapters use `skills: [math-…]` to preload them in the already-created child. Bundled
+adapters omit model/effort; the host resolves those choices. Optional explicit runtime
+choices belong in a consuming installation, not the shared skills or task handoffs.
+Direct skill loading uses the current context, so it is not independent review.
+Check native dispatch and context boundaries when a separate reviewer is needed.
 
 If using `claude plugin validate`, check that its report actually covers the
 components. The tested CLI rejected an enclosing symlink, and returned success
 with an empty component report for real directories even with malformed control
 files; those runs did not establish component validation. Use explicit YAML/
-frontmatter tests and native entry checks for the role files. The standard
-skill-creator validator does not accept Claude extension keys; validation of a
-standard-frontmatter projection is supplemental, not proof that those extension
-fields work. Do not change the global validator to hide this distinction.
+frontmatter tests and native entry checks for the role files. The standard skill-creator validator checks the portable skill frontmatter.
+Adapter YAML validation and host behavior are separate checks.
 Native host loading and live entrypoint checks remain separate.
 
 Claude Code 2.1.222 locally exposes native nesting and recognizes these

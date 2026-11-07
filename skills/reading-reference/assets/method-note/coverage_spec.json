@@ -1,0 +1,128 @@
+{
+ "resources": [
+  {
+   "id": "R1",
+   "kind": "code",
+   "what": "reference implementation of the method",
+   "status": "read",
+   "locator": "repo@HASH",
+   "read_in": "u2"
+  },
+  {
+   "id": "R2",
+   "kind": "supplement",
+   "what": "extra plots",
+   "status": "listed",
+   "reason": "not cited by the main text and not one of the required kinds"
+  }
+ ],
+ "comparisons": [
+  {
+   "id": "C1",
+   "relation": "inherited",
+   "claim_loc": "Sec. 2, p.3",
+   "unit": "u2",
+   "primary": {
+    "work": "Older Method (1999)",
+    "locator": "Alg. 1, p.5",
+    "status": "read"
+   },
+   "purpose": "built to order items without a reference point",
+   "place": "family of spectral orderings",
+   "inherited": "the graph construction",
+   "changed": "edge weights now depend on density",
+   "excerpt": true,
+   "translation_needed": true,
+   "translation": true,
+   "code": "diff",
+   "weakness": "(fictional) the earlier method joins points across gaps",
+   "verified": "(fictional) read the source; same finding"
+  },
+  {
+   "id": "C2",
+   "relation": "origin",
+   "claim_loc": "Intro, p.1",
+   "unit": "u1",
+   "primary": {
+    "work": "Older Method (1999)",
+    "locator": "Sec. 1, p.1",
+    "status": "read"
+   },
+   "purpose": "ordering without labels",
+   "place": "unsupervised ordering",
+   "weakness": "(fictional) the earlier method joins points across gaps",
+   "verified": "(fictional) read the source; same finding"
+  }
+ ],
+ "units": [
+  {
+   "id": "u1",
+   "parent": "root",
+   "needs": [
+    "external:ordering problem"
+   ],
+   "produces": [
+    "ordering problem stated"
+   ],
+   "bridge_in": "We start from the ordering problem and state it."
+  },
+  {
+   "id": "u2",
+   "parent": "u1",
+   "needs": [
+    "ordering problem stated"
+   ],
+   "produces": [
+    "graph"
+   ],
+   "terminal": true,
+   "bridge_in": "Given the ordering problem stated above, we build the graph."
+  }
+ ],
+ "sentences": [
+  {
+   "unit": "u1",
+   "n": 1,
+   "kind": "cite",
+   "gloss": {
+    "object": "o",
+    "known": "k",
+    "claim": "c",
+    "benefit": "b",
+    "added": "a"
+   }
+  },
+  {
+   "unit": "u1",
+   "n": 2,
+   "kind": "plain"
+  }
+ ],
+ "overview": {
+  "lineage_label": "sec:lineage",
+  "values_label": "sec:values",
+  "code_notes": [
+   {
+    "unit": "u1",
+    "blocks": [
+     {
+      "lines": "L10-14",
+      "does": "(fictional) joins each point to its k nearest",
+      "source": "inherited from the earlier method",
+      "difference": "none visible on the example"
+     }
+    ]
+   }
+  ],
+  "differences": [
+   {
+    "figure": "Fig.1",
+    "steps": [
+     "graph"
+    ],
+    "where": "method.py L10-14",
+    "by": "note"
+   }
+  ]
+ }
+}

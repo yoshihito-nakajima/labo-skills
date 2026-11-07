@@ -1,5 +1,11 @@
 # Lean placement and proof completion
 
+This completion policy belongs to research exploration proof tasks. Reading
+this reference to reuse Lean checking practices does not put a book under this
+workflow. For book production's disposable local checks, use
+[reading-book's checker procedure](../../reading-book/references/lean-checks.md).
+That procedure does not relax the completion conditions for tasks governed here.
+
 The user's policy for the current exploration workflow is that every proof receives Lean
 assurance. In this workflow the standard route for a new proof runs from Lean
 formalization through a registered formal review (the steps below), not only

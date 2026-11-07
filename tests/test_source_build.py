@@ -6,12 +6,19 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from labo_tools.build import run_source_build, source_build_command  # noqa: E402
+import json  # noqa: E402
+
+from labo_tools.build import (  # noqa: E402
+    record_postprocess, run_postprocess, run_source_build, source_build_command, verify_current,
+)
 from labo_tools.paper import PaperError  # noqa: E402
 
 
 class SourceBuildTests(unittest.TestCase):
     def setUp(self):
+        audit = patch("labo_tools.build.check_navigation")
+        self.audit = audit.start()
+        self.addCleanup(audit.stop)
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)
         self.root = Path(temp.name).resolve()
@@ -87,6 +94,91 @@ class SourceBuildTests(unittest.TestCase):
             ["sample-paper.pdf", "sample-paper.synctex.gz"],
         )
         self.assertTrue((self.folder / ".temp/sample-paper_en.aux").exists())
+        self.audit.assert_called_once_with(
+            self.root / "output/sample-paper.pdf", self.folder / ".temp", "sample-paper_en",
+            self.folder / ".temp/sample-paper_en.aux",
+            source=self.source,
+        )
+
+
+    def _successful_build(self):
+        def build(command, **kwargs):
+            cache = self.folder / ".temp"
+            (cache / "sample-paper_en.pdf").write_bytes(b"new PDF")
+            (cache / "sample-paper_en.synctex.gz").write_bytes(b"new SyncTeX")
+        with patch("labo_tools.build.subprocess.run", side_effect=build):
+            run_source_build(self.root, self.source, None, False)
+
+    def test_successful_build_records_a_stamp_that_verify_current_accepts(self):
+        self._successful_build()
+        record = json.loads((self.folder / ".temp/sample-paper.build.json").read_text())
+        self.assertEqual(record["status"], "ok")
+        ok, message = verify_current(self.root, source=self.source)
+        self.assertTrue(ok, message)
+
+    def test_failed_build_marks_the_kept_pdf_as_stale(self):
+        self._successful_build()
+        with patch("labo_tools.build.subprocess.run"):
+            (self.folder / ".temp/sample-paper_en.pdf").unlink()
+            with self.assertRaises(PaperError):
+                run_source_build(self.root, self.source, None, False)
+        self.assertEqual((self.root / "output/sample-paper.pdf").read_bytes(), b"new PDF")
+        ok, message = verify_current(self.root, source=self.source)
+        self.assertFalse(ok)
+        self.assertIn("stale", message)
+
+    def test_another_source_in_same_folder_cannot_reuse_the_build_record(self):
+        self._successful_build()
+        other = self.source.with_name("another.tex")
+        other.write_text(self.source.read_text())
+        ok, message = verify_current(self.root, source=other)
+        self.assertFalse(ok)
+        self.assertIn("different source", message)
+        ok, message = verify_current(self.root, source=self.source.relative_to(self.root))
+        self.assertTrue(ok, message)
+
+    def test_replaced_pdf_is_not_the_current_build(self):
+        self._successful_build()
+        (self.root / "output/sample-paper.pdf").write_bytes(b"some other PDF")
+        ok, message = verify_current(self.root, source=self.source)
+        self.assertFalse(ok)
+        self.assertIn("differs", message)
+
+    def test_recorded_postprocessing_keeps_the_pdf_current_only_after_success(self):
+        self._successful_build()
+        (self.root / "output/sample-paper.pdf").write_bytes(b"normalized PDF")
+        record_postprocess(self.root, "normalize_pdf.py", source=self.source)
+        ok, message = verify_current(self.root, source=self.source)
+        self.assertTrue(ok, message)
+        with patch("labo_tools.build.subprocess.run"):
+            (self.folder / ".temp/sample-paper_en.pdf").unlink()
+            with self.assertRaises(PaperError):
+                run_source_build(self.root, self.source, None, False)
+        with self.assertRaisesRegex(PaperError, "failed"):
+            record_postprocess(self.root, "normalize_pdf.py", source=self.source)
+
+    def test_postprocess_option_runs_and_records_each_step(self):
+        self._successful_build()
+        step = f"{Path(sys.executable).as_posix()} -c \"open('output/sample-paper.pdf','wb').write(b'normalized')\""
+        run_postprocess(self.root, [step], source=self.source)
+        self.assertEqual((self.root / "output/sample-paper.pdf").read_bytes(), b"normalized")
+        ok, message = verify_current(self.root, source=self.source)
+        self.assertTrue(ok, message)
+        record = json.loads((self.folder / ".temp/sample-paper.build.json").read_text())
+        self.assertEqual(record["postprocessed"][0]["step"], step)
+
+    def test_failing_postprocess_makes_the_pdf_not_current(self):
+        self._successful_build()
+        with self.assertRaisesRegex(PaperError, "post-processing failed"):
+            run_postprocess(self.root, [f"{sys.executable} -c \"raise SystemExit(3)\""], source=self.source)
+        ok, message = verify_current(self.root, source=self.source)
+        self.assertFalse(ok)
+        self.assertIn("post-processing failed", message)
+
+    def test_no_record_means_not_verified(self):
+        ok, message = verify_current(self.root, source=self.source)
+        self.assertFalse(ok)
+        self.assertIn("build first", message)
 
 
 if __name__ == "__main__":

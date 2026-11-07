@@ -34,26 +34,19 @@ records are optional deployment results.
    user configuration. Global changes need an understood scope and authority;
    a project request normally belongs in project files. Keep reusable behavior
    in this policy checkout and private host choices in the consuming workspace.
-4. Maintain explicit model/effort assignments for mathematical roles, using
-   user constraints, callable host choices and task requirements. Reuse an
-   existing assignment when it covers the task. Record the configuration's
-   source and scope; use available task evidence when revising it. Assignment
-   is an operational choice, not a guarantee of mathematical correctness.
-   Follow [the role contract](../research-router/references/mathematical-roles.md)
-   and the corresponding `math-decomposer`, `math-proof-worker` or
-   `math-verifier` skill, which owns the role body and description.
-   Use native model fields; a persona title is not model selection. The
-   [role installer](scripts/install_roles.py) previews or creates project roles
-   referencing this checked-out contract. Supply model/effort explicitly. It
-   refuses differing existing files and leaves host settings untouched; merge
-   existing host settings carefully for the supported keys needed by the task.
-   Claude's native roles/settings already ship at the policy root. Read them
-   through `.claude`, either the real submodule or its whole-directory alias.
-   Their `skills: [role]` field preloads that same body; their short native
-   instruction executes it in the current child without reinvoking the skill.
-   Preserve a pre-existing unrelated `.claude` tree; migrate it deliberately
-   rather than creating another registration mechanism. Single-host setup
-   leaves the other host's entry absent.
+4. Keep role instructions portable: no concrete model IDs, provider aliases or
+   fixed reasoning levels in shared skills, templates or task handoffs. Bundled
+   native adapters omit model/effort and use the host's selection behavior.
+   The [role installer](scripts/install_roles.py) previews or creates adapters;
+   optional `--model`/`--effort` overrides are deployment choices only. Use such
+   overrides only when requested or justified by the actual setup task and
+   confirmed supported by the host. A missing preset is not a reason to change
+   configuration during ordinary research or writing; use the routing fallback.
+   Role bodies live in `math-decomposer`, `math-proof-worker`, `math-verifier`.
+   Native adapters load these instructions into their current child. Direct skill
+   loading does not by itself spawn a separate worker or establish independence.
+   Preserve differing existing files, unrelated settings and the user's primary
+   runtime choices. Single-host setup leaves the other host's entry absent.
 5. Validate syntax and host loading, then use a tiny native delegation probe
    when authorized. Bound its depth, concurrency, tools, time and cost. Test
    actual parent→child→grandchild when claiming nesting. Check effective model
@@ -67,9 +60,11 @@ records are optional deployment results.
    Commit/push only within the user's publication authorization, policy before
    the parent pin when both repositories are involved.
 
-Examples (preview first; use the model assigned to the role and callable on the host):
+Examples (preview first; defaults use host selection):
 
 ```sh
-python3 .agents/skills/agent-host-setup/scripts/install_roles.py --workspace . --host codex --model gpt-6.1-sol --effort high
-python3 .claude/skills/agent-host-setup/scripts/install_roles.py --workspace . --host claude --model claude-opus-5-5 --effort high
+python3 .agents/skills/agent-host-setup/scripts/install_roles.py --workspace . --host codex
+python3 .claude/skills/agent-host-setup/scripts/install_roles.py --workspace . --host claude
 ```
+
+The installer is optional setup tooling, not a prerequisite for ordinary task work.

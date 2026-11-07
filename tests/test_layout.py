@@ -49,6 +49,35 @@ class LayoutTests(unittest.TestCase):
         self.assertFalse((self.root / "README.md").exists())
         self.assertFalse((self.root / "website").exists())
 
+    def test_new_paper_without_init_excludes_future_corpus_entries(self):
+        self.root.mkdir()
+        (self.root / ".gitignore").write_bytes(b"# User exclusions\r\nprivate/")
+        new_item(self.root, "paper", "first-paper")
+        before = (self.root / ".gitignore").read_bytes()
+        self.assertEqual(before, b"# User exclusions\r\nprivate/\n/writing/.corpus/\n")
+        new_item(self.root, "paper", "second-paper")
+        self.assertEqual((self.root / ".gitignore").read_bytes(), before)
+        subprocess.run(["git", "init", "-q", str(self.root)], check=True)
+        # Register a later source and its metadata after the initial paper creation.
+        corpus = self.root / "writing/.corpus"
+        (corpus / "later-source.pdf").write_bytes(b"fictional later source")
+        (corpus / "index.md").write_text("fictional private registration")
+        (corpus / "selections/document").mkdir(parents=True)
+        (corpus / "selections/document/corpus.toml").write_text('source = "fictional"')
+        subprocess.run(["git", "-C", str(self.root), "add", "."], check=True)
+        result = subprocess.run(["git", "-C", str(self.root), "ls-files", "--", "writing/.corpus"], capture_output=True)
+        self.assertEqual(result.stdout, b"")
+
+    def test_new_paper_rejects_symlinked_ignore_before_writing(self):
+        self.root.mkdir()
+        target = self.root.parent / "ignore-outside"
+        target.write_text("private/")
+        (self.root / ".gitignore").symlink_to(target)
+        with self.assertRaisesRegex(LayoutError, "symlink"):
+            new_item(self.root, "paper", "example")
+        self.assertFalse((self.root / "writing").exists())
+        self.assertEqual(target.read_text(), "private/")
+
     def test_dry_runs_do_not_create_even_the_workspace(self):
         code, output, error = self.cli("layout", "init", "--dry-run")
         self.assertEqual((code, error), (0, ""))
@@ -163,7 +192,7 @@ class LayoutTests(unittest.TestCase):
         self.assertFalse(self.root.exists())
 
     @unittest.skipUnless(shutil.which("git"), "Git needed to verify ignore behavior")
-    def test_unassigned_inbox_is_ignored_and_assigned_sources_trackable(self):
+    def test_inbox_and_references_are_ignored_but_assigned_research_is_trackable(self):
         init_layout(self.root)
         subprocess.run(["git", "init", "-q", str(self.root)], check=True)
         for name, expected in (
@@ -171,7 +200,10 @@ class LayoutTests(unittest.TestCase):
             ("writing/example/.temp/main.aux", 0),
             ("inbox/original.pdf", 0),
             ("research/example/inbox/original.pdf", 1),
-            ("reference/source/publisher.pdf", 1),
+            ("reference/source/publisher.pdf", 0),
+            ("writing/.corpus/index.md", 0),
+            ("writing/.corpus/source.pdf", 0),
+            ("writing/.corpus/selections/example/corpus.toml", 0),
         ):
             result = subprocess.run(
                 ["git", "-C", str(self.root), "-c", "core.excludesFile=/dev/null", "check-ignore", "-q", name],

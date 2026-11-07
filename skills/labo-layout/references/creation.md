@@ -59,8 +59,12 @@ python3 <labo-script> layout new reference example-source
   `output/`. It creates generic corpus/rules guides and an empty corpus index
   only when absent, creates an empty `AGENTS.md` if absent, and appends missing
   workspace ignore patterns to `.gitignore`. Root `inbox/` contents are local
-  unassigned intake; assigned originals under `research/<slug>/inbox/` and
-  source PDFs under `reference/` remain trackable. It does not populate
+  unassigned intake. Assigned originals under `research/<slug>/inbox/`
+  remain trackable unless their confidentiality requires local-only storage.
+  Both `/reference/` and `/writing/.corpus/` (including registration metadata)
+  are excluded from the parent Git. Corpus examples serve reading and writing.
+  Local source history, if requested, belongs to a separate Git without
+  remotes; see [reference privacy](reference-privacy.md). It does not populate
   research programs, import source files, install dependencies, or run Git.
   Repeating it preserves existing files; empty directories can be recreated
   after cloning. Inspect pre-existing broad ignore rules such as `*.pdf` so
@@ -76,10 +80,12 @@ python3 <labo-script> layout new reference example-source
 - `layout new paper` creates `writing/<slug>/main.tex` and
   `sections/01-introduction.tex`, compatible with `paper map` and `build`. It
   also creates missing workspace-level corpus/rules guides, preserving any
-  existing local index or rules. It creates no research program or translation
+  existing local index or rules. It also appends `/writing/.corpus/` to the
+  parent ignore file even when `layout init` has not run. It creates no research program or translation
   automatically.
 - `layout new reference` creates `reference/<key>/reference.md` for identity
-  and version provenance. Fill it from the source; do not invent metadata.
+  and version provenance and ensures `/reference/` is ignored in the parent.
+  Fill it from the source; do not invent metadata.
 
 Names use lowercase kebab-case. New-item commands refuse an existing target,
 including an empty directory; inspect and complete it directly when appropriate.

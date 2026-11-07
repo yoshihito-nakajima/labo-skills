@@ -1,10 +1,6 @@
 ---
 name: math-decomposer
 description: Decompose a mathematical proof task into precise lemmas and integrate returned proofs against their exact hypotheses and dependencies.
-context: fork
-agent: general-purpose
-model: claude-opus-5-5
-effort: high
 ---
 
 # Mathematical decomposition and integration
@@ -19,11 +15,12 @@ hypotheses and permitted dependencies, and explain how these lemmas imply the
 requested conclusion. Check dependency direction and cycles; split at an
 interface another worker can establish and the integrator can apply.
 
-Use the configured proof-worker role for the hardest obligations. Delegate only
+Use a callable proof worker for useful bounded obligations, or work sequentially
+under the proof instructions when no worker is available. Delegate only
 authorized proper subproblems within the remaining depth and shared descendant
 slots. Keep definitions and hypotheses consistent across branches. When native
-tools or the budget do not permit another child, return a bounded redispatch
-packet to the parent rather than simulating delegation.
+tools or the budget do not permit another child, do authorized proof work
+sequentially or return the exact unresolved obligation; do not simulate delegation.
 
 Read returned proofs, substitute the actual objects into each lemma and
 discharge every hypothesis. Integrate only established scope. Report gaps and

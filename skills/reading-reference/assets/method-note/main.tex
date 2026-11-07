@@ -1,0 +1,65 @@
+% !TeX program = lualatex
+% Skeleton of a method-paper reading note. Fictional placeholder content throughout.
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=23mm]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,array,listings,xcolor,hyperref}
+\usepackage[most]{tcolorbox}
+\lstset{basicstyle=\ttfamily\scriptsize,breaklines=true,numbers=left,numberstyle=\tiny,frame=single}
+\input{macros.tex}
+\begin{document}
+\title{Reading note: ``A Fictional Ordering Method'' (Doe, 2001)}
+\date{}
+\maketitle
+\tableofcontents
+
+\section{Scope, reader floor and spine}
+\subsection{The paper and what was read}
+Identity, version, DOI and stored copy; what was read and what was not (supplement, code,
+data); what is assumed of the reader (mathematics, domain). \mine{Placeholder.}
+
+\subsection{Spine and section map}
+The question, the claims in dependency order, and for each unit its parent, what it needs
+and what it produces (kept as data in \texttt{coverage\_spec.json}).
+
+\subsection{Lineage overview}\label{sec:lineage}
+One row per earlier work (the paper's inherited, compared, criticised ones): made for; the
+weakness the paper names; what the method keeps or changes; what checking the source found;
+the section that treats it. Reference lineages the code does not show are marked; later
+developments are a separate auxiliary section. \mine{Placeholder.}
+
+\subsection{Values}\label{sec:values}
+One table: the code's argument (the paper's symbol), the paper's value, the code's default and
+the rule that sets it, the values used in each run of this note and of the companion.
+\mine{Placeholder.}
+
+\section{Section 2 of the paper: the method}
+\chain{an ordering problem stated in the introduction}{the graph construction}
+\role{Background}{what the problem needs}
+\begin{bgcard}
+\cardrow{Problem}{items without a reference point must be ordered.}
+\cardrow{Why the previous tool is not enough}{state a concrete failure of the earlier method.}
+\cardrow{Idea}{state it in words before the definition.}
+\end{bgcard}
+\role{Mathematics and implementation}{the step, its reason, the authors' code}
+Correspondence table between the paper's step and the lines of the authors' code. After each
+excerpt, \verb|\codenotes{...}|: per block, what it does in plain words, where it comes from,
+and what differs and what that changes.
+\role{Where the figure's difference comes from}{steps and lines, marked as the paper's statement or this note's reading}
+For each main-text figure that compares methods or conditions: the blocks of the code that make
+the difference.
+\role{Original and translation}{the passage as published}
+\workhead{Doe (2001)}{Sec.~2, p.\,3}
+% \origin{sec2}  % extracted source text in orig/sec2.tex, then the faithful translation:
+\begin{trans}Faithful translation of the passage goes here.\end{trans}
+
+\section{Supplement items the main text relies on}
+Each code, procedure, claim-bearing figure, derivation, data or validation item, read at the
+place where the main text points to it.
+
+\section{Execution and reproduction}
+Environment and versions, runs labelled by provenance, what was reproduced and what was not.
+
+\section{Status}
+Resources not obtained or not read, the places tried, what is wanted, free alternatives, and any
+stand-in made with the user's per-resource permission (labelled, shown beside the open entry).
+\end{document}

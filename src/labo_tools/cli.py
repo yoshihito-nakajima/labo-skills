@@ -18,6 +18,9 @@ from .build import (
     prune_output,
     run_build,
     run_source_build,
+    record_postprocess,
+    run_postprocess,
+    verify_current,
 )
 from .evidence import EvidenceError, KINDS, check_evidence, init_catalog, snapshot
 from . import exploration
@@ -131,6 +134,8 @@ def _build_arguments(parser: argparse.ArgumentParser) -> None:
     viewer.add_argument("--no-open", dest="open_viewer", action="store_false",
                         help=argparse.SUPPRESS)
     parser.set_defaults(open_viewer=False)
+    parser.add_argument("--postprocess", action="append", default=[], metavar="COMMAND",
+                        help="after a successful build, run COMMAND (no shell; repeatable) and record it")
     parser.add_argument("--dry-run", action="store_true")
 
 
@@ -153,6 +158,10 @@ def _build(args: argparse.Namespace) -> None:
         else:
             command = run_build(args.workspace, args.paper, args.engine or "pdflatex", False)
             stem = args.paper
+        for message in run_postprocess(args.workspace, args.postprocess,
+                                       paper=None if args.source is not None else args.paper,
+                                       source=args.source):
+            print(message)
         result = prune_output(
             output, args.max_files, protected_stems={stem},
             superseded_prefixes={f"{stem}_"},
@@ -360,6 +369,23 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
         "build", help="compile to a slug-named PDF/SyncTeX pair and prune old output",
     )
     _build_arguments(output_build)
+    output_verify = output_actions.add_parser(
+        "verify-current",
+        help="exit 0 only if output/ holds the PDF of the latest successful build of this target",
+    )
+    _workspace(output_verify)
+    verify_target = output_verify.add_mutually_exclusive_group(required=True)
+    verify_target.add_argument("--paper", help="standard writing/<slug>/main.tex")
+    verify_target.add_argument("--source", type=Path, help="TeX document root under writing/ or reading/")
+    output_post = output_actions.add_parser(
+        "record-postprocess",
+        help="after a successful build, accept a named step that rewrote the published PDF",
+    )
+    _workspace(output_post)
+    post_target = output_post.add_mutually_exclusive_group(required=True)
+    post_target.add_argument("--paper")
+    post_target.add_argument("--source", type=Path)
+    output_post.add_argument("--step", required=True, help="the post-processing command, for the record")
     output_prune = output_actions.add_parser("prune", help="remove the oldest managed PDF/SyncTeX outputs")
     _workspace(output_prune)
     output_prune.add_argument("--max-files", type=int, default=DEFAULT_OUTPUT_MAX_FILES,
@@ -553,6 +579,12 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
                         print(f"## {opening.section}\n{opening.opening}\n")
         elif args.area == "build" or (args.area == "output" and args.action == "build"):
             _build(args)
+        elif args.area == "output" and args.action == "record-postprocess":
+            print(record_postprocess(args.workspace, args.step, paper=args.paper, source=args.source))
+        elif args.area == "output" and args.action == "verify-current":
+            ok, message = verify_current(args.workspace, paper=args.paper, source=args.source)
+            print(message, file=sys.stdout if ok else sys.stderr)
+            return 0 if ok else 1
         elif args.area == "output" and args.action == "prune":
             if args.max_files < 2:
                 raise PaperError("--max-files must be at least 2 to retain a PDF and SyncTeX")

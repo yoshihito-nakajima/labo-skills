@@ -1,0 +1,4 @@
+interface:
+  display_name: "Exposition Flow Review"
+  short_description: "Read a whole exposition, map its actual flow and propose a reconnected outline"
+  default_prompt: "Use $exposition-flow-review to read the frozen exposition in full and return its actual flow, breaks and a proposed outline with bridges."

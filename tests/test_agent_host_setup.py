@@ -35,7 +35,7 @@ class HostRoleTests(unittest.TestCase):
                     (root / ".claude").symlink_to(".agents", target_is_directory=True)
                 hosts = ("codex", "claude") if mode == "both" else (mode,)
                 for host in hosts:
-                    model = "claude-opus-5-5" if host == "claude" else "gpt-6-astra"
+                    model = "fixture-runtime-b" if host == "claude" else "fixture-runtime-a"
                     settings = root / (".claude/settings.json" if host == "claude" else ".codex/config.toml")
                     settings.parent.mkdir(exist_ok=True)
                     settings.write_text("synthetic existing primary and permissions")
@@ -72,7 +72,7 @@ class HostRoleTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             policy = self.mounted(root, ".agents")
-            files = roles.render_roles(root, "codex", "gpt-6-astra", "high", policy)
+            files = roles.render_roles(root, "codex", "fixture-runtime-a", "high", policy)
             last = list(files)[-1]
             last.parent.mkdir(parents=True)
             last.write_text("user customized role")
@@ -91,7 +91,7 @@ class HostRoleTests(unittest.TestCase):
             data = yaml.safe_load(front)
             data["description"] = "Synthetic revised task interface"
             path.write_text("---\n" + yaml.safe_dump(data) + "---\n" + body)
-            for host, model in (("codex", "gpt-6-astra"), ("claude", "claude-opus-5-5")):
+            for host, model in (("codex", "fixture-runtime-a"), ("claude", "fixture-runtime-b")):
                 files = roles.render_roles(root, host, model, "high", policy)
                 output = next(value for path, value in files.items() if path.stem == "math-proof-worker")
                 adapter = tomllib.loads(output) if host == "codex" else yaml.safe_load(output.split("---", 2)[1])
@@ -99,19 +99,18 @@ class HostRoleTests(unittest.TestCase):
             data["disable-model-invocation"] = True
             path.write_text("---\n" + yaml.safe_dump(data) + "---\n" + body)
             with self.assertRaisesRegex(ValueError, "enabled preload"):
-                roles.render_roles(root, "claude", "claude-opus-5-5", "high", policy)
+                roles.render_roles(root, "claude", "fixture-runtime-b", "high", policy)
 
-    def test_claude_skill_and_native_entry_do_not_select_each_other(self):
+    def test_portable_skills_and_default_adapters_do_not_pin_runtime(self):
         for name in roles.ROLES:
             metadata = yaml.safe_load((CHECKOUT / "skills" / name / "SKILL.md").read_text().split("---", 2)[1])
-            self.assertEqual(metadata["context"], "fork")
-            self.assertEqual(metadata["agent"], "general-purpose")
-            self.assertEqual(metadata["model"], "claude-opus-5-5")
-            self.assertEqual(metadata["effort"], "high")
-            self.assertNotIn(metadata["agent"], roles.ROLES)
+            for field in ("context", "agent", "model", "effort"):
+                self.assertNotIn(field, metadata)
             self.assertIsNot(metadata.get("disable-model-invocation"), True)
             native = yaml.safe_load((CHECKOUT / "agents" / f"{name}.md").read_text().split("---", 2)[1])
             self.assertEqual(native["skills"], [name])
+            self.assertNotIn("model", native)
+            self.assertNotIn("effort", native)
             self.assertNotIn("context", native)
             self.assertEqual(native["description"], metadata["description"])
 
@@ -120,24 +119,39 @@ class HostRoleTests(unittest.TestCase):
             root = Path(directory)
             policy = self.mounted(root, ".agents")
             with self.assertRaisesRegex(ValueError, "whole-directory"):
-                roles.render_roles(root, "claude", "claude-opus-5-5", "high", policy)
+                roles.render_roles(root, "claude", "fixture-runtime-b", "high", policy)
             self.assertFalse((root / ".claude").exists())
             (root / ".claude").mkdir()
             (root / ".claude/user.txt").write_text("preserve me")
             with self.assertRaisesRegex(ValueError, "whole-directory"):
-                roles.render_roles(root, "claude", "claude-opus-5-5", "high", policy)
+                roles.render_roles(root, "claude", "fixture-runtime-b", "high", policy)
             self.assertEqual((root / ".claude/user.txt").read_text(), "preserve me")
 
-    def test_symlink_escape_and_restricted_model_are_rejected(self):
+    def test_symlink_escape_and_invalid_override_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryDirectory() as outside:
             root = Path(directory)
             policy = self.mounted(root, ".agents")
-            for model in ("", "gpt-6-luna"):
+            for model in ("", "invalid\nselection"):
                 with self.assertRaises(ValueError):
                     roles.render_roles(root, "codex", model, "high", policy)
-            files = roles.render_roles(root, "codex", "gpt-6-astra", "high", policy)
+            files = roles.render_roles(root, "codex", "fixture-runtime-a", "high", policy)
             (root / ".codex").mkdir()
             (root / ".codex/agents").symlink_to(outside)
             with self.assertRaisesRegex(ValueError, "escapes"):
                 roles.install(files, apply=True)
             self.assertEqual(list(Path(outside).iterdir()), [])
+
+    def test_defaults_omit_runtime_fields_but_preserve_role_and_tool_boundaries(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            policy = self.mounted(root, ".claude")
+            for host in ("codex", "claude"):
+                files = roles.render_roles(root, host, policy_root=policy)
+                for path, content in files.items():
+                    data = tomllib.loads(content) if host == "codex" else yaml.safe_load(content.split("---", 2)[1])
+                    for field in ("model", "effort", "model_reasoning_effort"):
+                        self.assertNotIn(field, data)
+                    if host == "claude" and data["name"] == "math-verifier":
+                        self.assertEqual(data["tools"], ["Read", "Glob", "Grep"])
+                roles.install(files, apply=True)
+                self.assertEqual(roles.install(files, apply=True), [])

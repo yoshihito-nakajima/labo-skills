@@ -1,0 +1,115 @@
+{
+ "_meta": {
+  "target": "T",
+  "note": "Entirely fictional fixture: a toy convergence theorem for a damped iteration. It carries no research content."
+ },
+ "steps": [
+  {
+   "id": "T",
+   "title": "Convergence of the damped iteration",
+   "statement": "If f is a q-contraction on [0,1] and step sizes h_n lie in [0,1] with every block of m steps summing to at least delta, then x_{n+1}=(1-h_n)x_n+h_n f(x_n) converges to the fixed point.",
+   "hyps": [
+    "f",
+    "h"
+   ],
+   "deps": [
+    "S5"
+   ],
+   "loc": "Theorem 1",
+   "origin": "new",
+   "tier": "standard",
+   "role": "conclusion"
+  },
+  {
+   "id": "S1",
+   "title": "Setting and the fixed point",
+   "statement": "A q-contraction on [0,1] has a unique fixed point x*.",
+   "hyps": [
+    "f"
+   ],
+   "deps": [],
+   "loc": "Section 2",
+   "origin": "standard",
+   "tier": "standard",
+   "role": "gives x*"
+  },
+  {
+   "id": "S2",
+   "title": "One-step contraction",
+   "statement": "|x_{n+1}-x*| <= (1-h_n(1-q)) |x_n-x*|.",
+   "hyps": [
+    "f",
+    "h"
+   ],
+   "deps": [
+    "S1"
+   ],
+   "loc": "Lemma 3",
+   "origin": "adapted",
+   "tier": "semi",
+   "role": "per-step decay",
+   "why_tier": "Routine estimate; the damping is what is specific to this iteration."
+  },
+  {
+   "id": "S3",
+   "title": "Product bound",
+   "statement": "A product of factors 1-a_n with a_n in [0,1] is at most exp(-sum a_n).",
+   "hyps": [],
+   "deps": [],
+   "loc": "Lemma 4",
+   "origin": "standard",
+   "tier": "standard",
+   "role": "turns sums into decay"
+  },
+  {
+   "id": "S4",
+   "title": "Block-sum lemma",
+   "statement": "If every block of m consecutive steps has h-sum at least delta, the product of the block factors is at most exp(-(1-q)delta) per block, so the product tends to 0.",
+   "hyps": [
+    "h"
+   ],
+   "deps": [
+    "S2",
+    "S3"
+   ],
+   "loc": "Lemma 5",
+   "origin": "new",
+   "tier": "key",
+   "role": "replaces the usual divergent-sum condition by a block condition that tolerates vanishing steps",
+   "why_tier": "Without it the theorem needs sum h_n = infinity with h_n bounded below on a tail; the paper claims the block form is new.",
+   "seeds": [
+    "blocks that straddle the start index",
+    "delta close to 0 and m large"
+   ]
+  },
+  {
+   "id": "S5",
+   "title": "Conclusion",
+   "statement": "Combine S2 and S4: |x_n - x*| tends to 0.",
+   "hyps": [],
+   "deps": [
+    "S2",
+    "S4"
+   ],
+   "loc": "Proof of Theorem 1",
+   "origin": "adapted",
+   "tier": "semi",
+   "role": "closes the proof",
+   "why_tier": "Bookkeeping around the key lemma."
+  },
+  {
+   "id": "S6",
+   "title": "Remark: a rate for h_n = 1/n",
+   "statement": "A polynomial rate follows when h_n = 1/n.",
+   "hyps": [],
+   "deps": [
+    "S3"
+   ],
+   "loc": "Remark 6",
+   "origin": "standard",
+   "tier": "standard",
+   "role": "side remark",
+   "outside": true
+  }
+ ]
+}

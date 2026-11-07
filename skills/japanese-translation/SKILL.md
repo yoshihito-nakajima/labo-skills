@@ -33,6 +33,14 @@ explanations or source investigations and
 [paper-writing](../paper-writing/SKILL.md) for requested manuscript revisions.
 A translation request leaves the source manuscript unchanged.
 
+When the requested final product is a lecture or textbook, a Japanese working
+draft used to build it is not automatically a faithful-translation deliverable.
+Use the owning lecture workflow and
+[mathematical substance and proof detail](../mathematical-exposition/references/mathematical-substance.md)
+for that draft: necessary mathematical corrections and expansions are allowed.
+The fidelity rules below govern actual translation deliverables, not a ban on
+repairing the lecture's adopted mathematics.
+
 ## Preserve what the reader needs to notice
 
 Write idiomatic Japanese at the source's level of formality and technical

@@ -1,6 +1,6 @@
 ---
 name: labo-self-improve
-description: Improve research skills in the user's labo-skills fork through actual use, and prepare reusable changes for an optional upstream pull request.
+description: Create or improve research skills in the user's labo-skills fork through actual use, with focused responsibilities and reviewable changes for an optional upstream pull request.
 ---
 
 # Research institute self-improvement
@@ -19,6 +19,17 @@ The user normally runs their own fork as the `.agents` submodule. Develop
 improvements there so mathematical practice can feed back into shared skills.
 Fork-specific choices can remain in the fork; upstream acceptance is not a
 prerequisite for using them.
+Use [labo-git](../labo-git/SKILL.md) when repository boundaries or push checks
+need setup. Follow its [publication boundary](../labo-git/SKILL.md#publication-boundary):
+both push and PR operate in the independent policy Git. Everything outside
+that Git stays local by default; local parent history is not a dependency of
+either operation.
+
+For all skill creation and changes in this collection, apply
+[reviewable skill design](references/skill-design.md): group reusable work by
+responsibility, keep existing-skill edits focused on necessary integration, and
+make a future PR understandable on its own. Use skill-creator for authoring
+mechanics when available; this reference owns the collection's design conventions.
 
 Keep the complete reusable harness in that checkout: instructions, formats,
 templates, executable code, and synthetic tests. `.agents` and `.claude` are
@@ -33,9 +44,17 @@ When a recurring problem appears:
 1. Describe the failure and the smallest generalizable change.
 2. Distinguish a reusable upstream improvement, a fork-specific preference,
    and private research material. Edit the first two in the fork checkout;
-   private-only material stays outside that public Git history.
-3. Check which skill owns the rule. Add a rule to that skill's own
-   `references/`, not a global rules file or `AGENTS.md`.
+   private-only material stays outside that public Git history. Before adding
+   motivating evidence to the skill checkout, apply the
+   [public extraction boundary](../labo-pr/references/publication-gate.md): carry
+   over reusable rules/procedures and self-contained fictional examples, not the
+   research sources, reading accounts or unpublished mathematics. A skill's
+   `references/` directory is for generic guidance, not an exception for private
+   research material. Keep the actual incident and trial evidence in the private
+   parent workspace. Public access to a source does not authorize bundling it.
+3. Identify the owner under [reviewable skill design](references/skill-design.md).
+   Refine the existing owner or introduce a distinct reusable skill as appropriate;
+   keep detailed rules with that owner and connect callers through short links.
 4. Implement and check the authorized change using that checkout's tools.
    Use synthetic examples to make a reusable change reviewable independently
    of the research that motivated it. For instruction changes, preserve the
@@ -47,8 +66,10 @@ When a recurring problem appears:
    candidate. The user can keep it fork-only or contribute it through `labo-pr`;
    an existing request to contribute already settles that choice. A public
    fork is public even without a PR; private-only material stays outside it.
-6. Commit/push the fork, record the chosen parent gitlink, and publish the PR
-   only within the requested scope. These are separate actions. To adopt
+6. Commit the selected policy changes, push the fork, or publish a PR only
+   within the requested scope. A push alone does not request a PR; a requested
+   PR includes its necessary reviewed branch push. Parent gitlink recording
+   is separate local work, never a prerequisite for policy publication. To adopt
    upstream improvements, inspect and integrate them into the user's fork,
    validate there, then advance the parent pin; preserve local customizations.
 

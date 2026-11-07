@@ -1,0 +1,27 @@
+% notelink.sty -- say on each deck page where it comes from in the detailed reading note.
+% Use: \usepackage[ja]{.../notelink}; \input{note_links.tex} (written by scripts/link_note.py build)
+% The link is a GoToR action with an explicit page destination (a named destination "page=N", as
+% \href{file.pdf#page=N} gives, is not understood by viewers). LuaLaTeX only.
+% On each page, before \srctag/\src: \noteref{sec:star-i,eq:prob}  or  \nonote{reason}.
+% \notetag gives the text to append to the source tag.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{notelink}[2026/11/04 links from deck pages to the detailed note]
+\newif\ifnotelinkja\notelinkjafalse
+\DeclareOption{ja}{\notelinkjatrue}\DeclareOption{en}{\notelinkjafalse}
+\ProcessOptions\relax
+\makeatletter
+\newcommand{\NotePDF}{note.pdf}
+\def\notedef#1#2#3{\@namedef{noteL@#1}{#2}\@namedef{noteP@#1}{#3}}
+\newcommand{\NoteWord}{\ifnotelinkja 詳細版\else Detailed note\fi}
+\newcommand{\NoteNone}{\ifnotelinkja 詳細版に対応なし\else No counterpart in the detailed note\fi}
+\newcommand{\notefmt}[1]{%
+  \@ifundefined{noteL@#1}{\textbf{??#1}\PackageWarning{notelink}{undefined note label #1}}{%
+    \pdfextension startlink attr {/Border [0 0 0.6] /C [0.9 0.64 0.24]}
+      user {/Subtype /Link /A << /S /GoToR /F (\NotePDF) /D [\the\numexpr\@nameuse{noteP@#1}-1\relax\space /Fit] >>}%
+    \@nameuse{noteL@#1}\,(p.\,\@nameuse{noteP@#1})%
+    \pdfextension endlink}}
+\newcommand{\notetag}{}
+\newcommand{\noteref}[1]{\gdef\notetag{\NoteWord:\ \@for\@tempa:=#1\do{\notefmt{\@tempa}\ }}}
+\newcommand{\nonote}[1]{\gdef\notetag{\NoteNone\ifnotelinkja（#1）\else\ (#1)\fi}}
+\makeatother
+\endinput

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Exposition Review Loop"
+  short_description: "Freeze an exposition, run adversarial flow and line reviewers, revise and re-review"
+  default_prompt: "Use $exposition-review to review and revise the assigned exposition with independent flow and critique reviewers."

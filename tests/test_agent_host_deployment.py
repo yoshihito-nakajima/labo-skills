@@ -23,8 +23,7 @@ class DistributedHostTests(unittest.TestCase):
 
     def invoke(self, workspace, script, cwd, host):
         return subprocess.run([sys.executable, "-B", "-I", str(script), "--workspace", str(workspace),
-                               "--host", host, "--model", "gpt-6-astra" if host == "codex" else "claude-opus-5-5",
-                               "--effort", "high", "--apply"], cwd=cwd, capture_output=True, text=True)
+                               "--host", host, "--apply"], cwd=cwd, capture_output=True, text=True)
 
     def test_native_agents_native_claude_and_whole_directory_alias(self):
         for mode in ("codex", "claude", "both"):
@@ -73,7 +72,8 @@ class DistributedHostTests(unittest.TestCase):
                     for path in (native / "agents").glob("math-*.md"):
                         front, prompt = path.read_text().split("---", 2)[1:]
                         metadata = yaml.safe_load(front)
-                        self.assertEqual(metadata["model"], "claude-opus-5-5")
+                        self.assertNotIn("model", metadata)
+                        self.assertNotIn("effort", metadata)
                         self.assertEqual(metadata["skills"], [path.stem])
                         self.assertTrue((native / "skills" / path.stem / "SKILL.md").is_file())
                 launcher = policy / "scripts/labo.py"

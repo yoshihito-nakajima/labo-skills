@@ -31,9 +31,21 @@ repairs. Do not turn a small page correction into a full site audit.
   mathematics; a new lemma or stronger claim is not merely a paraphrase.
   Label theorem, conjecture, observation and analogy accurately. Do not repair
   a source gap by inventing a proof or importing an unpublished result.
+  Apply the [readability audit](../../mathematical-exposition/references/reader-pull.md#readability-audit):
+  a hurried reader gets result, significance and key idea from the first
+  screen; terms are defined before use; the page works with every link removed.
 - **W4 Evidence and credit** — Check both sides of historical or novelty
   comparisons. Credit the exact paper and the actual figure/code source;
   distinguish schematic illustrations from measured or reported results.
+  Every page that cites works carries an annotated reference list on the
+  page, and every numbered or named citation resolves to an entry there (keep
+  the source paper's numbers when the text uses them). The page states what
+  each cited work contributes: the used result or definition in usable form
+  at its point of use, and in the entry what the page takes from the work and
+  where (under [reader pull](../../mathematical-exposition/references/reader-pull.md#keep-the-page-self-contained)). Run
+  `scripts/check_citations.py PAGE.md --previous-rev REV` on changed pages:
+  dangling citations and entries dropped since the previous version are
+  defects, whatever the reason for the rewrite.
   Link a paper to an explanation of the matching edition, with differences
   stated when deliberately discussing another version. Inspect rights before
   redistributing source assets; a citation alone does not grant reuse rights.

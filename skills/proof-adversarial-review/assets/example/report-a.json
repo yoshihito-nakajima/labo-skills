@@ -1,0 +1,16 @@
+[
+ {
+  "id": "F01",
+  "sev": "minor",
+  "status": "confirmed",
+  "short": "Lemma 3 omits that a_n lies in [0,1]",
+  "steps": [
+   "S3"
+  ],
+  "from": [
+   "line-by-line"
+  ],
+  "detail": "The statement is for arbitrary a_n; the proof uses a_n in [0,1].",
+  "evidence": "a_1 = a_2 = 2 gives the product (1-2)(1-2) = 1, but exp(-4) is about 0.018, so the stated bound fails without a_n in [0,1]."
+ }
+]

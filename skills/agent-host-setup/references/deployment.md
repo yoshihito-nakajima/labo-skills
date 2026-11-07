@@ -35,22 +35,22 @@ entry for the symlink does not create a second initialized checkout.
    through its `.claude` entry. Each native adapter preloads its matching
    `math-…` skill with `skills: [role]`; the body and description live in that
    skill. It executes the current task without invoking the skill again.
-   Alternatively `/math-… <bounded packet>` runs that same body in one fresh
-   built-in general-purpose child via Claude's `context: fork`. Reconsider their
-   model/effort for the actual task and account. The optional role installer
+   Direct loading of `/math-… <bounded packet>` supplies instructions in the
+   current context; it does not itself request a fork. Bundled adapters omit
+   model/effort so the host chooses them. The optional role installer
    with `--host claude` checks/generates that same native location, refuses a
    different `.claude` tree, and preserves differing existing files.
 4. For Codex, run `scripts/install_roles.py` from the real policy checkout with
-   `--workspace`, `--host codex`, and explicit `--model`/`--effort`. Preview, then
+   `--workspace` and `--host codex`. Model/effort overrides are optional. Preview, then
    add `--apply` to create `.codex/agents` role files. Use
    `assets/codex-agents.toml` as a supported-key example for `.codex/config.toml`.
    Create a new absent config from it or merge only needed `[agents]` keys into
    an existing file. Preserve primary model/effort, provider, permissions,
    hooks, MCP and unrelated settings. The installer leaves main settings alone.
-   Codex adapters select model/effort and read the corresponding role SKILL.md
+   Codex adapters use native defaults or local overrides and read the role SKILL.md
    in the existing delegated thread. Personal `~/.codex/agents` registration is
-   unnecessary for this project. Claude skill frontmatter has no equivalent
-   spawning/model meaning in Codex; other harnesses need their own native setup.
+   unnecessary for this project. Shared skill frontmatter contains no host-specific spawning/model fields; other
+   harnesses use their own native interface or the sequential routing fallback.
 5. Validate parse and fresh native discovery separately from live execution.
    Use bounded native nesting probes when authorized; keep unavailable model
    access or authentication explicit. Codex depth is a decreasing invocation
@@ -68,14 +68,13 @@ Single-host fixtures assert that the other host's directories remain absent.
 Keep the role skills available to automatic invocation: Claude skips missing or
 disabled preloads with a warning, so a native adapter without its loaded skill
 does not supply the full role. The native verifier's `Read, Glob, Grep` list
-restricts its tools. Direct general-purpose skill execution retains a behavioral
+restricts its tools. Direct skill loading retains a behavioral
 read-only requirement; do not assert that it has the same technical restriction.
 Check each entrypoint separately when claiming execution. Validation/loading
 alone establishes neither child creation nor effective account access.
 
-Model presets are revisable deployment choices, not a fixed capability ranking.
-On 2026-11-02, official [Opus 5.5](https://platform.claude.com/docs/en/models/opus-5-5/overview)
-used ID `claude-opus-5-5`, while local Claude Code 2.1.222's `opus` alias resolved
-to `claude-opus-5`. The bundled Claude roles select the explicit 5.5 ID at high
-effort. Recheck current official guidance, local selection and account access;
-syntax/loading evidence alone does not prove live API compatibility.
+Concrete runtime choices belong to local host configuration or actual invocations,
+not portable handoffs or shared role bodies. Do not infer account availability from
+bundled adapters. Missing selection controls or roles do not block ordinary authorized
+work: use the consultation and assignment fallbacks in research-router. Independent
+review still requires a genuinely separate context.

@@ -1,0 +1,24 @@
+% talkbase.sty -- shared by talkstyle (reading deck) and flowstyle (stage deck):
+% language switch \T{English}{Japanese}, portable fonts, TikZ libraries.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{talkbase}[2026/11/03 shared language and font setup for talk styles]
+\RequirePackage{amsmath,amssymb,mathtools,booktabs,array,xcolor,tikz,tcolorbox,listings,fontspec}
+\tcbuselibrary{skins}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\newif\iftalkja\talkjafalse
+\DeclareOption{ja}{\talkjatrue}\DeclareOption{en}{\talkjafalse}
+\ProcessOptions\relax
+\newcommand{\T}[2]{\iftalkja#2\else#1\fi}
+
+% ---------- fonts (portable: falls back when the macOS fonts are missing)
+\setsansfont{TeX Gyre Heros}\renewcommand{\familydefault}{\sfdefault}
+\IfFontExistsTF{Menlo}{\setmonofont{Menlo}[Scale=MatchLowercase]}{\setmonofont{Latin Modern Mono}}
+\iftalkja
+  \IfFontExistsTF{Hiragino Sans W3}{%
+    \RequirePackage{luatexja-fontspec}
+    \setmainjfont{Hiragino Sans W3}[BoldFont=Hiragino Sans W6]
+    \setsansjfont{Hiragino Sans W3}[BoldFont=Hiragino Sans W6]}{%
+    \RequirePackage[haranoaji]{luatexja-preset}}
+\fi
+
+\endinput

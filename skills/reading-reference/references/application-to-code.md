@@ -23,26 +23,14 @@ Identify the method by its established name before its background; put the
 role sections below that subject identity under the
 [heading contract](../../mathematical-exposition/references/roles-and-headings.md#name-the-subject-before-its-roles).
 
-For each coherent method/application account, fix the added role sections in
-this order: **background → obstacle → method/implementation → specific fit and
-limits → comparison** (`背景 → 障害 → 方法・実装 → 適合理由・限界 → 比較`).
-This is the section skeleton, not merely a list of facts to place anywhere.
-Keep each role's boundary and use a [two-part heading](../../mathematical-exposition/references/roles-and-headings.md)
-that shows its stable role name and this method's concrete point. Background
-includes the visible application, desired output and reason for this example;
-method/implementation includes the mathematical derivation and corresponding code.
-Keep required execution-status and implementation-search records as explicit
-additional role sections after the main account; preserve their agreed order.
-
-Apply this skeleton to complete method/application explanations. Optional code
-or background collections use the roles needed for their declared scope under
-[the view contract](paper-preparation.md#keep-section-progression-and-purpose-specific-views-distinct).
-In the main route the skeleton belongs below
-the owning source section/method and must not rename, renumber or reparent the
-source's sections. Within a role, group related operations without repeated
-introductions. Across roles, keep [adjacent-passage continuity](../../mathematical-exposition/SKILL.md#carry-the-argument-across-adjacent-passages):
-carry the specific result/question into the next opening. Do not conceal role
-boundaries by merging the entire account under only a content-specific title.
+Use the ordered role-section map in [Reading structure](reading-structure.md#fix-the-scope-and-the-section-map-before-editing)
+for each coherent method/application account, once per method rather than per
+excerpt. That file owns the skeleton, including comparison, execution status,
+implementation search/adoption and the return to the target original/translation.
+This file supplies each method role's content requirements. Preserve the source
+parent and role boundaries; group operations within a role and connect adjacent
+openings to the result or question just established. Optional collections retain
+the roles needed for their declared task under the same structure contract.
 
 ## Establish the application before its code
 
@@ -75,6 +63,25 @@ result or remove the photographs from a mixed-role figure. Keep visible marks,
 captions and explanatory prose together at a readable scale. File storage once
 does not mean display once. Source originals and their translation order stay
 intact; an added, clearly attributed preview can supply the earlier context.
+
+## Show the adopted source code first
+
+The search for the source authors' or official code comes before any independent code
+is written ([R18](methods.md)). On the reader's main route, every code unit then opens
+with the code that search adopted:
+
+1. the source authors' code, if obtained and its license allows display ([R6a](source-rules.md));
+2. otherwise a later or related author's code for the same operation, or an official
+   library, whose license allows display, with its relation stated (not the source authors'
+   code, and what differs); obtained code with an unknown license is linked, not shown;
+3. otherwise the source paper's own algorithm (its table or figure) beside AI-created code,
+   labelled, with the link to the unshown code and a statement of what was searched (R18).
+
+An AI-created implementation follows, labelled as a supplement (a check, an adaptation
+or a missing step), never as the unit's main code, even when it is shorter or was
+written first. How much of the adopted code may be displayed depends on its license
+([R6a](source-rules.md)). The comparison section then refers back to this display
+instead of repeating it.
 
 ## Show the whole implementation before its parts
 
@@ -178,6 +185,8 @@ For every in-scope method/application account, develop:
 5. **Relationships.** Explain what other methods share or change and how that
    changes the response to this same task, under the relationship rules below.
 
+Choose the example as the method's *specific example*: the one where its lens is most
+visible ([roots and lenses](roots-and-lenses.md)), next to the root's shared example.
 Also state **why this example is introduced in this particular section**: which
 concept, mechanism, comparison or limitation the reader should understand through
 it, and how it connects the preceding passage to the code now shown. This teaching
@@ -189,7 +198,10 @@ background and auxiliary method code as well as headline algorithms.
 
 ## Find and inspect the application evidence
 
-For each method, inspect its proposal's application sections and follow references,
+For each method, also record what the sources say about its lens and its failure
+([roots and lenses](roots-and-lenses.md#collect-them-while-investigating-the-sources)); this
+search is the *specific example* row of [the card-driven search](roots-and-lenses.md#let-the-card-decide-what-to-search).
+Inspect its proposal's application sections and follow references,
 supplements and application papers as needed, beyond the target bibliography.
 Find evidence of the actual need, placement of the method and obtained result,
 not just an abstract or a sentence saying it is used in a field. A proposal with
@@ -220,6 +232,23 @@ match any reproduction claim to the procedure, data, settings and actual run.
 For additional language versions, apply [the multilingual code contract](multilanguage-code.md).
 Carry one calculation through the languages with actual code and explain the
 idiomatic operations, design decisions and per-language verification.
+
+## Give every code unit a reason card
+
+Beside each code excerpt or full listing, record in this order, so that a derived view
+(for example a slide) can use it directly:
+
+1. **Step** — which step of the algorithm the code implements (the algorithm's step
+   number or equation, and the matching lines).
+2. **Reason** — why this code is shown at this subsection: the obstacle it addresses or
+   the root it serves, with the source that states that reason (page).
+3. **Lines to look at, what they do and role** — the few characteristic blocks; for each, what
+   it does in plain words ("sets OD and TD as percentiles of the local density"), where it comes
+   from ("inherited from SPADE, `downsample.R` L95–107", "added by the authors"), and its role:
+   inherited unchanged, removes the obstacle, serves another aim, only tidies, or leads on; for a
+   change, what it changes in the output. A role label alone does not explain the lines.
+4. **Provenance and license** — by the provenance classes (R5a) of [Sources](source-rules.md),
+   with the license and the display extent it allows (R6a).
 
 ## Explain relationships for every code unit
 

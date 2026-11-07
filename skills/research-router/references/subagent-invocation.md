@@ -17,21 +17,20 @@ assignment needs:
 - the exact task, scope, and expected output;
 - allowed source files or paths, with version or frozen-artifact identity;
 - relevant constraints and evidence needed to do the work;
-- invocation provenance: actual model selection and exposed reasoning setting,
-  their native invocation fields or matching host-session metadata, and the
-  configured role or explicit assignment source and its permitted work;
-  record an absent reasoning control as unsupported rather than inventing a value;
+- assignment provenance: the user's task or parent's bounded role, permitted work,
+  actual tool/permission limits and the context boundary; keep private runtime
+  selection metadata out of reusable task instructions;
 - consultation status for this assignment, so a worker can reuse a completed
   check without recursively commissioning another advisor;
 - context and files the agent must not use, when the selected skill requires
   that boundary.
 
-For substantive roles, explicitly use the host's native model-selection and
-exposed reasoning controls; prompt text alone is not a selection. Use the
-[eligibility rule](editing-capability.md) to resolve unknown or conflicting
-provenance. An explicit parent selection in this packet is sufficient
-identity evidence for the selected worker. Carry the established role assignment
-forward; do not require another mathematical-ability assessment.
+Use the host's actual callable interface. A native default or inherited model is
+valid; explicit selection is optional when supported and appropriate. Concrete
+runtime choices belong to host configuration or the invocation, not the reusable
+packet. Missing model/effort metadata or a named preset does not block delegation.
+If dispatch is unavailable, use the [consultation fallback](consultation.md) and
+[sequential assignment rules](editing-capability.md); do not fake another worker.
 
 Do not paste the full conversation, implementation transcript, unrelated
 decisions, or another reviewer's report. Do not rely on a saved persona or
@@ -46,7 +45,7 @@ do not reuse a producer's thread as an independent reviewer.
 
 A qualified worker may delegate a proper subproblem when the user or selected
 skill authorizes delegation and the host exposes native child spawning. Nesting
-preserves this contract, including actual model selection and fresh context.
+preserves this contract, including actual native dispatch and fresh context.
 Reuse the completed consultation for the same assignment; a child does not
 commission another advisor merely because it received delegated work.
 
@@ -73,9 +72,8 @@ parent-mediated delegation. Starting subprocess CLIs to evade a native limit
 does not preserve its session budget or permission boundary.
 
 For mathematical decomposition, proving and independent verification, use the
-[mathematical role contract](mathematical-roles.md). Host role presets supply a
-model and a narrow job; the selected skill and current packet remain the task
-authority. Configure actual host support through
+[mathematical role contract](mathematical-roles.md). Host role presets are optional adapters; the selected skill and current packet
+remain the task authority. Configure actual host support only when requested through
 [agent-host-setup](../../agent-host-setup/SKILL.md).
 
 ## Preserve independent reviews

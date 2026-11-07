@@ -1,0 +1,45 @@
+% Shared macros for a method-paper reading note (skeleton; fictional defaults).
+% Set these once per note. NoteDir is the note's directory relative to the workspace root.
+\newcommand{\NoteDir}{reading/example-note}
+\newcommand{\PDFURL}{file:///path/to/the/stored/paper.pdf}
+% Labels (translate here, once).
+\newcommand{\LabelOrig}{Original}
+\newcommand{\LabelTrans}{Faithful translation}
+\newcommand{\LabelSrc}{Source}
+\newcommand{\LabelAdded}{Added by this note}
+\newcommand{\LabelCard}{Background card}
+\newcommand{\LabelFrom}{Taken from earlier units}
+\newcommand{\LabelTo}{Handed to later units}
+% \srcp{journal page}{pdf page}{label}: link to a page of the stored PDF
+\newcommand{\srcp}[3]{\href{\PDFURL\#page=#2}{#3, p.#1}}
+% provenance tags (R5a): source, and material the note adds (not evidence for a claim)
+\newcommand{\src}[1]{{\small\color{teal}[\LabelSrc: #1]}}
+\newcommand{\mine}[1]{{\small\color{brown}[\LabelAdded: #1]}}
+% role heading: role | concrete point
+\newcommand{\role}[2]{\subsubsection{#1 | #2}}
+% term registration for the index
+\newcommand{\defterm}[1]{\phantomsection\label{def:#1}}
+% named-work heading above an original/translation pair
+\newcommand{\workhead}[2]{\par\medskip\noindent{\small\bfseries\textcolor{blue}{#1}\ --\ #2}\par\nopagebreak}
+\newenvironment{orig}{\par\smallskip\noindent\textbf{\LabelOrig}\par\begin{quote}\small\sffamily}{\end{quote}}
+\newenvironment{trans}{\par\smallskip\noindent\textbf{\LabelTrans}\par\begin{quote}\small}{\end{quote}}
+% \origin{name}: input NoteDir/orig/name.tex (extracted source text kept in its own file)
+\newcommand{\origin}[1]{\begin{orig}\input{\NoteDir/orig/#1.tex}\end{orig}}
+% background card
+\newenvironment{bgcard}{\par\medskip\begin{tcolorbox}[colback=black!3,colframe=teal!60!black,title={\LabelCard},fonttitle=\bfseries\small,boxrule=0.5pt,left=2mm,right=2mm,top=1mm,bottom=1mm,breakable]\small}{\end{tcolorbox}}
+\newcommand{\cardrow}[2]{\par\noindent\textbf{#1}: #2}
+% \paperfig{file}{width}{journal page}{pdf page}{reading of the figure}: a figure cut out of the source
+\newcommand{\paperfig}[5]{%
+  \begin{figure}[htbp]\centering
+  \includegraphics[width=#2\linewidth]{\NoteDir/figures/#1}
+  \caption{Cut out of the source (\srcp{#3}{#4}{page}), unaltered. #5}
+  \end{figure}}
+% authors' code: \authorcode{file}{first}{last}{caption}, then \codeid{file}
+\newcommand{\authorcode}[4]{\lstinputlisting[language=Python,firstline=#2,lastline=#3,firstnumber=#2,caption={#4}]{\NoteDir/code/#1}}
+% notes under an author-code excerpt: what each block does / where it comes from / what differs and what that changes
+% needs \usepackage{needspace} so the heading is not left alone at the foot of a page
+\newcommand{\codenotes}[1]{\Needspace{12\baselineskip}\par\smallskip\noindent{\small\bfseries Code notes}\par\nopagebreak
+  {\footnotesize\begin{longtable}{p{1.7cm}p{4.3cm}p{3.6cm}p{4.9cm}}\toprule Lines & Does & From & Difference and effect\\\midrule\endhead #1\\\bottomrule\end{longtable}}}
+\newcommand{\codeid}[1]{\par{\small\textbf{Code source:} AUTHORS, REPOSITORY, commit \texttt{HASH}, \nolinkurl{#1}; licence: LICENCE. State whether this is the version used in the paper.}\par}
+% unit chain box: what this unit takes from earlier units and what it hands on
+\newcommand{\chain}[2]{\par\medskip\noindent\fbox{\parbox{0.96\linewidth}{\small\textbf{\LabelFrom:} #1\par\textbf{\LabelTo:} #2}}\par\medskip}

@@ -5,7 +5,8 @@
 Prefer relevant inspected author/supplement code regardless of its language.
 Do not silently replace R, Julia, MATLAB, C or another original language with
 Python. Preserve its actual language, fixed version and consequential behavior
-when presenting it. Language preference does not discharge R18's source search.
+when presenting it. Language preference does not discharge R18's source search,
+and the display order follows [the adopted source code first](application-to-code.md#show-the-adopted-source-code-first).
 
 For teaching materials, choose languages to serve the requested learning goal
 and the method: Python, R, Julia or others may show useful differences in array

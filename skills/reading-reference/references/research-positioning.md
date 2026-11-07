@@ -19,6 +19,11 @@ certificate, a fixed citation quota, or a requirement to acquire every paper.
 
 ## Required checkpoints
 
+For a paper being read, the relations to inventory (inherited, baseline, criticised,
+encompassing, encompassed, origin, prior version) and the treatment level of each are in
+[lineage and comparison](lineage-and-comparison.md); this protocol supplies the search and
+memo for them.
+
 Run or refresh positioning at each of these points:
 
 - starting a new research direction or substantively reframing an existing one;
