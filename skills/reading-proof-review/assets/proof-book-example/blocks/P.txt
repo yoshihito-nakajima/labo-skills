@@ -1,0 +1,17 @@
+block: P
+title: 道具（望遠鏡和）
+claim: $N\ge2$ のとき $\sum_{n=2}^{N}\frac1{n(n-1)}=1-\frac1N$。
+loc: 見本（架空の例）
+>> 後のブロックが引く、隣り合う項が打ち消し合う和の公式を示す。
+> 記号。$n\ge2$ は整数、$N\ge2$。
+
+step: P.1
+title: 望遠鏡和
+ledger: P1
+loc: 見本
+claim: $N\ge2$ のとき $\sum_{n=2}^{N}\frac1{n(n-1)}=1-\frac1N$。
+>> まず一項ずつを差に分け、足すと内側の項が消えることを見る。
+- \frac1{n(n-1)}=\frac1{n-1}-\frac1n @@ $n\ge2$ のとき、右辺を通分すると、 @@ recon
+- \sum_{n=2}^{N}\frac1{n(n-1)}=\sum_{n=2}^{N}\Bigl(\frac1{n-1}-\frac1n\Bigr) @@ (P.1.1) を $n=2,\dots,N$ で足すと、
+- =\sum_{n=1}^{N-1}\frac1n-\sum_{n=2}^{N}\frac1n @@ 第 1 項の添字を $n-1\mapsto n$ と取り替えると、 @@ fine:添字の取り替え
+- =1-\frac1N @@ 共通の項 $n=2,\dots,N-1$ が消えて、残るのは $n=1$ の項と $n=N$ の項だけなので、

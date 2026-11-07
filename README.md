@@ -418,8 +418,10 @@ result on one page, [reading-proof-review](skills/reading-proof-review/SKILL.md)
 single-file HTML from a sourced step ledger: a dependency diagram, step cards whose proofs fold,
 the key steps compared with the standard ones, the review findings, the comparison with prior work,
 and a viability indicator whose verdict is capped by explicit rules (`check_ledger.py`,
-`indicator.py`, `build_review_page.py`, `check_review_page.py`). Neither edits the manuscript, and
-neither certifies correctness.
+`indicator.py`, `build_review_page.py`, `check_review_page.py`). The same skill also builds a
+proof-centred reading book (`proof_book.py`): the proof cut into blocks, each formula step preceded by its
+reason, the difficulties and the role of each step shown, one cross-linked HTML and one PDF with the full
+derivation. Neither edits the manuscript, and neither certifies correctness.
 
 For whole-paper design or structural reassessment, use
 [paper-structure](skills/paper-structure/SKILL.md). It maps current material to

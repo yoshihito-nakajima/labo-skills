@@ -129,7 +129,8 @@ class ProofReviewTests(unittest.TestCase):
             page = self.out.read_text()
             self.assertIn('id="step-S4"', page)
             self.assertIn("t-keyc", page)            # the key step is styled as key
-            self.assertNotIn("{{", page)
+            import re  # a real KaTeX copy contains "{{" itself; only template placeholders count
+            self.assertIsNone(re.search(r"\{\{(BODY|TITLE|LANG|EXTRA_SCRIPT|L:[a-z_]+)\}\}", page))
             c = self.py(RPR / "scripts/check_review_page.py", self.out, "--spec", self.spec)
             self.assertEqual(c.returncode, 0, c.stdout)
 
@@ -199,3 +200,71 @@ class ProofReviewTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ProofBookTests(unittest.TestCase):
+    """Fictional two-block example: source parsing, numbering, TeX generation and (when tools exist) the full build."""
+
+    @classmethod
+    def setUpClass(cls):
+        sys.path.insert(0, str(RPR / "scripts"))
+        import proof_book
+        cls.pb = proof_book
+        cls.example = RPR / "assets/proof-book-example"
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.proj = Path(self.tmp.name) / "proj"
+        shutil.copytree(self.example, self.proj)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_numbering_numbers_only_cited_lines_and_citations_resolve(self):
+        self.pb.load_project(self.proj)
+        q = self.pb.parse(self.pb.BLOCKS_DIR / "Q.txt")
+        refs, nums = self.pb.numbering(q)
+        self.assertEqual(refs, {"Q.1.1"})
+        self.assertEqual(nums, {"Q.1.1": "Q.1.1"})
+        p = self.pb.parse(self.pb.BLOCKS_DIR / "P.txt")
+        self.assertEqual(self.pb.numbering(p)[1], {"P.1.1": "P.1.1"})
+
+    def test_citing_a_fine_line_is_refused(self):
+        self.pb.load_project(self.proj)
+        f = self.pb.BLOCKS_DIR / "P.txt"
+        f.write_text(f.read_text(encoding="utf-8").replace("(P.1.1) を $n=2", "(P.1.3) を $n=2"), encoding="utf-8")
+        with self.assertRaises(SystemExit):
+            self.pb.numbering(self.pb.parse(f))
+
+    def test_cross_block_citation_becomes_a_link_in_tex_and_html(self):
+        self.pb.load_project(self.proj)
+        self.assertIn(r"\hyperref[P.1]{ブロック~P・段~1}", self.pb.to_tex("ブロック P・段 1 の公式"))
+        self.assertIn('href="example-block-P.html#P.1"', self.pb.to_html("ブロック P・段 1 の公式"))
+
+    def test_tex_uses_block_ids_as_section_names_and_has_context_boxes(self):
+        self.pb.load_project(self.proj)
+        blocks = [self.pb.parse(self.pb.BLOCKS_DIR / f"{b}.txt") for b in ("P", "Q")]
+        uses, used_by = self.pb.usage()
+        refs = set()
+        for b in blocks:
+            refs |= self.pb.numbering(b)[0]
+        tex = self.pb.render_tex_all(blocks, "/x/example.html", refs, uses, used_by, ["P", "Q"], "見本")
+        self.assertIn(r"\renewcommand{\thesection}{P}", tex)
+        self.assertIn(r"\renewcommand{\thesection}{Q}", tex)
+        self.assertIn(r"\label{Q.1.1}", tex)
+        self.assertNotIn(r"\label{Q.1.2}", tex)
+        self.assertIn("使われる先", tex)
+        self.assertEqual(used_by.get("P.1"), ["Q.1"])
+
+    @unittest.skipUnless(shutil.which("latexmk") and shutil.which("lualatex"), "LuaLaTeX not installed")
+    def test_full_build_has_matching_numbers(self):
+        try:
+            self.pb.find_katex()
+        except Exception:
+            self.skipTest("KaTeX not available")
+        r = subprocess.run([sys.executable, str(RPR / "scripts/proof_book.py"), "build", str(self.proj)], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout[-800:] + r.stderr[-800:])
+        out = self.proj / "out"
+        for name in ("example.pdf", "example.html", "example-index.html", "example-block-P.html", "pages.json"):
+            self.assertTrue((out / name).exists(), name)
+        self.assertIn("equations numbered: 2", r.stdout)

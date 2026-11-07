@@ -1,0 +1,17 @@
+block: Q
+title: 主結果（二乗の逆数の和）
+claim: すべての $N\ge1$ で $\sum_{n=1}^{N}\frac1{n^2}\le2-\frac1N$。
+loc: 見本（架空の例）
+>> 各項を望遠鏡和の項で押さえて、ブロック P の公式に帰着させる。
+
+step: Q.1
+title: 上からの評価
+ledger: Q1
+loc: 見本
+claim: すべての $N\ge1$ で $\sum_{n=1}^{N}\frac1{n^2}\le2-\frac1N$。
+>> $n=1$ の項を分け、残りを $\frac1{n(n-1)}$ で押さえる。
+- \frac1{n^2}\le\frac1{n(n-1)}\qquad(n\ge2) @@ $n^2\ge n(n-1)>0$ なので、
+- \sum_{n=1}^{N}\frac1{n^2}=1+\sum_{n=2}^{N}\frac1{n^2} @@ $N\ge2$ とし、$n=1$ の項を分けると、
+- \le1+\sum_{n=2}^{N}\frac1{n(n-1)} @@ (Q.1.1) を $n=2,\dots,N$ で足すと、
+- =2-\frac1N @@ ブロック P・段 1 の和の公式から、
+>> $N=1$ では左辺が $1=2-\frac11$ なので、等号で成り立つ。

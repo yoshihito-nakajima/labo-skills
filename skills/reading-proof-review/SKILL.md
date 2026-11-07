@@ -1,6 +1,6 @@
 ---
 name: reading-proof-review
-description: Turn a mathematical result's proof, either your own manuscript or someone else's paper, into one private HTML page that separates the key steps from the standard ones, shows the review findings and the difference from prior work, and gives a hedged paper-viability indicator. Builds a sourced step ledger, a dependency diagram, folded proofs, a key-versus-standard comparison and rule-capped verdict. Not the adversarial review itself, not slides, not a public page.
+description: Turn a mathematical result's proof, either your own manuscript or someone else's paper, into one private HTML page that separates the key steps from the standard ones, shows the review findings and the difference from prior work, and gives a hedged paper-viability indicator. Builds a sourced step ledger, a dependency diagram, folded proofs, a key-versus-standard comparison and rule-capped verdict. Also builds a proof-centred reading book: blocks, reason-before-formula derivations, cross-linked HTML and one PDF. Not the adversarial review itself, not slides, not a public page.
 ---
 
 # Proof-review reading page
@@ -45,6 +45,16 @@ user's reaction after each unless the user has asked to run through to the page.
    and verify with `check_review_page.py`, then look at the rendered page
    ([page contract](references/page.md)). Math needs KaTeX: `fetch_katex.py` downloads a pinned,
    integrity-checked copy into a cache once the user agrees.
+
+## Proof-centred mode: follow the proof itself
+
+When the user wants to *follow the proof* rather than judge it (every transformation traceable, blocks instead of many
+steps, difficulty and reason shown, a PDF with the full derivation), build the page and PDF from block sources with
+`python3 <scripts>/proof_book.py build <project>` and verify with `check`; the format, grouping, context layers,
+gap-avoidance rules and the independent-reader check are in [proof book](references/proof-book.md), and a fictional
+two-block project is in `assets/proof-book-example`. Prototype one block first, let the user react to the wording,
+the amount of narration and the layout, then extend to the other blocks. The PDF is for reading the derivation, not a
+paper; the HTML shows the main line and links to the PDF for lines too fine to print.
 
 ## Rules that keep the page honest
 
