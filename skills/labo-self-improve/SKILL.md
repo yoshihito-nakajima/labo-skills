@@ -67,7 +67,9 @@ When a recurring problem appears:
    an existing request to contribute already settles that choice. A public
    fork is public even without a PR; private-only material stays outside it.
 6. Commit the selected policy changes, push the fork, or publish a PR only
-   within the requested scope. A push alone does not request a PR; a requested
+   within the requested scope. In a fork whose owner enabled it, finished branches are
+   merged or deleted without asking, and `main` is brought level with upstream, under
+   [fork housekeeping](references/fork-housekeeping.md). A push alone does not request a PR; a requested
    PR includes its necessary reviewed branch push. Parent gitlink recording
    is separate local work, never a prerequisite for policy publication. To adopt
    upstream improvements, inspect and integrate them into the user's fork,
