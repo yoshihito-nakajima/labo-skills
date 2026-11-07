@@ -107,8 +107,15 @@ def panel_html(R, s):
 
 def card_html(R, s):
     out = [f'<p>Steps below show verbatim lines; the math correspondence follows each code block.</p>']
+    if s.get("flow"): out.append(f'<div class="flow"><b>What this code solves (overall flow)</b><p>{m(s["flow"])}</p></div>')
     for st in s["steps"]:
-        out.append(f'<div class="step"><h4>{esc(st["title"])}</h4><p>{m(st["what"])}</p>{code_box(R, (st["file"], st["first"], st["last"]))}<p class="mapto"><b>Math:</b> {m(st["math"])}</p></div>')
+        ln = "".join(f'<tr><td class="small">line {a}</td><td>{m(b)}</td></tr>' for a, b in st.get("lines", []))
+        ap = "".join(f'<div class="apic"><b><code>{esc(x["name"])}</code></b> <code class="small">{esc(x.get("sig", ""))}</code><br><b>returns:</b> {m(x.get("ret", ""))}<br><b>note:</b> {m(x.get("note", ""))}' + (f'<br><b>cost:</b> {m(x["cost"])}' if x.get("cost") else "") + (f'<div class="small muted">{esc(x["quote"])}</div>' if x.get("quote") else "") + '</div>' for x in st.get("apis", []))
+        out.append(f'<div class="step"><h4>{esc(st["title"])}</h4><p>{m(st["what"])}</p>{code_box(R, (st["file"], st["first"], st["last"]))}'
+                   + (f'<div class="lines"><b>Reading the lines</b><table>{ln}</table></div>' if ln else "")
+                   + (f'<details class="blk"><summary>Functions used in this Step ({len(st["apis"])})</summary><div class="inner">{ap}</div></details>' if ap else "")
+                   + f'<p class="mapto"><b>Math:</b> {m(st["math"])}</p></div>')
+    if s.get("after"): out.append(f'<div class="flow after"><b>Meaning of the result, and where it leads</b><p>{m(s["after"])}</p></div>')
     cm = s.get("comparison")
     if cm:
         body = ""
@@ -172,25 +179,31 @@ CSS = """body{font-family:system-ui,sans-serif;max-width:1200px;margin:0 auto;pa
 .panel2 table{width:100%;border-collapse:collapse}.panel2 th{width:8rem;text-align:left;vertical-align:top;font-size:.85rem;color:#055}.by{font-size:.72rem;padding:0 .35rem;border-radius:3px;margin-right:.2rem;background:#eee}.by-author,.by-official{background:#d8f0dc}.by-lib{background:#e3eaf8}.by-ai{background:#fbe3d0}
 .cb{background:#fbfbfd;border:1px solid #dde;padding:.3rem .5rem;font-size:.78rem;overflow:auto;white-space:pre}.cb .ln{color:#999;margin-right:.5rem}.cb.same{background:#eef8ee}.cb.chg{background:#fff8dc}.cb.onl{background:#eaf1fb}.cb.none{color:#999}.step{border-left:3px solid #9bc;padding:0 .6rem;margin:.6rem 0}.cmprow{margin:.5rem 0;padding:.3rem .5rem;border-radius:4px}
 .cmprow.same{background:#f2faf2}.cmprow.chg{background:#fffbe9}.cmprow.onl{background:#f1f6fc}.cmpgrid,.otgrid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}.otgrid img{max-width:100%;border:1px solid #ccd}.stl{font-size:.75rem;padding:0 .4rem;border-radius:3px;font-weight:700}.stl.same{background:#bfe3c1}.stl.chg{background:#f3dd7c}.stl.onl{background:#b9d0ee}.muted{color:#777}.small{font-size:.85rem}
-.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
+.lead,.bridge,.flow{background:#f7fbf9;border-left:4px solid #6b9;padding:.4rem .8rem;margin:.5rem 0}.bridge,.flow.after{border-left-color:#c96;background:#fcf9f5}.apic{border:1px solid #dde;padding:.3rem .5rem;margin:.3rem 0;font-size:.88rem}.lines td{border:1px solid #eee;padding:.1rem .4rem}.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
 
 
 def section_html(R, s, pdf, words):
     i = s["id"]; parts = [f'<details class="blk" id="p-{i}" open><summary>Section structure</summary><div class="inner">{panel_html(R, s)}</div></details>']
+    if s.get("explanation_html"): parts.append(f'<details class="blk" id="ex-{i}"><summary>Explanation</summary><div class="inner">{(R.base / s["explanation_html"]).read_text(encoding="utf-8")}</div></details>')
+    if s.get("glossary"):
+        gl = "".join(f'<tr><td><b>{m(w)}</b></td><td>{m(d)}</td><td class="small">{esc(wh)}</td><td class="small">{esc(fl)}</td></tr>' for w, d, wh, fl in s["glossary"])
+        parts.append(f'<details class="blk" id="gl-{i}"><summary>Terms in this section ({len(s["glossary"])})</summary><div class="inner"><table><tr><th>term</th><th>plain explanation and what it is good for</th><th>where</th><th>field</th></tr>{gl}</table></div></details>')
     parts.append(f'<details class="blk" id="ot-{i}"><summary>Original and faithful translation ({pages(s)})</summary><div class="inner">{orig_html(R, s, pdf, words)}</div></details>')
     if s.get("figures"):
         fig = ""
         for f in s["figures"]:
             d = R.FIGS[f]; img = f'<img src="{esc(d["image"])}" alt="{esc(f)}">' if d.get("image") else ""
             rel = "".join(f'<li>{esc(a)} → {esc(b)}: <b>{esc(k)}</b>. {m(dd)}</li>' for a, b, k, dd in R.d.get("figure_links", []) if f in (a, b))
-            fig += f'<div class="figin"><div>{img}</div><div><h4>{esc(f)} (p.{d["page"]})</h4><p>{m(d["what"])}</p><p><b>Colour:</b> {m(d["color"])}</p>{"<ul>" + rel + "</ul>" if rel else ""}</div></div>'
+            fig += f'<div class="figin"><div>{img}</div><div><h4>{esc(f)} (p.{d["page"]})</h4><p>{m(d["what"])}</p><p>{m(d.get("text", ""))}</p><p><b>Colour:</b> {m(d["color"])}</p>{"<ul>" + rel + "</ul>" if rel else ""}</div></div>'
         parts.append(f'<details class="blk"><summary>Figures of this section</summary><div class="inner">{fig}</div></details>')
     if s.get("steps"): parts.append(f'<details class="blk" id="cu-{i}"><summary>Code: Steps and comparison</summary><div class="inner">{card_html(R, s)}</div></details>')
+    if s.get("ledger_html"): parts.append(f'<details class="blk" id="led-{i}"><summary>Math ledger of this section</summary><div class="inner">{s["ledger_html"]}</div></details>')
     kids = "".join(section_html(R, k, pdf, words) for k in R.kids(i))
+    bridge = f'<div class="bridge"><b>To the next section</b><p>{m(s["bridge"])}</p></div>' if s.get("bridge") else ""
     w = " ".join(f"{n}{v}" for n, v in zip(("math", "code", "fig"), s.get("weights", [0, 0, 0])))
     kinds = " ".join(badge(c["kind"]) for c in s.get("code", []) if c.get("kind") != "none")
     return (f'<details class="blk" id="sec-{i}"><summary>§{i} {esc(s["title"])} <span class="muted small">{pages(s)} {w}</span> {kinds}'
-            f'<div class="small" style="font-weight:400">{m(s.get("sell", ""))}</div></summary><div class="inner">{"".join(parts)}{kids}</div></details>')
+            f'<div class="small" style="font-weight:400">{m(s.get("sell", ""))}</div></summary><div class="inner">{"".join(parts)}{kids}{bridge}</div></details>')
 
 
 def build_html(R, pdf=None):
@@ -219,8 +232,13 @@ def lst(R, x, tag, litdir):
 
 def card_tex(R, s, litdir):
     L = [r"\par\medskip\noindent{\large\bfseries \S%s Code: Steps%s}\par" % (s["id"], " and comparison" if s.get("comparison") else " (no comparison)")]
+    if s.get("flow"): L.append(r"\par{\small\textbf{What this code solves.} %s}\par" % tx(s["flow"]))
     for st in s["steps"]:
-        L += [r"\par\smallskip\noindent\textbf{%s}\quad %s\par" % (tx(st["title"]), tx(st["what"])), lst(R, (st["file"], st["first"], st["last"]), "", litdir), r"\par{\small\textbf{Math:} %s}\par" % tx(st["math"])]
+        L += [r"\par\smallskip\noindent\textbf{%s}\quad %s\par" % (tx(st["title"]), tx(st["what"])), lst(R, (st["file"], st["first"], st["last"]), "", litdir)]
+        if st.get("lines"): L.append(r"\par{\small\textbf{Reading the lines}}\begin{itemize}\footnotesize" + "".join(r"\item line %s: %s" % (a, tx(b)) for a, b in st["lines"]) + r"\end{itemize}")
+        if st.get("apis"): L.append(r"\par{\small\textbf{Functions used}}\begin{itemize}\footnotesize" + "".join(r"\item \texttt{%s}\ \texttt{%s}: returns %s; note: %s%s" % (tx(x["name"]), tx(x.get("sig", "")), tx(x.get("ret", "")), tx(x.get("note", "")), (r" {\scriptsize %s}" % tx(x["quote"])) if x.get("quote") else "") for x in st["apis"]) + r"\end{itemize}")
+        L.append(r"\par{\small\textbf{Math:} %s}\par" % tx(st["math"]))
+    if s.get("after"): L.append(r"\par{\small\textbf{Meaning of the result.} %s}\par" % tx(s["after"]))
     cm = s.get("comparison")
     if cm:
         L.append(r"\par\medskip\noindent\textbf{%s}\par{\small %s}\par" % (tx(cm["title"]), tx(summary(cm))))
@@ -242,7 +260,8 @@ def panel_tex(R, s):
     rows.append(("Code", "; ".join(f"[{KIND.get(c['kind'], c['kind'])}] {tx(c['name'])}" for c in cd) or "none"))
     head = r"{\small\bfseries Section structure: \S%s %s (%s)}" % (s["id"], tx(s["title"]), pages(s))
     body = "".join(f"{k} & {v} \\\\[2pt]\n" for k, v in rows)
-    return (r"\par\medskip\noindent\begin{tcolorbox}[colback=black!2,boxrule=0.4pt,fontupper=\small]" + head + r"\par\smallskip\begin{tabular}{@{}>{\raggedright\bfseries}p{2.4cm}@{\hspace{4pt}}>{\raggedright\arraybackslash}p{12.6cm}@{}}" + body + r"\end{tabular}\end{tcolorbox}\par\medskip")
+    lead = (r"\par\medskip\noindent{\small\textbf{Entrance.} %s}\par" % tx(s["lead"])) if s.get("lead") else ""
+    return (lead + r"\par\medskip\noindent\begin{tcolorbox}[colback=black!2,boxrule=0.4pt,fontupper=\small]" + head + r"\par\smallskip\begin{tabular}{@{}>{\raggedright\bfseries}p{2.4cm}@{\hspace{4pt}}>{\raggedright\arraybackslash}p{12.6cm}@{}}" + body + r"\end{tabular}\end{tcolorbox}\par\medskip")
 
 
 def main(argv=None):
@@ -254,6 +273,12 @@ def main(argv=None):
     for s in R.S:
         (out / "panels" / f"p{s['id']}.tex").write_text(panel_tex(R, s) + "\n")
         if s.get("steps"): (out / "codecards" / f"c{s['id']}.tex").write_text(card_tex(R, s, out / "lit") + "\n")
+        if s.get("glossary"):
+            (out / "glossary").mkdir(exist_ok=True)
+            rows = "".join(f"{tx(w)} & {tx(d)} & {tx(wh)} & {tx(fl)} \\\\\n" for w, d, wh, fl in s["glossary"])
+            (out / "glossary" / f"g{s['id']}.tex").write_text(r"{\footnotesize\begin{longtable}{@{}p{2.8cm}p{9.2cm}p{1.8cm}p{1.2cm}@{}}\toprule term&explanation and use&where&field\\\midrule\endhead" + "\n" + rows + r"\bottomrule\end{longtable}}" + "\n")
+        if s.get("bridge"):
+            (out / "bridge").mkdir(exist_ok=True); (out / "bridge" / f"br{s['id']}.tex").write_text(r"\par\medskip\noindent{\small\textbf{To the next section.} %s}\par" % tx(s["bridge"]) + "\n")
     print(f"built {len(R.S)} sections -> {out}")
 
 

@@ -36,6 +36,16 @@
    "heading_word": "Introduction",
    "translation": [
     "(faithful translation of section 1 goes here)"
+   ],
+   "lead": "This survey asks why values on a graph should be smoothed. Nothing is assumed yet; the next section gives the operation that does it.",
+   "bridge": "Section 2 defines the averaging step used throughout.",
+   "glossary": [
+    [
+     "graph smoothing",
+     "Replacing each node's value by something closer to its neighbours'; it removes noise that varies quickly between neighbours.",
+     "§1 (p.1)",
+     "statistics"
+    ]
    ]
   },
   {
@@ -91,7 +101,17 @@
      "file": "code/avg.py",
      "first": 2,
      "last": 3,
-     "math": "$N_i$"
+     "math": "$N_i$",
+     "lines": [
+      [
+       2,
+       "`neighbours` returns the indices j with a non-zero entry in row i of A."
+      ],
+      [
+       3,
+       "The list comprehension keeps those j."
+      ]
+     ]
     },
     {
      "title": "Step 2 mean",
@@ -99,7 +119,26 @@
      "file": "code/avg.py",
      "first": 4,
      "last": 5,
-     "math": "Eq. (2): $x\\leftarrow D^{-1}Ax$"
+     "math": "Eq. (2): $x\\leftarrow D^{-1}Ax$",
+     "lines": [
+      [
+       4,
+       "`mean_step` defines one smoothing step."
+      ],
+      [
+       5,
+       "Sum the neighbours' values and divide by their count."
+      ]
+     ],
+     "apis": [
+      {
+       "name": "sum",
+       "sig": "sum(iterable)",
+       "ret": "the sum of the items",
+       "note": "Python built-in; works on a generator.",
+       "quote": "Return the sum of a 'start' value plus an iterable of numbers (Python docs, abridged)"
+      }
+     ]
     }
    ],
    "comparison": {
@@ -168,6 +207,18 @@
    "heading_word": "Neighbour",
    "translation": [
     "(faithful translation of section 2 goes here)"
+   ],
+   "lead": "Section 1 said neighbouring values should agree but not how to make them agree. Here the paper gives the simplest operation, averaging with the neighbours, shows what repeating it does, and prepares the weighted version.",
+   "bridge": "The weighted version reappears when edge weights matter.",
+   "flow": "The code computes one smoothing step in two ways: collect the neighbours, then take their (weighted) mean.",
+   "after": "The step is a matrix–vector product, so repeated steps damp high-frequency parts first.",
+   "glossary": [
+    [
+     "high frequency",
+     "A pattern that changes sign between neighbouring nodes; averaging cancels it fast, which is why smoothing removes noise.",
+     "Eq. (2), p.2",
+     "statistics"
+    ]
    ]
   }
  ],
@@ -176,7 +227,8 @@
    "page": 3,
    "what": "values before and after three averaging steps",
    "color": "blue = before, orange = after (caption)",
-   "color_checked": true
+   "color_checked": true,
+   "text": "Read the blue points as the values before smoothing and the orange points as the values after three steps; the orange curve is visibly smoother, and the largest change happens where neighbours differ most."
   }
  },
  "edges": [

@@ -18,6 +18,8 @@ ledgers cannot disagree. Fields:
 | question, answer, evidence | what the section asks, claims, and rests on; each with a page locator |
 | selling point | the one thing a reader should carry away |
 | weights | (math, code, figures), 0–3; the format is common, only the weights differ |
+| lead, bridge | paragraphs for how the section follows from the previous one and what it hands on |
+| glossary | terms of the section: plain explanation and what the term is good for, where, field |
 | figures, code, materials | references; a material has a state (held, alternative only, requested, paid, not applicable) |
 
 Edges between sections (what a section hands on) live in **one list** `(from, to, what)`; each
@@ -39,7 +41,7 @@ A record field is a claim about the paper. Check each against the page it cites:
 
 ## Code per section
 
-Every section that has code gets its **Steps** and, when a predecessor exists, a comparison card
+Every section that has code gets a flow paragraph, its **Steps** (each read line by line, with the specification of the functions it calls), an account of what the result means, and, when a predecessor exists, a comparison card
 ([comparison](../../reading-companion/references/comparison.md)); a section without a
 predecessor says "no comparison" with the reason and still gives its Steps. Original, author or
 official code is the main code. AI-written code is allowed only where no original can be

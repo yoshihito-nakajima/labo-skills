@@ -39,6 +39,11 @@ def check(rec):
         i = s["id"]
         if not s.get("evidence") or not LOC.search(s["evidence"]):
             err.append(f"{i}: evidence lacks a page locator (p. N)")
+        for k in ("lead", "bridge"):
+            if not s.get(k) and not (k == "bridge" and not any(e[0] == i for e in rec.get("edges", []))):
+                warn.append(f"{i}: no '{k}' paragraph (entrance and bridge carry the connections)")
+        if not s.get("glossary") and s.get("weights", [1])[0] + s.get("weights", [0, 1])[1] > 0:
+            warn.append(f"{i}: no glossary (terms and what they are good for)")
         if not s.get("answer") or not s.get("question"):
             err.append(f"{i}: question and answer are required")
         a, b = s["pages"]
@@ -62,7 +67,12 @@ def check(rec):
                 err.append(f"{i}: a code section needs Steps")
             if not s.get("comparison") and not s.get("no_comparison_reason"):
                 err.append(f"{i}: needs a comparison or a reasoned 'no_comparison_reason'")
+            for k in ("flow", "after"):
+                if not s.get(k):
+                    warn.append(f"{i}: code section lacks '{k}' (what the code solves / what the result means)")
             for st in s.get("steps", []):
+                if not st.get("lines"):
+                    warn.append(f"{i}: step {st.get('title')!r} has no line-by-line reading")
                 for k in ("title", "what", "file", "first", "last", "math"):
                     if k not in st:
                         err.append(f"{i}: step {st.get('title')!r} lacks {k!r}")
