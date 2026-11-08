@@ -17,9 +17,14 @@ CHECKOUT = Path(__file__).resolve().parents[1]
 @unittest.skipUnless(shutil.which("git"), "Git is required for actual submodule tests")
 class DistributedHostTests(unittest.TestCase):
     def git(self, cwd, *args):
-        return subprocess.run(["git", "-C", str(cwd), "-c", "commit.gpgsign=false",
-                               "-c", "user.name=Host Test", "-c", "user.email=host@example.invalid",
-                               *args], check=True, capture_output=True, text=True).stdout.strip()
+        # A local clone must see a stable object store. Detached auto-maintenance
+        # can repack/delete loose objects while the next fixture command copies them.
+        result = subprocess.run(["git", "-C", str(cwd), "-c", "maintenance.auto=false",
+                                 "-c", "commit.gpgsign=false", "-c", "user.name=Host Test",
+                                 "-c", "user.email=host@example.invalid", *args],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+        return result.stdout.strip()
 
     def invoke(self, workspace, script, cwd, host):
         return subprocess.run([sys.executable, "-B", "-I", str(script), "--workspace", str(workspace),
