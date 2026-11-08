@@ -71,6 +71,27 @@ Three layers, all hand-written and checked like any claim:
 - `block[ID]`: `role` and the `diffs` it answers; `step[ID.n]`: `why` this step is needed here and the `diffs` it serves.
   "Used by" and "relies on" lists are computed from the citations, not written.
 
+## Review layer (review.json, optional)
+
+The reading page and the PDF show what was reviewed, how far it holds and what looks risky, in three places: a front
+section "査読の結果と、危うい点", a box per block, and a line in each step's context box. Everything is written in
+`review.json` (set `"review"` in `book.json`); `check` verifies ids, levels and statuses.
+
+- `verdict`: `summary` (the range actually checked, never "correct"), `cannot_say` (limits: language-model checkers,
+  no formal check, prior art unsettled), `indicator` (`label`, `why`; rule-capped).
+- `panel`: one entry per independent viewpoint: `key` (`audit`, `counter`, `numeric`, `prior`, `hostile`, ...),
+  `short`, `title`, `how`, `what`, `covers` (block ids or step ids), `result`. The step line "検査 ... 数値確認" is
+  computed from `covers`; a step outside every `numeric` entry is shown as "未実施（解析的な段）".
+- `risks`: `id`, `level` (`high|mid|low`), `title`, `why`, `safe_if` (what would settle it), `where` (step ids).
+- `findings`: `id`, `level` (`major|minor|expr`), `status` (`fixed|supplement|open|noted`), `where`, `text`, `fix`,
+  `source`, `certain` (false = suspected). `fixed` = the blocks were changed; `supplement` = not repairable on the page,
+  the manuscript needs the change (also write it under `supplements`); `open` = unresolved.
+- `supplements`: what the manuscript itself should say; `block[ID]`: a one-line note per block.
+
+Loop to run before building: independent panel -> parent merges findings (confirmed vs suspected) -> repair the blocks
+and re-check the repaired lines with a fresh checker (at most three rounds) -> whatever cannot be repaired becomes a
+`supplement` or `open` finding. Never change the manuscript's claim to make a line pass; report it.
+
 ## Writing the derivation: how to avoid gaps
 
 - Every formula change is a line; the lead says which rule, which earlier line, which hypothesis. If a reader could not
@@ -89,7 +110,7 @@ Three layers, all hand-written and checked like any claim:
    (see [proof-adversarial-review](../../proof-adversarial-review/SKILL.md), role "line-by-line audit" / "independent verification")
    with the manuscript as authority; ask for line-level findings with severity. Fix, rebuild, and keep the report in the
    project's private review folder. A second pass of the same kind checks `context.json` against the manuscript.
-4. Say what was and was not checked: hand computation by language models is not a formal proof.
+4. Fill `review.json` (above) so the page itself says what was and was not checked: hand computation by language models is not a formal proof.
 
 ## Limits
 

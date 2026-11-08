@@ -37,6 +37,7 @@ BLOCKS_DIR = pathlib.Path(".")
 LEDGER = {}
 CTX = {"page": {}, "diffs": {}, "block": {}, "step": {}}
 PREFIX = "proof"
+REVIEW = {}   # review.json: verdict, panel, risks, findings, supplements (optional)
 
 ID_LINE = re.compile(r"(?<![\w.])([A-Z]\.\d+\.\d+)(?![\w]|\.\d)")
 ID_STEP = re.compile(r"(?<![\w.])([A-Z]\.\d+)(?![\w]|\.\d)")
@@ -173,14 +174,174 @@ def step_ctx(st, here_block, merged, uses, used_by):
         rows.append("<div><b>前提にする段</b>　%s</div>" % "　".join(step_link(x, here_block, merged) for x in uses[st["id"]]))
     if cls:
         rows.append('<div class="lab"><b>分類</b>　台帳 %s：%s</div>' % (E(st.get("ledger", "")), E(cls)))
+    rv = rv_step_html(st["id"], merged)
+    if rv:
+        rows.append(rv)
     return '<div class="ctx">%s</div>' % "".join(rows) if rows else ""
 
 
 def block_ctx(blk, merged):
     role, ds = block_ctx_data(blk["id"])
+    rv = rv_block_html(blk["id"], merged)
     if not role:
+        return rv
+    return '<div class="card ctxb"><p><b>このブロックの役割</b>　%s　%s</p></div>' % (to_html(role), diff_chips(ds, merged)) + rv
+
+
+# ---------------------------------------------------------------- review layer (review.json)
+LEVEL = {"major": "要修正", "minor": "軽微", "expr": "表現"}
+STATUS = {"fixed": ("直した", "ok"), "supplement": ("補足を載せた", "warn"), "open": ("未解決", "bad"), "noted": ("注記のみ", "note")}
+RISK = {"high": "高", "mid": "中", "low": "低"}
+
+
+def _covers(sid, covers):
+    return any(sid == c or sid.startswith(c + ".") for c in covers)
+
+
+def rv_step(sid):
+    """(roles covering the step, findings on it, risks on it)"""
+    if not REVIEW:
+        return [], [], []
+    roles = [p for p in REVIEW.get("panel", []) if _covers(sid, p.get("covers", []))]
+    finds = [f for f in REVIEW.get("findings", []) if any(_covers(sid, [w]) or w == sid for w in f.get("where", []))]
+    risks = [r for r in REVIEW.get("risks", []) if any(w == sid for w in r.get("where", []))]
+    return roles, finds, risks
+
+
+def rv_ref(kind, ident, merged):
+    base = "" if merged else "%s.html" % PREFIX
+    return "%s#%s-%s" % (base, kind, ident)
+
+
+def rv_step_html(sid, merged):
+    roles, finds, risks = rv_step(sid)
+    if not REVIEW:
         return ""
-    return '<div class="card ctxb"><p><b>このブロックの役割</b>　%s　%s</p></div>' % (to_html(role), diff_chips(ds, merged))
+    pn = {p["key"]: p for p in REVIEW.get("panel", [])}
+    done = [p for p in roles if p["key"] != "numeric"]
+    num = any(p["key"] == "numeric" for p in roles)
+    bits = ["%s %s" % ("検査", "・".join(E(p["short"]) for p in done) or "なし")]
+    bits.append("数値確認：<b>%s</b>" % ("実施（違反なし）" if num else "未実施（解析的な段）"))
+    chips = "".join('<a class="fchip st-%s" href="%s" title="%s">%s・%s・%s</a>' % (
+        STATUS[f["status"]][1], rv_ref("find", f["id"], merged), E(f["text"]), E(f["id"]), LEVEL[f["level"]], STATUS[f["status"]][0]) for f in finds)
+    rchips = "".join('<a class="fchip rk-%s" href="%s" title="%s">危うい点 %s（%s）</a>' % (r["level"], rv_ref("risk", r["id"], merged), E(r["title"]), E(r["id"]), RISK[r["level"]]) for r in risks)
+    tail = chips + rchips if (chips or rchips) else "指摘なし"
+    return '<div class="rv"><b>査読</b>　%s　／　指摘：%s</div>' % ("　／　".join(bits), tail)
+
+
+def rv_block_html(bid, merged):
+    if not REVIEW:
+        return ""
+    fs = [f for f in REVIEW.get("findings", []) if any(w.split(".")[0] == bid for w in f.get("where", []))]
+    rs = [r for r in REVIEW.get("risks", []) if any(w.split(".")[0] == bid for w in r.get("where", []))]
+    cnt = {}
+    for f in fs:
+        cnt[f["status"]] = cnt.get(f["status"], 0) + 1
+    sm = "、".join("%s %d 件" % (STATUS[k][0], v) for k, v in cnt.items()) or "指摘なし"
+    note = REVIEW.get("block", {}).get(bid, "")
+    base = "" if merged else "%s.html" % PREFIX
+    return '<div class="card rv"><p><b>このブロックの査読</b>　指摘 %d 件（%s）、危うい点 %d 件。%s　<a class="xb" href="%s#review">査読の結果（全体）</a></p></div>' % (len(fs), sm, len(rs), to_html(note) if note else "", base)
+
+
+def rv_front_html(order, merged):
+    if not REVIEW:
+        return ""
+    v = REVIEW.get("verdict", {})
+    H = ['<section class="blk" id="review"><h2 id="blk-review">査読の結果と、危うい点</h2>']
+    H.append('<div class="card key"><p><b>結論（検査した範囲）</b>　%s</p>%s</div>' % (
+        to_html(v.get("summary", "")), "".join('<p class="lab">%s</p>' % to_html(t) for t in v.get("cannot_say", []))))
+    ind = v.get("indicator")
+    if ind:
+        H.append('<div class="card"><p><b>論文になりそうかの指標（上限つき・暫定）</b>　<b>%s</b>　%s</p></div>' % (E(ind["label"]), to_html(ind["why"])))
+    H.append("<details open><summary><b>誰がどこまで調べたか</b></summary>")
+    for p in REVIEW.get("panel", []):
+        H.append('<div class="card"><p><b>%s</b>　<span class="lab">%s</span></p><p>%s</p><p class="lab">範囲：%s</p><p><b>結果</b>　%s</p></div>' % (
+            E(p["title"]), E(p.get("how", "")), to_html(p.get("what", "")), E("、".join(p.get("covers", [])) or "全体"), to_html(p["result"])))
+    H.append("</details>")
+    H.append("<details open><summary><b>何が危うそうか（重い順）</b></summary>")
+    order_r = {"high": 0, "mid": 1, "low": 2}
+    for r in sorted(REVIEW.get("risks", []), key=lambda r: (order_r[r["level"]], r["id"])):
+        where = "　".join(step_link(w, "", True) if "." in w else '<a class="xb" href="#blk-%s">%s</a>' % (w, w) for w in r.get("where", []))
+        H.append('<div class="card rcard rk-%s" id="risk-%s"><p><b>%s　%s</b>　<span class="fchip rk-%s">危うさ：%s</span></p><p>%s</p><p><b>これが確かめられれば安心できる</b>　%s</p><p class="lab">該当：%s</p></div>' % (
+            r["level"], E(r["id"]), E(r["id"]), E(r["title"]), r["level"], RISK[r["level"]], to_html(r["why"]), to_html(r["safe_if"]), where))
+    H.append("</details>")
+    H.append("<details open><summary><b>指摘の一覧と、その直し方</b></summary>")
+    lo = {"major": 0, "minor": 1, "expr": 2}
+    for f in sorted(REVIEW.get("findings", []), key=lambda f: (lo[f["level"]], f["id"])):
+        where = "　".join(step_link(w, "", True) if "." in w else E(w) for w in f.get("where", []))
+        H.append('<div class="card fcard st-%s" id="find-%s"><p><b>%s</b>　<span class="fchip st-%s">%s</span>　<span class="lab">%s・%s・出所：%s</span></p><p>%s</p><p><b>%s</b>　%s</p><p class="lab">該当：%s</p></div>' % (
+            STATUS[f["status"]][1], E(f["id"]), E(f["id"]), STATUS[f["status"]][1], STATUS[f["status"]][0], LEVEL[f["level"]],
+            "確定" if f.get("certain", True) else "疑い", E(f.get("source", "")), to_html(f["text"]), "どう直したか" if f["status"] == "fixed" else "補足", to_html(f["fix"]), where))
+    H.append("</details>")
+    if REVIEW.get("supplements"):
+        H.append("<details open><summary><b>原稿そのものへの補足（直せなかった点）</b></summary>")
+        for sp in REVIEW["supplements"]:
+            H.append('<div class="card"><p><b>%s</b></p><p>%s</p></div>' % (E(sp["title"]), to_html(sp["text"])))
+        H.append("</details>")
+    H.append("</section>")
+    return "\n".join(H)
+
+
+def rv_tex_row(sid):
+    if not REVIEW:
+        return ""
+    roles, finds, risks = rv_step(sid)
+    done = [p for p in roles if p["key"] != "numeric"]
+    num = any(p["key"] == "numeric" for p in roles)
+    ch = "".join(r"\hyperref[find-%s]{\textcolor{%s}{[%s・%s]}}~" % (f["id"], {"ok": "green!50!black", "warn": "orange!80!black", "bad": "red", "note": "gray"}[STATUS[f["status"]][1]], f["id"], LEVEL[f["level"]]) for f in finds)
+    ch += "".join(r"\hyperref[risk-%s]{\textcolor{red!70!black}{[危うい点~%s]}}~" % (r["id"], r["id"]) for r in risks)
+    return r"\textbf{\textcolor{blue}{査読}}\quad 検査：%s\quad 数値確認：\textbf{%s}\quad 指摘：%s\par" % (
+        to_tex("・".join(p["short"] for p in done) or "なし"), "実施（違反なし）" if num else "未実施（解析的な段）", ch or "なし")
+
+
+def rv_tex_block(bid):
+    if not REVIEW:
+        return ""
+    fs = [f for f in REVIEW.get("findings", []) if any(w.split(".")[0] == bid for w in f.get("where", []))]
+    rs = [r for r in REVIEW.get("risks", []) if any(w.split(".")[0] == bid for w in r.get("where", []))]
+    cnt = {}
+    for f in fs:
+        cnt[f["status"]] = cnt.get(f["status"], 0) + 1
+    sm = "、".join("%s %d 件" % (STATUS[k][0], v) for k, v in cnt.items()) or "指摘なし"
+    note = REVIEW.get("block", {}).get(bid, "")
+    return r"\begin{tcolorbox}[colback=green!3,colframe=green!30!black!40,boxrule=.4pt,left=5pt,right=5pt,top=2pt,bottom=2pt,fontupper=\small]\textbf{このブロックの査読}\quad 指摘 %d 件（%s）、危うい点 %d 件。%s\quad\hyperref[review]{査読の結果（全体）}\end{tcolorbox}" % (len(fs), to_tex(sm), len(rs), to_tex(note))
+
+
+def rv_tex_chapter(order):
+    if not REVIEW:
+        return []
+    v = REVIEW.get("verdict", {})
+    A = []
+    a = A.append
+    a(r"\clearpage\phantomsection\hypertarget{review}{}\label{review}\section*{査読の結果と、危うい点}\addcontentsline{toc}{section}{査読の結果と、危うい点}")
+    a(r"\begin{tcolorbox}[colback=blue!4,colframe=blue!30,boxrule=.4pt,breakable,left=5pt,right=5pt,top=2pt,bottom=2pt]\textbf{結論（検査した範囲）}\quad %s\par %s\end{tcolorbox}" % (to_tex(v.get("summary", "")), "".join(r"{\small %s}\par " % to_tex(t) for t in v.get("cannot_say", []))))
+    ind = v.get("indicator")
+    if ind:
+        a(r"\textbf{論文になりそうかの指標（上限つき・暫定）}\quad \textbf{%s}\quad %s\par" % (to_tex(ind["label"]), to_tex(ind["why"])))
+    a(r"\paragraph{\textcolor{blue}{誰がどこまで調べたか}}")
+    for p in REVIEW.get("panel", []):
+        a(r"\begin{tcolorbox}[colback=white,colframe=gray!40,boxrule=.4pt,breakable,left=5pt,right=5pt,top=2pt,bottom=2pt,fontupper=\small]\textbf{%s}\quad{\footnotesize %s}\par %s\par\textbf{範囲}：%s\par\textbf{結果}\quad %s\end{tcolorbox}" % (
+            to_tex(p["title"]), to_tex(p.get("how", "")), to_tex(p.get("what", "")), to_tex("、".join(p.get("covers", [])) or "全体"), to_tex(p["result"])))
+    a(r"\paragraph{\textcolor{blue}{何が危うそうか（重い順）}}")
+    order_r = {"high": 0, "mid": 1, "low": 2}
+    col = {"high": "red!8", "mid": "orange!8", "low": "yellow!8"}
+    for r in sorted(REVIEW.get("risks", []), key=lambda r: (order_r[r["level"]], r["id"])):
+        where = "\\quad ".join(r"\hyperref[%s]{%s}" % (w, w) for w in r.get("where", []))
+        a(r"\phantomsection\hypertarget{risk-%s}{}\label{risk-%s}\begin{tcolorbox}[colback=%s,colframe=red!30,boxrule=.4pt,breakable,left=5pt,right=5pt,top=2pt,bottom=2pt,fontupper=\small]\textbf{%s\quad %s}\quad（危うさ：%s）\par %s\par\textbf{これが確かめられれば安心できる}\quad %s\par{\footnotesize 該当：%s}\end{tcolorbox}" % (
+            r["id"], r["id"], col[r["level"]], r["id"], to_tex(r["title"]), RISK[r["level"]], to_tex(r["why"]), to_tex(r["safe_if"]), where))
+    a(r"\paragraph{\textcolor{blue}{指摘の一覧と、その直し方}}")
+    lo = {"major": 0, "minor": 1, "expr": 2}
+    colf = {"ok": "green!6", "warn": "orange!8", "bad": "red!8", "note": "gray!8"}
+    for f in sorted(REVIEW.get("findings", []), key=lambda f: (lo[f["level"]], f["id"])):
+        where = "\\quad ".join(r"\hyperref[%s]{%s}" % (w, w) if "." in w else to_tex(w) for w in f.get("where", []))
+        a(r"\phantomsection\hypertarget{find-%s}{}\label{find-%s}\begin{tcolorbox}[colback=%s,colframe=gray!45,boxrule=.4pt,breakable,left=5pt,right=5pt,top=2pt,bottom=2pt,fontupper=\small]\textbf{%s}\quad[%s・%s・%s]\quad{\footnotesize 出所：%s}\par %s\par\textbf{%s}\quad %s\par{\footnotesize 該当：%s}\end{tcolorbox}" % (
+            f["id"], f["id"], colf[STATUS[f["status"]][1]], f["id"], STATUS[f["status"]][0], LEVEL[f["level"]], "確定" if f.get("certain", True) else "疑い",
+            to_tex(f.get("source", "")), to_tex(f["text"]), "どう直したか" if f["status"] == "fixed" else "補足", to_tex(f["fix"]), where))
+    if REVIEW.get("supplements"):
+        a(r"\paragraph{\textcolor{blue}{原稿そのものへの補足（直せなかった点）}}")
+        for sp in REVIEW["supplements"]:
+            a(r"\begin{tcolorbox}[colback=orange!5,colframe=orange!35,boxrule=.4pt,breakable,left=5pt,right=5pt,top=2pt,bottom=2pt,fontupper=\small]\textbf{%s}\par %s\end{tcolorbox}" % (to_tex(sp["title"]), to_tex(sp["text"])))
+    return A
 
 
 # ---------------------------------------------------------------- text helpers
@@ -360,6 +521,9 @@ def ctx_tex(st, uses, used_by):
         rows.append(r"\textbf{\textcolor{blue}{前提にする段}}\quad %s\par" % r"\quad ".join(r"\hyperref[%s]{%s}" % (x, x) for x in uses[st["id"]]))
     if led:
         rows.append(r"\textbf{\textcolor{blue}{分類}}\quad 台帳 %s：%s・%s（暫定）\par" % (st.get("ledger", ""), TIER.get(led.get("tier"), "?"), ORIGIN.get(led.get("origin"), "?")))
+    rv = rv_tex_row(st["id"])
+    if rv:
+        rows.append(rv)
     return (r"\begin{tcolorbox}[colback=blue!4,colframe=blue!25,boxrule=.4pt,left=5pt,right=5pt,top=2pt,bottom=2pt,breakable,fontupper=\small]" + "\n".join(rows) + r"\end{tcolorbox}") if rows else ""
 
 
@@ -416,6 +580,8 @@ def render_tex_all(blocks, html_path, refs, uses, used_by, order, title="証明"
     a(r"\paragraph{\textcolor{blue}{戦略（原稿が主張する工夫）}}")
     for t in CTX["page"].get("strategy", []):
         a(to_tex(t) + r"\par")
+    for line in rv_tex_chapter(order):
+        a(line)
     for blk in blocks:
         role, ds = block_ctx_data(blk["id"])
         a(r"\clearpage")
@@ -425,6 +591,7 @@ def render_tex_all(blocks, html_path, refs, uses, used_by, order, title="証明"
         a(r"{\small 原稿：%s}\par" % to_tex(blk.get("loc", "")))
         if role:
             a(r"\begin{tcolorbox}[colback=blue!4,colframe=blue!25,boxrule=.4pt,left=5pt,right=5pt,top=2pt,bottom=2pt,fontupper=\small]\textbf{\textcolor{blue}{このブロックの役割}}\quad %s %s\end{tcolorbox}" % (to_tex(role), "".join(r"\hyperref[diff-%d]{\textcolor{orange!70!black}{[難所~%d]}}~" % (n, n) for n in ds)))
+        a(rv_tex_block(blk["id"]))
         a(r"\textbf{主張}\quad " + to_tex(blk["claim"]) + r"\par")
         for it in blk["intro"]:
             a(to_tex(it["text"]) + r"\par")
@@ -485,6 +652,17 @@ body.hide-ctx .ctx{display:none}
 p.narr{background:#fbfbf4;border-left:4px solid #e3e2c8;padding:.45em .9em;margin:.9em 0;font-size:15px;color:#33405a}
 body.hide-narr p.narr{display:none}
 p.prose{margin:.8em 0}
+.rv{margin:.4em 0;padding:.35em .8em;background:#eef8f0;border:1px solid #cfe7d5;border-radius:8px;font-size:14px;line-height:1.7}
+.fchip{display:inline-block;margin:0 .25em;padding:0 7px;border-radius:10px;font-size:12px;text-decoration:none;border:1px solid #ccc;background:#f4f4f4;color:#333}
+.fchip.st-ok{background:#e1f4e5;border-color:#a8d5b1;color:#17692b}
+.fchip.st-warn{background:#fdeccf;border-color:#e7c98f;color:#8a5200}
+.fchip.st-bad{background:#fbdcdc;border-color:#e3a3a3;color:#9b1c1c}
+.fchip.rk-high{background:#fbdcdc;border-color:#e3a3a3;color:#9b1c1c}
+.fchip.rk-mid{background:#fdeccf;border-color:#e7c98f;color:#8a5200}
+.fchip.rk-low{background:#fff7cf;border-color:#e8dc9a;color:#6b5a00}
+.rcard{border-left:5px solid #e3a3a3}.rcard.rk-mid{border-left-color:#e7c98f}.rcard.rk-low{border-left-color:#e8dc9a}
+.fcard.st-ok{border-left:5px solid #a8d5b1}.fcard.st-warn{border-left:5px solid #e7c98f}.fcard.st-bad{border-left:5px solid #e3a3a3}
+.card.rv,.rv .card{background:#eef8f0}
 </style>"""
 
 
@@ -609,6 +787,10 @@ def load_project(project):
     CTX["diffs"] = {int(k): v for k, v in raw.get("diffs", {}).items()}
     CTX["block"] = raw.get("block", {})
     CTX["step"] = raw.get("step", {})
+    rp = project / cfg.get("review", "review.json")
+    REVIEW.clear()
+    if rp.exists():
+        REVIEW.update(json.loads(rp.read_text(encoding="utf-8")))
     out = project / cfg.get("out", "out")
     out.mkdir(parents=True, exist_ok=True)
     return cfg, out
@@ -667,7 +849,7 @@ document.getElementById('narr').onclick=function(){document.body.classList.toggl
 function openTo(id){var t=document.getElementById(id);if(!t)return;var p=t;while(p){if(p.tagName==='DETAILS')p.open=true;p=p.parentElement;}
 t.scrollIntoView({block:'center'});t.classList.add('flash');setTimeout(function(){t.classList.remove('flash');},2500);}
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(a){e.preventDefault();var id=decodeURIComponent(a.getAttribute('href').slice(1));history.replaceState(null,'','#'+id);openTo(id);}});
-setTimeout(function(){document.querySelectorAll('#problem details').forEach(function(d){d.open=true;});},60);
+setTimeout(function(){document.querySelectorAll('#problem details,#review details').forEach(function(d){d.open=true;});},60);
 if(location.hash){openTo(decodeURIComponent(location.hash.slice(1)));}
 })();</script>"""
 
@@ -677,8 +859,11 @@ def write_combined(blocks, order, pdf_name, aux, per, title, out):
     MERGED = True
     body = ['<h1 id="top">%s</h1>' % E(title),
             '<p class="sub">全ブロックを 1 ページに並べた版。左の目次、または下の一覧から各ブロックへ移れる。各式の「PDF ↗」は、そのブロックの PDF の同じ式へ移る（PDF は同じフォルダに置いて使う）。他のブロックを引く箇所は、このページの中で移る。</p>']
-    chips = '<a class="pdfl" href="#blk-problem">この問題と難所</a>　' + "　".join('<a class="pdfl" href="#blk-%s">%s %s</a>' % (b["id"], b["id"], E(b["title"])) for b in blocks)
+    chips = '<a class="pdfl" href="#blk-problem">この問題と難所</a>　' + ('<a class="pdfl rvl" href="#blk-review">査読の結果と危うい点</a>　' if REVIEW else '') + "　".join('<a class="pdfl" href="#blk-%s">%s %s</a>' % (b["id"], b["id"], E(b["title"])) for b in blocks)
     body.append('<div class="card"><p><b>ブロック</b>　%s</p><p class="lab">読む順序は %s。</p></div>' % (chips, " → ".join(order)))
+    if REVIEW:
+        v = REVIEW.get("verdict", {})
+        body.append('<div class="card rv"><p><b>査読の要点</b>　%s　<a class="xb" href="#blk-review">詳しくは「査読の結果と危うい点」へ</a></p></div>' % to_html(v.get("summary", "")))
     if CTX["page"] or CTX["diffs"]:
         sec = ['<section class="blk" id="problem"><h2 id="blk-problem">この問題と、どこが難しいか</h2>']
         for head, key in (("問題設定", "setting"), ("何を示すか", "goal")):
@@ -695,6 +880,8 @@ def write_combined(blocks, order, pdf_name, aux, per, title, out):
             sec.append("<details open><summary><b>戦略</b></summary>%s</details>" % "".join('<p class="prose">%s</p>' % to_html(t) for t in CTX["page"]["strategy"]))
         sec.append("</section>")
         body.append("\n".join(sec))
+    if REVIEW:
+        body.append(rv_front_html(order, True))
     for i, blk in enumerate(blocks):
         refs, nums = per[blk["id"]]
         part = render_html(blk, pdf_name, aux, refs, nums, embed=True)
@@ -770,10 +957,39 @@ def build(project, builder=None):
     return out
 
 
+def review_problems(cfg):
+    """Consistency of review.json: allowed levels/statuses, required fields, every `where` is a step id (or free text for the manuscript)."""
+    if not REVIEW:
+        return []
+    steps = set()
+    for b in cfg["order"]:
+        steps |= {st["id"] for st in parse(BLOCKS_DIR / f"{b}.txt")["steps"]}
+    keys = {p["key"] for p in REVIEW.get("panel", [])}
+    bad = []
+    for f in REVIEW.get("findings", []):
+        if f.get("level") not in LEVEL or f.get("status") not in STATUS:
+            bad.append("%s: level/status" % f.get("id"))
+        for k in ("id", "text", "fix", "where"):
+            if not f.get(k):
+                bad.append("%s: missing %s" % (f.get("id"), k))
+        bad += ["%s: unknown step %s" % (f["id"], w) for w in f.get("where", []) if re.fullmatch(r"[A-Z]\.\d+", w) and w not in steps]
+    for r in REVIEW.get("risks", []):
+        if r.get("level") not in RISK:
+            bad.append("%s: level" % r.get("id"))
+        bad += ["%s: unknown step %s" % (r["id"], w) for w in r.get("where", []) if re.fullmatch(r"[A-Z]\.\d+", w) and w not in steps]
+    ids = [x["id"] for x in REVIEW.get("findings", []) + REVIEW.get("risks", [])]
+    bad += ["duplicate id %s" % i for i in set(ids) if ids.count(i) > 1]
+    if "numeric" not in keys:
+        bad.append("panel has no numeric entry (state that numeric check was not run, as a panel entry with key numeric and covers [])")
+    return bad
+
+
 def check(project):
     """Log, KaTeX render errors, dangling anchors, PDF margins and links.  Needs headless Chrome and PyMuPDF."""
     cfg, out = load_project(project)
     problems = 0
+    rp = review_problems(cfg)
+    print("review.json problems:", rp or "none"); problems += len(rp)
     log = (out / ".tex/.temp/main.log").read_text(errors="ignore")
     bad = [l for l in log.splitlines() if re.search(r"Undefined|Multiply|undefined|Overfull \\hbox \((\d{2,})|Token not allowed", l)]
     print("log problems:", bad[:6] or "none"); problems += len(bad)

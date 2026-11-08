@@ -229,6 +229,19 @@ class ProofBookTests(unittest.TestCase):
         p = self.pb.parse(self.pb.BLOCKS_DIR / "P.txt")
         self.assertEqual(self.pb.numbering(p)[1], {"P.1.1": "P.1.1"})
 
+    def test_review_json_renders_in_tex_and_html_and_is_checked(self):
+        self.pb.load_project(self.proj)
+        self.assertEqual(self.pb.review_problems(json.loads((self.proj / "book.json").read_text(encoding="utf-8"))), [])
+        q = self.pb.parse(self.pb.BLOCKS_DIR / "P.txt")
+        self.pb.USES.clear(); self.pb.USED_BY.clear()
+        tex = self.pb.rv_tex_chapter(["P", "Q"])
+        self.assertTrue(any("find-V1" in x for x in tex) and any("risk-R1" in x for x in tex))
+        self.assertIn("未実施", self.pb.rv_step_html("Q.1", True))
+        self.assertIn("実施（違反なし）", self.pb.rv_step_html("P.1", True))
+        self.assertIn('id="find-V1"', self.pb.rv_front_html(["P", "Q"], True))
+        self.pb.REVIEW["findings"][0]["where"] = ["P.9"]
+        self.assertTrue(self.pb.review_problems(json.loads((self.proj / "book.json").read_text(encoding="utf-8"))))
+
     def test_citing_a_fine_line_is_refused(self):
         self.pb.load_project(self.proj)
         f = self.pb.BLOCKS_DIR / "P.txt"

@@ -1,0 +1,71 @@
+{
+ "verdict": {
+  "summary": "見本：検査した範囲では誤りは見つからなかった。指摘 1 件は直した。",
+  "cannot_say": [
+   "見本の数値は架空である。"
+  ],
+  "indicator": {
+   "label": "見本（暫定）",
+   "why": "見本のため判定はしない。"
+  }
+ },
+ "panel": [
+  {
+   "key": "audit",
+   "short": "行監査",
+   "title": "行ごとの監査",
+   "how": "新しい文脈の検証者・手計算",
+   "what": "各行を導き直した。",
+   "covers": [
+    "P",
+    "Q"
+   ],
+   "result": "軽微 1 件。"
+  },
+  {
+   "key": "numeric",
+   "short": "数値",
+   "title": "数値確認",
+   "how": "Python",
+   "what": "和の恒等式を数値で確かめた。",
+   "covers": [
+    "P.1"
+   ],
+   "result": "違反なし。"
+  }
+ ],
+ "risks": [
+  {
+   "id": "R1",
+   "level": "low",
+   "title": "見本の危うい点",
+   "why": "例示のため。",
+   "safe_if": "例示のため。",
+   "where": [
+    "Q.1"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "id": "V1",
+   "level": "minor",
+   "status": "fixed",
+   "where": [
+    "P.1"
+   ],
+   "text": "見本の指摘。",
+   "fix": "見本の直し方。",
+   "source": "行監査"
+  }
+ ],
+ "supplements": [
+  {
+   "title": "S1　見本の補足",
+   "text": "原稿そのものに書くべき補足の例。"
+  }
+ ],
+ "block": {
+  "P": "見本のブロック注記。"
+ }
+}

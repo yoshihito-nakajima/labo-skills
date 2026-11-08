@@ -56,6 +56,13 @@ two-block project is in `assets/proof-book-example`. Prototype one block first, 
 the amount of narration and the layout, then extend to the other blocks. The PDF is for reading the derivation, not a
 paper; the HTML shows the main line and links to the PDF for lines too fine to print.
 
+In this mode the review is part of the page, not a separate report: run the independent panel
+([proof-adversarial-review](../proof-adversarial-review/SKILL.md), including a numerical check), **repair the blocks**
+for every finding that can be repaired (re-check repaired lines with a fresh checker, at most three rounds), turn what
+cannot be repaired into a supplement or an open finding, and record validity, risks, findings and limits in
+`review.json` (see the review layer in the proof book reference). The page then shows a front section with the
+range checked, the risk map and the findings with their fate, a box per block, and a review line in every step.
+
 ## Rules that keep the page honest
 
 - Every claim carries a locator in the source. Mark each statement as confirmed, suspected or
