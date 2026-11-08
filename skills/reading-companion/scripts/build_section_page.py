@@ -148,21 +148,43 @@ def read_words(pdf):
     return words
 
 
+def stitch(parts):
+    """Join per-page crops [(page, jpeg bytes)] into one tall image: the section's region in one place.
+    A thin dotted line and a small page label mark each page break. Needs Pillow."""
+    from PIL import Image, ImageDraw, ImageFont
+    import io
+    ims = [(p, Image.open(io.BytesIO(b)).convert("RGB")) for p, b in parts]
+    w = max(im.width for _, im in ims); canvas = Image.new("RGB", (w, sum(im.height for _, im in ims)), "white"); y = 0; dr = ImageDraw.Draw(canvas)
+    try: font = ImageFont.load_default(size=14)
+    except TypeError: font = ImageFont.load_default()
+    for n, (p, im) in enumerate(ims):
+        canvas.paste(im, (0, y))
+        if n:
+            for x in range(0, w, 12): dr.line([(x, y), (x + 6, y)], fill=(120, 140, 160))
+            dr.rectangle([w - 58, y, w, y + 18], fill=(235, 241, 247)); dr.text((w - 54, y + 1), f"p.{p}", fill=(60, 80, 100), font=font)
+        y += im.height
+    buf = io.BytesIO(); canvas.save(buf, "JPEG", quality=72)
+    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+
+
 def crops(R, s, pdf, words):
+    """Returns ([(first_page, data_uri, pages)], description): one stitched image for the whole region."""
     order = [x["id"] for x in R.S]; k = order.index(s["id"])
     st = locate(words, s["id"], s.get("heading_word", ""), *s["pages"])
     nxt = R.BY[order[k + 1]] if k + 1 < len(order) else None
     nx = locate(words, nxt["id"], nxt.get("heading_word", ""), *nxt["pages"]) if nxt else None
     if not st: return [], "heading not located; showing whole pages"
-    en = nx or (st[0], 800); out = []; sc = 110 / 72
+    en = nx or (st[0], 800); parts = []; sc = 110 / 72
     for p in range(st[0], en[0] + 1):
-        y0 = st[1] - 6 if p == st[0] else 70; y1 = en[1] - 6 if p == en[0] else 790
+        y0 = st[1] - 6 if p == st[0] else 70; y1 = en[1] - 6 if p == en[0] else 706
         if y1 - y0 < 14: continue
         with tempfile.TemporaryDirectory() as d:
             subprocess.run(["pdftoppm", "-r", "110", "-f", str(p), "-l", str(p), "-x", "60", "-y", str(int(y0 * sc)), "-W", str(int(480 * sc)), "-H", str(int((y1 - y0) * sc)), "-jpeg", str(pdf), d + "/x"], check=True, capture_output=True)
-            fn = sorted(os.listdir(d))[0]
-            out.append((p, "data:image/jpeg;base64," + base64.b64encode(open(d + "/" + fn, "rb").read()).decode()))
-    return out, f"from the heading of §{s['id']} on p.{st[0]} to the next heading"
+            parts.append((p, open(d + "/" + sorted(os.listdir(d))[0], "rb").read()))
+    if not parts: return [], "empty region"
+    try: uri = stitch(parts)
+    except ImportError: return [(p, "data:image/jpeg;base64," + base64.b64encode(b).decode(), [p]) for p, b in parts], "Pillow missing: pages shown separately"
+    return [(parts[0][0], uri, [p for p, _ in parts])], f"from the heading of §{s['id']} on p.{st[0]} to the next heading, as one continuous region"
 
 
 def orig_html(R, s, pdf, words):
@@ -171,7 +193,7 @@ def orig_html(R, s, pdf, words):
     elif s.get("translation"): tr = "".join(f"<p>{m(p)}</p>" for p in s["translation"])
     imgs, desc = ([], "")
     if pdf and s.get("heading_word"): imgs, desc = crops(R, s, pdf, words)
-    left = "".join(f'<figure><img src="{u}" alt="p.{p}"><figcaption>p.{p} (original, this section only)</figcaption></figure>' for p, u in imgs) or '<p class="muted">no original region (give --original and heading_word)</p>'
+    left = "".join(f'<div class="origscroll"><figure><img src="{u}" alt="p.{pl[0]}"><figcaption>p.{pl[0]}' + (f'-{pl[-1]}' if len(pl) > 1 else '') + ' (original, this section only; page breaks marked by dotted lines)</figcaption></figure></div>' for p, u, pl in imgs) + ('<button class="small" onclick="this.previousElementSibling.classList.toggle(\'full\')">expand / collapse the original column</button>' if imgs else '') or '<p class="muted">no original region (give --original and heading_word)</p>'
     return f'<div class="otgrid"><div><h4>Original</h4><p class="small muted">{esc(desc)}</p>{left}</div><div><h4>Faithful translation</h4>{tr or "<p class=muted>(none)</p>"}</div></div>'
 
 
@@ -179,7 +201,7 @@ CSS = """body{font-family:system-ui,sans-serif;max-width:1200px;margin:0 auto;pa
 .panel2 table{width:100%;border-collapse:collapse}.panel2 th{width:8rem;text-align:left;vertical-align:top;font-size:.85rem;color:#055}.by{font-size:.72rem;padding:0 .35rem;border-radius:3px;margin-right:.2rem;background:#eee}.by-author,.by-official{background:#d8f0dc}.by-lib{background:#e3eaf8}.by-ai{background:#fbe3d0}
 .cb{background:#fbfbfd;border:1px solid #dde;padding:.3rem .5rem;font-size:.78rem;overflow:auto;white-space:pre}.cb .ln{color:#999;margin-right:.5rem}.cb.same{background:#eef8ee}.cb.chg{background:#fff8dc}.cb.onl{background:#eaf1fb}.cb.none{color:#999}.step{border-left:3px solid #9bc;padding:0 .6rem;margin:.6rem 0}.cmprow{margin:.5rem 0;padding:.3rem .5rem;border-radius:4px}
 .cmprow.same{background:#f2faf2}.cmprow.chg{background:#fffbe9}.cmprow.onl{background:#f1f6fc}.cmpgrid,.otgrid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}.otgrid img{max-width:100%;border:1px solid #ccd}.stl{font-size:.75rem;padding:0 .4rem;border-radius:3px;font-weight:700}.stl.same{background:#bfe3c1}.stl.chg{background:#f3dd7c}.stl.onl{background:#b9d0ee}.muted{color:#777}.small{font-size:.85rem}
-.ledcard{border:1px solid #cdd;border-radius:6px;margin:.35rem 0;background:#fff}.ledcard>summary{cursor:pointer;padding:.35rem .6rem;background:#f6f9fa}.ledcard>.inner{padding:.4rem .8rem}.sumgist{font-weight:400;font-size:.88rem;color:#345}.ledctl{margin:.4rem 0}.gist{background:#eef7f3;border-left:3px solid #4a9;padding:.25rem .5rem}.gistlist{background:#f6faf8;border:1px solid #cde;border-radius:6px;padding:.3rem .7rem;margin:.4rem 0}.lead,.bridge,.flow{background:#f7fbf9;border-left:4px solid #6b9;padding:.4rem .8rem;margin:.5rem 0}.bridge,.flow.after{border-left-color:#c96;background:#fcf9f5}.apic{border:1px solid #dde;padding:.3rem .5rem;margin:.3rem 0;font-size:.88rem}.lines td{border:1px solid #eee;padding:.1rem .4rem}.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
+.ledcard{border:1px solid #cdd;border-radius:6px;margin:.35rem 0;background:#fff}.ledcard>summary{cursor:pointer;padding:.35rem .6rem;background:#f6f9fa}.ledcard>.inner{padding:.4rem .8rem}.sumgist{font-weight:400;font-size:.88rem;color:#345}.ledctl{margin:.4rem 0}.origscroll{max-height:85vh;overflow-y:auto;border:1px solid #ccd}.origscroll.full{max-height:none}.gist{background:#eef7f3;border-left:3px solid #4a9;padding:.25rem .5rem}.gistlist{background:#f6faf8;border:1px solid #cde;border-radius:6px;padding:.3rem .7rem;margin:.4rem 0}.lead,.bridge,.flow{background:#f7fbf9;border-left:4px solid #6b9;padding:.4rem .8rem;margin:.5rem 0}.bridge,.flow.after{border-left-color:#c96;background:#fcf9f5}.apic{border:1px solid #dde;padding:.3rem .5rem;margin:.3rem 0;font-size:.88rem}.lines td{border:1px solid #eee;padding:.1rem .4rem}.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
 
 
 def ledger_parts(R, s):

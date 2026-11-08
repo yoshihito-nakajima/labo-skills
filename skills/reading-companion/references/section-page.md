@@ -36,6 +36,12 @@ Both reader types enter the same way; the weights decide only what the reader op
   (located from word positions of the PDF text layer), not whole pages; embed the image directly
   (no lazy loading that depends on script events). When the heading cannot be located, show whole
   pages and say so.
+- **One region, one place.** When the section runs across pages, join the per-page crops into a single
+  continuous image (page breaks marked by a thin dotted line and a small page label; header and page number
+  trimmed away) with one caption giving the page range. Do not list one figure per page: a paragraph or
+  formula that crosses the break must read as one. Show it in a scroll area of about 85% of the screen height so that the original and the
+  translation can be read side by side, with a button that expands it. Stitching needs Pillow; without it the builder
+  shows the pages separately and says so.
 - Faithful translation is shown without commentary; reader's notes go in a separate collapsed
   block labelled as not the paper's statements. A heading with no body says so.
 - Check coverage: compare the translation length with the original's per section and read any
