@@ -104,15 +104,41 @@ def panel_html(R, s):
     row("Materials", "<br>".join(f'{esc(x["item"])}: <span class="mat {esc(x["state"])}">{esc(MATSTATE.get(x["state"], x["state"]))}</span> <span class="muted">{esc(x.get("note", ""))}</span>' for x in s.get("materials", [])) or "—")
     return f'<div class="panel2"><table>{"".join(rows)}</table></div>'
 
+def _overlap(x, f, a, b):
+    return bool(x) and not isinstance(x, dict) and x[0] == f and not (x[2] < a or x[1] > b)
+
+
+def compare_notes(R, cm, f, a, b):
+    """Notes for the comparison rows whose lines overlap f:a-b: the status and the counterpart lines on the other side."""
+    out = []
+    for r in (cm or {}).get("rows", []):
+        for mine, other, oname in ((r.get("left"), r.get("right"), cm["right"]["name"]), (r.get("right"), r.get("left"), cm["left"]["name"])):
+            if not _overlap(mine, f, a, b): continue
+            lab, cls = STATUS[r["status"]]
+            if not other: where = f"{m(oname)} has no corresponding lines"
+            elif isinstance(other, dict): where = f"in {m(oname)}: one line <code>{esc(other['lit'])}</code>"
+            else: where = f"{m(oname)}, <code>{esc(other[0])}</code> lines {other[1]}-{other[2]}"
+            out.append(f'<div class="cnote {cls}"><span class="stl {cls}">{lab}</span> <b>{esc(r["label"])}</b>. Counterpart: {where}. {m(r["why"])}</div>')
+            break
+    return "".join(out)
+
+
+def annotated_code(R, st, cm):
+    """Each note stands directly above the lines it explains; the comparison counterpart follows the note."""
+    f = st["file"]; L = R.lines(f, st["first"], st["last"]); out = []
+    for a, b, text in st["lines"]:
+        body = "\n".join(f'<span class="ln">{n}</span> {esc(L[n - st["first"]])}' for n in range(a, b + 1))
+        rng = f"line {a}" if a == b else f"lines {a}-{b}"
+        out.append(f'<div class="ablk"><div class="anote"><span class="alab">{rng}</span> {m(text)}</div>{compare_notes(R, cm, f, a, b)}<pre class="cb">{body}</pre></div>')
+    return f'<div class="acode">{"".join(out)}</div><div class="muted small">{esc(f)} {st["first"]}-{st["last"]} (notes are display only; the file is unchanged)</div>'
+
 
 def card_html(R, s):
     out = [f'<p>Steps below show verbatim lines; the math correspondence follows each code block.</p>']
-    if s.get("flow"): out.append(f'<div class="flow"><b>What this code solves (overall flow)</b><p>{m(s["flow"])}</p></div>')
+    if s.get("flow"): out.append(f'<details class="flow goal" open><summary><b>Goal of this code as a whole, and why this tool</b></summary><p>{m(s["flow"])}</p>' + (f'<p>{m(s["why"])}</p>' if s.get("why") else "") + '</details>')
     for st in s["steps"]:
-        ln = "".join(f'<tr><td class="small">line {a}</td><td>{m(b)}</td></tr>' for a, b in st.get("lines", []))
         ap = "".join(f'<div class="apic"><b><code>{esc(x["name"])}</code></b> <code class="small">{esc(x.get("sig", ""))}</code><br><b>returns:</b> {m(x.get("ret", ""))}<br><b>note:</b> {m(x.get("note", ""))}' + (f'<br><b>cost:</b> {m(x["cost"])}' if x.get("cost") else "") + (f'<div class="small muted">{esc(x["quote"])}</div>' if x.get("quote") else "") + '</div>' for x in st.get("apis", []))
-        out.append(f'<div class="step"><h4>{esc(st["title"])}</h4><p>{m(st["what"])}</p>{code_box(R, (st["file"], st["first"], st["last"]))}'
-                   + (f'<div class="lines"><b>Reading the lines</b><table>{ln}</table></div>' if ln else "")
+        out.append(f'<div class="step"><h4>{esc(st["title"])}</h4><p>{m(st["what"])}</p>{annotated_code(R, st, s.get("comparison"))}'
                    + (f'<details class="blk"><summary>Functions used in this Step ({len(st["apis"])})</summary><div class="inner">{ap}</div></details>' if ap else "")
                    + f'<p class="mapto"><b>Math:</b> {m(st["math"])}</p></div>')
     if s.get("after"): out.append(f'<div class="flow after"><b>Meaning of the result, and where it leads</b><p>{m(s["after"])}</p></div>')
@@ -201,7 +227,7 @@ CSS = """body{font-family:system-ui,sans-serif;max-width:1200px;margin:0 auto;pa
 .panel2 table{width:100%;border-collapse:collapse}.panel2 th{width:8rem;text-align:left;vertical-align:top;font-size:.85rem;color:#055}.by{font-size:.72rem;padding:0 .35rem;border-radius:3px;margin-right:.2rem;background:#eee}.by-author,.by-official{background:#d8f0dc}.by-lib{background:#e3eaf8}.by-ai{background:#fbe3d0}
 .cb{background:#fbfbfd;border:1px solid #dde;padding:.3rem .5rem;font-size:.78rem;overflow:auto;white-space:pre}.cb .ln{color:#999;margin-right:.5rem}.cb.same{background:#eef8ee}.cb.chg{background:#fff8dc}.cb.onl{background:#eaf1fb}.cb.none{color:#999}.step{border-left:3px solid #9bc;padding:0 .6rem;margin:.6rem 0}.cmprow{margin:.5rem 0;padding:.3rem .5rem;border-radius:4px}
 .cmprow.same{background:#f2faf2}.cmprow.chg{background:#fffbe9}.cmprow.onl{background:#f1f6fc}.cmpgrid,.otgrid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}.otgrid img{max-width:100%;border:1px solid #ccd}.stl{font-size:.75rem;padding:0 .4rem;border-radius:3px;font-weight:700}.stl.same{background:#bfe3c1}.stl.chg{background:#f3dd7c}.stl.onl{background:#b9d0ee}.muted{color:#777}.small{font-size:.85rem}
-.ledcard{border:1px solid #cdd;border-radius:6px;margin:.35rem 0;background:#fff}.ledcard>summary{cursor:pointer;padding:.35rem .6rem;background:#f6f9fa}.ledcard>.inner{padding:.4rem .8rem}.sumgist{font-weight:400;font-size:.88rem;color:#345}.ledctl{margin:.4rem 0}.origscroll{max-height:85vh;overflow-y:auto;border:1px solid #ccd}.origscroll.full{max-height:none}.gist{background:#eef7f3;border-left:3px solid #4a9;padding:.25rem .5rem}.gistlist{background:#f6faf8;border:1px solid #cde;border-radius:6px;padding:.3rem .7rem;margin:.4rem 0}.lead,.bridge,.flow{background:#f7fbf9;border-left:4px solid #6b9;padding:.4rem .8rem;margin:.5rem 0}.bridge,.flow.after{border-left-color:#c96;background:#fcf9f5}.apic{border:1px solid #dde;padding:.3rem .5rem;margin:.3rem 0;font-size:.88rem}.lines td{border:1px solid #eee;padding:.1rem .4rem}.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
+.ledcard{border:1px solid #cdd;border-radius:6px;margin:.35rem 0;background:#fff}.ledcard>summary{cursor:pointer;padding:.35rem .6rem;background:#f6f9fa}.ledcard>.inner{padding:.4rem .8rem}.sumgist{font-weight:400;font-size:.88rem;color:#345}.ledctl{margin:.4rem 0}.origscroll{max-height:85vh;overflow-y:auto;border:1px solid #ccd}.origscroll.full{max-height:none}.gist{background:#eef7f3;border-left:3px solid #4a9;padding:.25rem .5rem}.gistlist{background:#f6faf8;border:1px solid #cde;border-radius:6px;padding:.3rem .7rem;margin:.4rem 0}.lead,.bridge,.flow{background:#f7fbf9;border-left:4px solid #6b9;padding:.4rem .8rem;margin:.5rem 0}.bridge,.flow.after{border-left-color:#c96;background:#fcf9f5}.apic{border:1px solid #dde;padding:.3rem .5rem;margin:.3rem 0;font-size:.88rem}.acode{margin:.3rem 0}.ablk{margin:.1rem 0 .5rem}.anote{background:#f3f7fb;border-left:3px solid #6a9fd0;padding:.25rem .6rem;line-height:1.7}.alab{font-size:.75rem;color:#356;font-weight:700;margin-right:.3rem}.cnote{padding:.2rem .6rem;font-size:.88rem;border-left:3px solid #aaa}.cnote.same{background:#eef8ee}.cnote.chg{background:#fff8dc}.cnote.onl{background:#eaf1fb}.ablk .cb{margin:0}.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
 
 
 def ledger_parts(R, s):
@@ -346,10 +372,11 @@ def lst(R, x, tag, litdir):
 
 def card_tex(R, s, litdir):
     L = [r"\par\medskip\noindent{\large\bfseries \S%s Code: Steps%s}\par" % (s["id"], " and comparison" if s.get("comparison") else " (no comparison)")]
-    if s.get("flow"): L.append(r"\par{\small\textbf{What this code solves.} %s}\par" % tx(s["flow"]))
+    if s.get("flow"): L.append(r"\par{\small\textbf{Goal of this code as a whole, and why this tool.} %s%s}\par" % (tx(s["flow"]), (r"\par " + tx(s["why"])) if s.get("why") else ""))
     for st in s["steps"]:
-        L += [r"\par\smallskip\noindent\textbf{%s}\quad %s\par" % (tx(st["title"]), tx(st["what"])), lst(R, (st["file"], st["first"], st["last"]), "", litdir)]
-        if st.get("lines"): L.append(r"\par{\small\textbf{Reading the lines}}\begin{itemize}\footnotesize" + "".join(r"\item line %s: %s" % (a, tx(b)) for a, b in st["lines"]) + r"\end{itemize}")
+        L.append(r"\par\smallskip\noindent\textbf{%s}\quad %s\par" % (tx(st["title"]), tx(st["what"])))
+        for a, b, text in st["lines"]:
+            L += [r"\par\smallskip{\footnotesize\textbf{%s:} %s}" % (("line %d" % a) if a == b else ("lines %d--%d" % (a, b)), tx(text)), lst(R, (st["file"], a, b), "", litdir)]
         if st.get("apis"): L.append(r"\par{\small\textbf{Functions used}}\begin{itemize}\footnotesize" + "".join(r"\item \texttt{%s}\ \texttt{%s}: returns %s; note: %s%s" % (tx(x["name"]), tx(x.get("sig", "")), tx(x.get("ret", "")), tx(x.get("note", "")), (r" {\scriptsize %s}" % tx(x["quote"])) if x.get("quote") else "") for x in st["apis"]) + r"\end{itemize}")
         L.append(r"\par{\small\textbf{Math:} %s}\par" % tx(st["math"]))
     if s.get("after"): L.append(r"\par{\small\textbf{Meaning of the result.} %s}\par" % tx(s["after"]))

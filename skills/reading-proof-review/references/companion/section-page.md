@@ -27,7 +27,7 @@ Both reader types enter the same way; the weights decide only what the reader op
 2. **Original and translation**: the original passage and the faithful translation side by side.
 3. **Figures** of the section (static copy with caption, colour legend, links to other figures; the
    interactive unit stays in the figure list, with a link — one interactive component per figure).
-4. **Code**: what the code solves (flow), Steps with line-by-line reading and the specification of the functions each Step calls, the meaning of the result, then the comparison card ([comparison](comparison.md)); math correspondence after the code.
+4. **Code**: a foldable goal block (what the code does as a whole and why this tool), Steps whose code carries a note directly above every line, with the comparison counterpart on the line, the specification of the functions each Step calls, the meaning of the result, then the comparison card ([comparison](comparison.md)); math correspondence after the code.
 5. **Math ledger of the section** (concepts and claims in full, with proofs) — the overall ledger stays in the top-level list; then limits and next. The head of the section lists its concepts with a one-line gist each; see the next part.
 
 ## Original and translation
@@ -114,7 +114,17 @@ does. A one-line item that only names a thing is a defect, not a summary.
 - **Terms**: each term gets a plain explanation *and what it is good for* ("a ridge gives a centre line that
   survives noise"), where it appears, and its field. Terms the reader's mathematics already covers stay
   short; spend words on code, statistics, computing and the application field.
-- **Code**: before the Steps, the problem and the flow in words; per Step, the lines read one by one; per
+- **Code**: opening the code shows first a foldable **goal** block: what the code does as a whole
+  and why this function, method or way of writing it is used rather than another (`flow` and `why` in the
+  record), at the length and explanatory level of the links between sections. Then the Steps. **Inside
+  each Step the explanation lives in the code, not in a separate table**: every line has a note directly
+  above it saying what it does, which symbol or formula of the source it is, and what trips a beginner
+  (axis, shape, zero-based index, transpose, sign). Blank, import and closing-bracket lines may share a
+  note with a neighbour. Where a comparison exists, the line also carries its counterpart on the other
+  side — same / changed / only here, the counterpart's file and lines, and the reason — derived from the
+  comparison rows, not written twice. A note must not restate the goal block. Notes are display only:
+  the copy button and any saved file stay the verbatim original. Record form: per Step
+  `lines: [[first, last, text], ...]` covering the Step's lines exactly once. Per
   library call, a specification card — name, the signature as used, what it returns (shape, order,
   conventions such as which factor a decomposition returns), cost, a short quotation of the installed
   version's documentation plus a summary in the note's own words. Take quotations from the installed

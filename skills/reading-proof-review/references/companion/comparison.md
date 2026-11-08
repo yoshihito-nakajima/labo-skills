@@ -56,7 +56,7 @@ the draw (frequencies, curves, invariants) and say so.
 ## Cards for every code section (survey papers)
 
 When code is spread over sections, give each code section a **Steps** list: each Step names what
-it does, shows the verbatim lines, reads them one by one, gives the specification of the library calls it uses, and states the math it corresponds to after the code. Then:
+it does, shows the verbatim lines with a note directly above every line (and, for lines in a comparison, the counterpart on the other side), gives the specification of the library calls it uses, and states the math it corresponds to after the code. Then:
 
 - Comparison card where an earlier method exists: left and right code in aligned blocks coloured
   same / changed / only-in-one, each with its reason, a count ("N of M compared lines are

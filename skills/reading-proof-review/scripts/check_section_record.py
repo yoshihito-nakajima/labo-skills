@@ -10,6 +10,22 @@ KINDS = {"author", "official", "lib", "ai", "none"}
 LOC = re.compile(r"\bpp?\.\s?\d+")
 
 
+def chk_notes(i, st, err, warn):
+    """Line notes: [first, last, text] ranges that cover the Step's lines exactly once (blank, import and closing-bracket lines may share a note)."""
+    rows = st.get("lines") or []
+    if not rows: err.append(f"{i}: step {st.get('title')!r} has no line notes; every line needs one (grouping blank/import lines is fine)"); return
+    a0, b0 = st.get("first"), st.get("last"); seen = []
+    for r in rows:
+        if not (isinstance(r, list) and len(r) == 3 and isinstance(r[0], int) and isinstance(r[1], int)):
+            err.append(f"{i}: step {st.get('title')!r}: a line note must be [first, last, text]"); return
+        a, b, t = r
+        if a > b or a < a0 or b > b0: err.append(f"{i}: step {st.get('title')!r}: note range {a}-{b} is outside the Step {a0}-{b0}")
+        if len((t or "").strip()) < 12: warn.append(f"{i}: step {st.get('title')!r}: note for lines {a}-{b} is too short to say what the lines are for")
+        seen += list(range(a, b + 1))
+    if sorted(seen) != list(range(a0, b0 + 1)): err.append(f"{i}: step {st.get('title')!r}: notes must cover lines {a0}-{b0} exactly once")
+    if len(rows) * 2 < (b0 - a0 + 1) // 3: warn.append(f"{i}: step {st.get('title')!r}: very few notes for {b0 - a0 + 1} lines")
+
+
 def check(rec):
     err, warn = [], []
     secs = {s["id"]: s for s in rec["sections"]}
@@ -84,12 +100,11 @@ def check(rec):
                 err.append(f"{i}: a code section needs Steps")
             if not s.get("comparison") and not s.get("no_comparison_reason"):
                 err.append(f"{i}: needs a comparison or a reasoned 'no_comparison_reason'")
-            for k in ("flow", "after"):
+            for k in ("flow", "why", "after"):
                 if not s.get(k):
-                    warn.append(f"{i}: code section lacks '{k}' (what the code solves / what the result means)")
+                    warn.append(f"{i}: code section lacks '{k}' (the goal of the code as a whole / why this tool and not another / what the result means)")
             for st in s.get("steps", []):
-                if not st.get("lines"):
-                    warn.append(f"{i}: step {st.get('title')!r} has no line-by-line reading")
+                chk_notes(i, st, err, warn)
                 for k in ("title", "what", "file", "first", "last", "math"):
                     if k not in st:
                         err.append(f"{i}: step {st.get('title')!r} lacks {k!r}")
