@@ -1,4 +1,4 @@
-"""Build and check the fictional reading-companion example, and exercise the main refusals."""
+"""Build and check the fictional companion example, and exercise the main refusals."""
 
 from pathlib import Path
 import json
@@ -8,10 +8,10 @@ import sys
 import tempfile
 import unittest
 
-SKILL = Path(__file__).resolve().parents[1] / "skills/reading-companion"
+SKILL = Path(__file__).resolve().parents[1] / "skills/reading-proof-review"
 BUILD = SKILL / "scripts/build_companion.py"
 CHECK = SKILL / "scripts/check_companion.py"
-EXAMPLE = SKILL / "assets/example"
+EXAMPLE = SKILL / "assets/companion-example"
 
 
 class ReadingCompanionTests(unittest.TestCase):
@@ -112,6 +112,25 @@ class ReadingCompanionTests(unittest.TestCase):
         self.assertIn('id "top" appears 2 times', bad.stdout)
         self.assertIn("#nowhere points to no element", bad.stdout)
 
+
+    def test_new_pair_makes_one_directory_per_source(self):
+        ws = Path(self.tmp.name) / "ws"
+        ws.mkdir()
+        subprocess.run(["git", "init", "-q", str(ws)], check=True)
+        (ws / ".gitignore").write_text("/reading/\n")
+        r = self.run_py(SKILL / "scripts/new_pair.py", "demo-paper", "--workspace", str(ws))
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        note = ws / "reading/demo-paper"
+        self.assertTrue((note / "demo-paper.tex").is_file())
+        self.assertTrue((note / "companion/companion.json").is_file())
+        self.assertFalse((ws / "reading/demo-paper-companion").exists())
+        pair = json.loads((note / "PAIR.json").read_text())
+        self.assertEqual(pair["note"]["root"], "demo-paper.tex")
+        self.assertTrue((note / pair["companion"]["spec"]).is_file())
+        spec = json.loads((note / "companion/companion.json").read_text())
+        self.assertEqual(spec["note"]["aux"], "../.temp/demo-paper.aux")
+        again = self.run_py(SKILL / "scripts/new_pair.py", "demo-paper", "--workspace", str(ws))
+        self.assertNotEqual(again.returncode, 0)
 
 if __name__ == "__main__":
     unittest.main()

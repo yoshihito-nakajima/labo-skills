@@ -51,8 +51,7 @@
 - [reading-book](skills/reading-book/SKILL.md) — 本から長いコースを、一つの正本で作る。
 - [reading-book-math-review](skills/reading-book-math-review/SKILL.md) — 固定した長いコースの数学的主張を査読する。
 - [reading-book-output-review](skills/reading-book-output-review/SKILL.md) — 固定したコース PDF の索引・描画・ナビゲーションを査読する。
-- [reading-companion](skills/reading-companion/SKILL.md) — 手法とコードの論文のための、私的な対話型 HTML 読み物。
-- [reading-proof-review](skills/reading-proof-review/SKILL.md) — 証明から作る私的な HTML（または証明の読み物）。要所と標準手順、指摘、見込みの指標。
+- [reading-proof-review](skills/reading-proof-review/SKILL.md) — 論文や証明を読んで作る私的な解説ページ：証明レビュー、証明の読み物、手法とコードの companion、散文の解説。サイトの Reader か 1 枚の HTML。
 - [japanese-translation](skills/japanese-translation/SKILL.md) — 原稿を通して読める日本語訳にする。
 
 ### 説明とナビゲーション
@@ -76,7 +75,7 @@
 
 ### ビルド・Git・スキルの保守
 
-- [labo-build](skills/labo-build/SKILL.md) — TeX を slug 名の PDF と SyncTeX にビルドする。
+- [labo-build](skills/labo-build/SKILL.md) — TeX を slug とルート名の PDF と SyncTeX にビルドする。
 - [labo-git](skills/labo-git/SKILL.md) — 研究用の Git とスキルの fork を整えて確認する。
 - [labo-sync](skills/labo-sync/SKILL.md) — 共有 labo-skills の変更を確認し、選んで取り込む。
 - [labo-pr](skills/labo-pr/SKILL.md) — 選んだスキルの改善を upstream へ PR で出す。
@@ -94,10 +93,12 @@
 
 - 公開: このリポジトリ、そのスキル、番号付きのレビュー規則、ソフトウェア、
   架空の例、プルリクエストで提案される汎用的な変更。
-- 原則ローカルのみ: あなたの研究リポジトリ。研究計画、元の inbox 資料、Lean ファイル、
+- 自分の private リポジトリ: あなたの研究リポジトリ。研究計画、元の inbox 資料、Lean ファイル、
   原稿、参考文献、発表資料、個人用スキル、未公開の文章を置く。
-  独立した `.agents` の方針Git以外は、privateを含めGitHubへ送らない。
-  pushもPRも方針Gitだけから行い、親Gitはローカル履歴用にする。
+  作業の区切りで commit して、自分の private のリモートへ push する。公開リモートへは送らない。
+  資料庫 `reference/` とコーパス `writing/.corpus/` は独立した Git を持ち、ローカルに留める。
+  スキルの push と PR は、内容を確認したうえで、独立した `.agents` の方針Gitだけから行う。
+  どちらも親の commit や push を要せず、親を push してもスキルは公開されない。
   `.claude -> .agents` はローカルの入口であり、別の送信対象ではない。
   共通規則は [公開範囲](skills/labo-git/SKILL.md#publication-boundary)を参照する。
 - 配布モデルは**フォークして、使って、改善して、選んで上流に貢献する**こと。
@@ -371,8 +372,8 @@ Lean の証拠を必要とする。定理/補題ノードは自動的に必要�
 一つのデータファイルに記録し、`scripts/check_coverage.py` を完了の検査として通す。
 論文の手法のコードは、隔離した環境で実行する
 （[実行環境](skills/reading-reference/references/methods.md#execution-environments)）。
-方法論文の詳細ノートを、見て動かして理解するには、[reading-companion](skills/reading-companion/SKILL.md)
-で私用の1ファイルの HTML を作る。特徴ごとに、背景、売り、既存の方法とそのコード、
+方法論文の詳細ノートを、見て動かして理解するには、[reading-proof-review](skills/reading-proof-review/SKILL.md)
+の companion で私用の1ファイルの HTML を作る。特徴ごとに、背景、売り、既存の方法とそのコード、
 パラメータを操作部に結びつけた著者コード、著者コードを格子点で実行した図を並べる。公開はしない。
 
 Web ページ、HTML の解説、コンパニオン、長いノートは、渡す前に
@@ -568,9 +569,9 @@ Lean ソース、原稿は読まない。ステータスは `in_progress` と `c
 
 `output build` は `latexmk` に委ねる。中間ファイルは `writing/<paper>/.temp` に、
 PDF と SyncTeX は直接 `output/` に `<paper>.pdf` と `<paper>.synctex.gz` として書くので、
-すべてのプロジェクトをまとめて選べる。出力の組はプロジェクトの slug で名づけられ、
-同じプロジェクト内のルートは同じ組を上書きする。名前を付けたソースは、
-中間キャッシュ名を別々に持つ。`--dry-run` は呼び出しを表示する。
+すべてのプロジェクトをまとめて選べる。作り終えた単独の HTML は `output copy-html` で `output/` にコピーする（元は `reading/<slug>/` か `writing/<slug>/` に残る）。ソースルートの出力の組は、ルート名で名づけられる。ファイル名の幹が
+プロジェクトの slug で始まればそれを、始まらなければ `<slug>-<幹>` を使う（`main.tex` は主文書として slug になる）。
+同じプロジェクト内のルートは、別々の組と別々の中間キャッシュを持つ。`--dry-run` は呼び出しを表示する。
 実際のコンパイルには `latexmk` を含む TeX ディストリビューションが必要。
 成功とは PDF と SyncTeX の両方があることで、キャッシュ済みのビルドなのに
 SyncTeX が無いときは、強制再ビルドを最大一回行う。ビルドが成功すると、
@@ -582,8 +583,9 @@ SyncTeX が無いときは、強制再ビルドを最大一回行う。ビルド
 同時ビルドと掃除を直列化する。
 
 既存のドキュメント名には、`writing/<slug>/` か `reading/<slug>/` の下の TeX ルートを指定して
-`output build --source` を使う。出力の組はプロジェクトの slug で名づけられるので、
-同じ slug の下の複数のルートは互いに上書きする。ソースはその場に残り、キャッシュは
+`output build --source` を使う。出力の組はルート名（slug で始まるファイル名はそのまま、
+始まらなければ `<slug>-` を前置し、`main.tex` は slug を使う）で名づけられるので、
+同じ slug の下の複数のルートは別々の組を持つ。ソースはその場に残り、キャッシュは
 `.temp/` に置かれる。エンジンのディレクティブや `xeCJK` などのパッケージは検出され、
 `--engine` で上書きできる。作業ディレクトリの振る舞いは
 [ビルド契約](skills/labo-build/references/build-contract.md)に書いてある。

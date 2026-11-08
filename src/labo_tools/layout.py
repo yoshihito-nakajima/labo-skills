@@ -124,7 +124,7 @@ def new_item(
 ) -> list[str]:
     """Create one new item; existing items must be resumed, never overwritten."""
     workspace = _workspace(workspace)
-    roots = {"research": "research", "paper": "writing", "reference": "reference"}
+    roots = {"research": "research", "paper": "writing", "reference": "reference", "reading": "reading"}
     if kind not in roots:
         raise LayoutError(f"unknown item kind: {kind}")
     if not SLUG.fullmatch(slug):
@@ -157,6 +157,12 @@ def new_item(
         }
         directories = ["sections"]
         writing_directories, writing_files = _writing_layout(workspace)
+    elif kind == "reading":
+        files = {
+            "README.md": (ASSETS / "reading-readme.md").read_text(encoding="utf-8").replace("{slug}", slug),
+            "reference.md": (ASSETS / "reference.md").read_text(encoding="utf-8"),
+        }
+        writing_directories, writing_files = [], []
     else:
         files = {"reference.md": (ASSETS / "reference.md").read_text(encoding="utf-8")}
         writing_directories, writing_files = [], []

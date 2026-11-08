@@ -231,12 +231,22 @@ def write_build_stamp(cache: Path, output_stem: str, source: Path, status: str,
     return stamp
 
 
+def published_stem(slug: str, source: Path, job: str) -> str:
+    """Name of the published PDF/SyncTeX pair of a source root.
+
+    The job name (the root's stem when it begins with the slug, otherwise `<slug>-<stem>`), except that a
+    root called `main.tex` is the project's main document and publishes as `<slug>`, as `writing/<slug>/main.tex`
+    does. The job name, and so the cache files, are unchanged.
+    """
+    return slug if source.name == "main.tex" else job
+
+
 def _target_stamp(workspace: Path, paper: str | None, source: Path | None) -> tuple[Path, Path, str]:
     workspace = workspace.resolve()
     if source is not None:
-        _command, _cwd, cache, output, _stem = source_build_command(workspace, source, None)
+        _command, _cwd, cache, output, job = source_build_command(workspace, source, None)
         source_path = (source if source.is_absolute() else workspace / source).resolve()
-        output_stem = source_path.relative_to(workspace).parts[1]
+        output_stem = published_stem(source_path.relative_to(workspace).parts[1], source_path, job)
     elif paper is not None:
         _command, _cwd, cache, output = build_command(workspace, paper, "pdflatex")
         output_stem = paper
@@ -284,6 +294,45 @@ def run_postprocess(workspace: Path, steps: list[str], paper: str | None = None,
             raise PaperError(f"post-processing failed: {step}") from exc
         messages.append(record_postprocess(workspace, step, paper=paper, source=source))
     return messages
+
+
+def html_output_name(source: Path, workspace: Path) -> str:
+    """Output name of a built HTML page kept under reading/<slug>/ or writing/<slug>/.
+
+    Same rule as a TeX root: the file stem when it begins with the project slug, otherwise
+    `<slug>-<stem>`. A page named `index.html` takes its directory's name instead.
+    """
+    relative = source.resolve().relative_to(workspace.resolve())
+    slug = relative.parts[1]
+    stem = source.stem
+    if stem == "index" and len(relative.parts) > 3:
+        stem = relative.parts[-2]
+    return stem if stem.startswith(slug) else f"{slug}-{stem}"
+
+
+def copy_html(workspace: Path, source: Path) -> Path:
+    """Copy a built HTML page into output/ as a disposable copy; the master stays in reading/ or writing/."""
+    workspace = workspace.resolve()
+    source = source if source.is_absolute() else workspace / source
+    if source.is_symlink() or not source.is_file() or source.suffix != ".html":
+        raise PaperError("source must be an existing, non-symlinked .html file")
+    try:
+        relative = source.resolve().relative_to(workspace)
+    except ValueError as exc:
+        raise PaperError("source must be inside the workspace") from exc
+    if len(relative.parts) < 3 or relative.parts[0] not in {"writing", "reading"}:
+        raise PaperError("source must be under writing/<slug>/ or reading/<slug>/")
+    if any(p.is_symlink() for p in source.parents if p != workspace and workspace in p.parents):
+        raise PaperError("source directories must not be symlinks")
+    name = html_output_name(source, workspace)
+    with output_transaction(workspace) as output:
+        target = output / f"{name}.html"
+        if target.is_symlink():
+            raise PaperError("output path must not be a symlink")
+        temporary = output / f".{name}.html.tmp"
+        shutil.copy2(source.resolve(), temporary)
+        temporary.replace(target)
+    return target
 
 
 def verify_current(workspace: Path, paper: str | None = None, source: Path | None = None) -> tuple[bool, str]:
@@ -414,8 +463,10 @@ def run_source_build(
     command, cwd, cache, output, stem = source_build_command(workspace, source, engine)
     workspace = workspace.resolve()
     source_path = source if source.is_absolute() else workspace / source
-    relative = source_path.resolve().relative_to(workspace)
-    output_stem = relative.parts[1]
+    # The published pair is named like the job: the root's own stem when it starts with
+    # the project slug, otherwise `<slug>-<stem>`; `main.tex` publishes as `<slug>`. Roots of one
+    # project do not overwrite each other.
+    output_stem = published_stem(source_path.resolve().relative_to(workspace).parts[1], source_path, stem)
     if not dry_run:
         cache.mkdir(parents=True, exist_ok=True)
         output.mkdir(parents=True, exist_ok=True)

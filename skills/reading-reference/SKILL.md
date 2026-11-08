@@ -124,8 +124,10 @@ the reader; do not let those exceptions leave ordinary explanatory text in a
 different language.
 
 Keep source originals in `reference/<key>/` or their existing inbox; record
-identity in `reference.md`. Persist notes and derived assets in `reading/`,
-with source links and a compact coverage/next-step record when needed to resume.
+identity in `reference.md`. Persist notes and derived assets in `reading/<slug>/`, one directory per source: translation, explanation,
+companion and notes of the same source share that directory, one `reference.md` and one fingerprint record,
+and are told apart by their root file names
+([layout](../labo-layout/references/layout.md#one-source-one-reading-directory)). Keep source links and a compact coverage/next-step record when needed to resume.
 Keep the cross-paper positioning memo with its research program, reusing an
 equivalent existing record; the positioning protocol owns its reusable template.
 Reuse existing records; no fixed manifest, helper CLI, reviewer roster or model
@@ -133,8 +135,9 @@ is required. Use `labo-layout` only when creating or locating workspace items.
 
 Produce the requested formats and language. For PDFs, build from the notes'
 own TeX root with `labo-build`'s `output build --source reading/<slug>/<root>.tex`
-workflow; it places the PDF and SyncTeX in `output/<slug>.*`, overwrites that
-pair on later builds from the same project, and prunes old output files. The
+workflow; it places the PDF and SyncTeX in `output/<name>.*` (the root's stem when
+it begins with the slug, otherwise `<slug>-<stem>`; `main.tex` takes the slug), overwrites only that root's pair
+on later builds, and prunes old output files. The
 viewer stays closed unless `--open` is supplied. The build runs the shared
 [PDF navigation check](../mathematical-navigation/references/pdf-checks.md).
 Record its status separately from rendering and actual viewer checks under R29;

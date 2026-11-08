@@ -20,6 +20,10 @@ and site maintenance. Read [website policy](references/website-policy.md).
 Infer audience, source version, destination and whether the request is for a
 private explanation, a public-page draft or a live publication. Preserve the
 existing site format and generator; no specific backend is required.
+A private explanation of a paper or proof that the user has read (a prose page, a proof review, a proof book)
+is made with [reading-proof-review](../reading-proof-review/SKILL.md); when the workspace has a private site
+it is a Reader page, and no standalone HTML is built for the same content
+([the two routes](../labo-layout/references/layout.md#private-html-the-site-route-and-the-standalone-route)).
 
 ## Workflow
 

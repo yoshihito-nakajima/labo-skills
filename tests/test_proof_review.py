@@ -189,6 +189,70 @@ class ProofReviewTests(unittest.TestCase):
         self.assertIn("integrity mismatch", r.stdout + r.stderr)
         self.assertFalse(dest.exists())
 
+    def test_site_export_writes_a_page_whose_anchors_and_blocks_are_consistent(self):
+        import re
+        site = Path(self.tmp.name) / "site"
+        r = self.py(RPR / "scripts/export_site_page.py", self.spec, "--slug", "example-review", "--out-dir", site, "--lang", "en")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        page = (site / "example-review.md").read_text()
+        self.assertTrue(page.startswith('+++\ntitle = "'))
+        self.assertIn('slug = "example-review"', page)
+        self.assertTrue((site / "figures/example-review/diagram.svg").read_text().startswith("<svg"))
+        anchors = re.findall(r"^::: details .* \{#([A-Za-z][A-Za-z0-9_-]*)\}$", page, re.M)
+        self.assertEqual(len(anchors), len(set(anchors)))
+        for target in re.findall(r"\]\(#([^)]+)\)", page):
+            self.assertIn(target, anchors)
+        depth = 0
+        for line in page.splitlines():
+            if line.startswith("::: details "):
+                depth += 1
+            elif line == ":::":
+                depth -= 1
+                self.assertGreaterEqual(depth, 0)
+        self.assertEqual(depth, 0)
+        self.assertNotIn("<span", page)
+        self.assertIn("asset:diagram.svg", page)
+        self.assertEqual(self.py(RPR / "scripts/export_site_page.py", self.spec, "--slug", "Bad_Slug", "--out-dir", site).returncode, 1)
+
+    def test_prose_page_builds_from_site_dialect_markdown(self):
+        import re
+        source = RPR / "assets/prose-example/example-prose.md"
+        out = Path(self.tmp.name) / "prose.html"
+        r = self.py(RPR / "scripts/build_prose_page.py", source, "--out", out)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        page = out.read_text()
+        body = page.split("<main>")[1].split("</main>")[0]
+        self.assertEqual(len(re.findall(r"<h2 id=", body)), 2)
+        self.assertIn('<details class="proof-details" id="why-b">', body)
+        self.assertIn('<details class="proof-details" id="check">', body)
+        inner = body.index('id="check"')
+        self.assertTrue(body.index('id="why-b"') < inner < body.index("Nothing else changes"))
+        self.assertIn('<div class="d">', body)
+        self.assertEqual(body.count("<table>"), 1)
+        self.assertIn("<figure><svg", body)
+        self.assertIn('href="#check"', body)
+        self.assertIn('<span class="m">x_1,\\dots,x_9</span>', body)
+        self.assertIsNone(re.search(r"\{\{(?:[A-Z_]+|L:[a-z_]+)\}\}", page))  # a real KaTeX copy may contain "{{"
+        c = self.py(RPR / "scripts/check_review_page.py", out)
+        self.assertEqual(c.returncode, 0, c.stdout + c.stderr)
+
+    def test_prose_page_refuses_bad_anchors_raw_blocks_and_missing_figures(self):
+        d = Path(self.tmp.name)
+        head = '+++\ntitle = "T"\nslug = "t"\nlanguage = "en"\n+++\n\n'
+        for name, body in (("anchor", "::: details Bad {#section-1}\n\nx\n\n:::\n"),
+                           ("unclosed", "::: details Open\n\nx\n"),
+                           ("figure", "![alt](asset:missing.svg)\n"),
+                           ("block", "::: widget demo\n")):
+            page = d / f"{name}.md"
+            page.write_text(head + body)
+            r = self.py(RPR / "scripts/build_prose_page.py", page, "--out", d / f"{name}.html")
+            self.assertNotEqual(r.returncode, 0, name)
+        raw = d / "raw.md"
+        raw.write_text(head + "A <script>alert(1)</script> line.\n")
+        out = d / "raw.html"
+        self.assertEqual(self.py(RPR / "scripts/build_prose_page.py", raw, "--out", out).returncode, 0)
+        self.assertNotIn("<script>alert", out.read_text())
+
     def test_builder_inlines_a_given_katex_directory(self):
         tgz, integ = self.fake_katex_tarball()
         dest = Path(self.tmp.name) / "cache"

@@ -1,7 +1,7 @@
 # Section-structured page (survey papers)
 
 For a paper read section by section (see the
-[survey profile](../../reading-reference/references/survey-profile.md)). It replaces the
+[survey profile](../../../reading-reference/references/survey-profile.md)). It replaces the
 figure-spine order of [companion-ideal](companion-ideal.md) when figures are many but not the
 only spine; for a figure-centred paper keep that order and add only the section head panel.
 

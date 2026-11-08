@@ -21,9 +21,9 @@ Fork-specific choices can remain in the fork; upstream acceptance is not a
 prerequisite for using them.
 Use [labo-git](../labo-git/SKILL.md) when repository boundaries or push checks
 need setup. Follow its [publication boundary](../labo-git/SKILL.md#publication-boundary):
-both push and PR operate in the independent policy Git. Everything outside
-that Git stays local by default; local parent history is not a dependency of
-either operation.
+both push and PR operate in the independent policy Git. The parent research
+repository is pushed to the user's own private remote as usual; its history is not a
+dependency of either operation.
 
 For all skill creation and changes in this collection, apply
 [reviewable skill design](references/skill-design.md): group reusable work by

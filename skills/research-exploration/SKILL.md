@@ -32,10 +32,10 @@ describe execution; stored parallel mode alone neither starts agents nor
 broadens the user's authorized task. Use bounded delegation when the current
 request or applicable skill instructions authorize it.
 
-Resolve `<labo-script>` as the absolute `../../scripts/labo.py` path from this
-skill's **real directory**, following symlinks. The mounted checkout detects
-the private Git superproject; use `--workspace /absolute/path` for overrides or
-a standalone checkout. The following follow
+`<labo-script>` is the checkout-local launcher `scripts/labo.py` of this policy checkout: from the workspace root it is
+`.agents/scripts/labo.py` (or the same file through the `.claude` mount). Use it rather than a globally installed `labo`
+command. It finds the workspace from its own location, so neither the working directory nor an absolute path matters;
+`--workspace <dir>` (relative or absolute) is only for overriding that or for a standalone policy checkout. The following follow
 `python3 <labo-script> research exploration`:
 
 ```sh

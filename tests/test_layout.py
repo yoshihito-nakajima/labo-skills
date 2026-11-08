@@ -49,6 +49,21 @@ class LayoutTests(unittest.TestCase):
         self.assertFalse((self.root / "README.md").exists())
         self.assertFalse((self.root / "website").exists())
 
+    def test_new_reading_creates_one_directory_with_readme_and_reference(self):
+        self.root.mkdir()
+        changes = new_item(self.root, "reading", "sample-source")
+        folder = self.root / "reading/sample-source"
+        self.assertEqual(sorted(p.name for p in folder.iterdir()), ["README.md", "reference.md"])
+        readme = (folder / "README.md").read_text()
+        self.assertIn("sample-source-ja.tex", readme)
+        self.assertNotIn("{slug}", readme)
+        self.assertIn("Route:", readme)
+        self.assertIn("create reading/sample-source/README.md", changes)
+        with self.assertRaises(LayoutError):
+            new_item(self.root, "reading", "sample-source")
+        with self.assertRaises(LayoutError):
+            new_item(self.root, "reading", "Bad_Name")
+
     def test_new_paper_without_init_excludes_future_corpus_entries(self):
         self.root.mkdir()
         (self.root / ".gitignore").write_bytes(b"# User exclusions\r\nprivate/")

@@ -2,7 +2,7 @@
 
 ## When a companion page exists: one source, two builds
 
-When a [companion page](../../reading-companion/SKILL.md) of the paper exists, slides are taken from
+When a [companion page](../../reading-proof-review/references/companion/overview.md) of the paper exists, slides are taken from
 it, not from the detailed note: the note holds far more than a talk can use, and a claim picked
 from it by hand is where mistakes enter. The companion already holds the selected, sourced
 material (the question, the lineage of earlier methods, each figure's claim, reading, difference

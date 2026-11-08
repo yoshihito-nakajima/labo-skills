@@ -1,7 +1,7 @@
 # Reproducible build contract
 
-For `writing/<slug>/main.tex`, use the absolute checkout-local launcher
-resolved in `SKILL.md`:
+For `writing/<slug>/main.tex`, use the checkout-local launcher described in
+`SKILL.md` (`.agents/scripts/labo.py` from the workspace root):
 
 ```sh
 python3 <labo-script> output build --paper <slug> --dry-run
@@ -26,8 +26,7 @@ rebuild; it does not disable the cache on every run or claim success without
 the promised outputs.
 
 Each successful build writes `<slug>.pdf` and same-stem SyncTeX directly under
-`output/`. Source roots under one project slug overwrite the same pair; the most
-recently built root is the one available from that project. The viewer stays
+`output/`. A root overwrites only its own pair, named by the rule below. The viewer stays
 closed by default; pass `--open` to launch the host's default PDF handler.
 After a successful build, the command prunes the oldest managed output groups
 toward a 30-file limit. A PDF and its `.synctex.gz` or `.synctex` file are
@@ -83,18 +82,26 @@ refused after a failed build.
 
 An imported manuscript may retain its original entry name, repository-root
 paths and TeX configuration. Pass the actual document root (not an included
-section) as an absolute or workspace-relative path:
+section) as a workspace-relative path (an absolute path also works):
 
 ```sh
 python3 <labo-script> output build --source writing/<slug>/<entry>.tex
 python3 <labo-script> output build --source reading/<slug>/<entry>.tex
 ```
 
+A built standalone HTML page is copied (never moved) with `output copy-html --source reading/<slug>/<page>.html`;
+the master stays beside its spec, and the copy is named by the same rule (stem when it begins with the slug,
+otherwise `<slug>-<stem>`; `index.html` takes its directory's name). `prune` leaves such copies alone.
+
+Several roots of one source (`reading/<slug>/<slug>-ja.tex`, `reading/<slug>/<slug>-ja-expansion.tex`)
+are the intended use of the naming rule below: each publishes its own pair.
+
 Named source builds run from the workspace root, use source-specific job names
-in `.temp/`, and copy the checked PDF/SyncTeX pair to `output/<slug>.*`.
-Existing source-derived output variants under `<slug>_` are retired when a
-slug-named build replaces them. Standard `writing/<slug>/main.tex` also uses
-the project slug as its output name. Do not generate a wrapper or restructure
+in `.temp/`, and copy the checked PDF/SyncTeX pair to `output/<name>.*`, where
+`<name>` is the root's file stem when it begins with `<slug>` and `<slug>-<stem>`
+otherwise (the job name). Roots of one project therefore publish separate pairs.
+A root called `main.tex` (under `writing/<slug>/` or `reading/<slug>/`) is the project's main document and
+publishes as `<slug>`; its job name, and so its cache files, are unchanged (`<slug>-main` under `reading/`). Do not generate a wrapper or restructure
 mathematics just to fit the CLI.
 
 An explicit `--engine` wins, then a `% !TeX program = ...` directive, then

@@ -33,7 +33,7 @@ learns what a block does where it is shown.
 | Relation | Meaning | Colour |
 |---|---|---|
 | same | the authors keep the earlier method's operation (possibly with other names or units) | green |
-| changed | the authors change it; say how, and its role: fixes the obstacle, another aim, or bookkeeping ([roles](../../deck-from-references/references/inherit-new-forward.md)) | orange |
+| changed | the authors change it; say how, and its role: fixes the obstacle, another aim, or bookkeeping ([roles](../../../deck-from-references/references/inherit-new-forward.md)) | orange |
 | only in the authors' code | added by the authors; give its role | grey |
 | only in the earlier code | dropped or not used by the authors | grey |
 

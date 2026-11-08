@@ -1,9 +1,9 @@
 # Public contribution gate
 
 Apply the [publication boundary](../../labo-git/SKILL.md#publication-boundary)
-to both fork pushes and upstream PRs. Only the independent policy Git is
-eligible by default; everything outside it stays local. A private destination
-does not widen the scope. `.claude` aliases the same policy checkout locally.
+to both fork pushes and upstream PRs. Only the independent policy Git carries
+skills; the parent research repository is not a contribution and never goes to a
+public remote. A private destination does not widen what a contribution may contain. `.claude` aliases the same policy checkout locally.
 
 1. **Classify** each changed file as public generic policy/tooling,
    private research/source/writing, or ambiguous. Start with an explicit list of
@@ -62,12 +62,12 @@ does not widen the scope. `.claude` aliases the same policy checkout locally.
    fork-only is equally legitimate.
 6. **Publish** within the policy repository only. A push request alone does
    not request a PR; a requested PR includes its necessary reviewed branch
-   push. Neither operation requires a parent commit, parent push, parent PR
-   or gitlink update. PR acceptance does not automatically adopt a version.
+   push. Neither operation requires a parent commit, parent push,
+   or gitlink update, and there is no parent PR. PR acceptance does not automatically adopt a version.
 7. **Adopt** a selected policy commit in one's own fork, and then
    update `.agents` and its private-parent gitlink when authorized,
    with local checks. Adoption need not wait for upstream acceptance or a
-   push; the parent records the chosen version locally. Publish a reviewed
+   push; the parent records the chosen version in its own history. Publish a reviewed
    policy commit to the fork only within the requested scope. Never auto-update
    to a remote branch tip or discard local changes. Policy push, policy PR and
    local parent version recording are independent operations.

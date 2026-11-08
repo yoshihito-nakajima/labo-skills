@@ -9,7 +9,7 @@ says so with a reason):
    meant to show and why it matters for the paper's question.
 2. **Reading** — the paper's figure cut out of the source with numbered marks, and for each mark
    *see* and *learn*, then the figure's *trouble* and *hand-off*, following the
-   [reading ladder](../../deck-from-references/references/figure-reading.md). Name panels exactly
+   [reading ladder](../../../deck-from-references/references/figure-reading.md). Name panels exactly
    as the paper does ("(ii)", "2C") everywhere on the page. State what each panel plots, the axes,
    colours and sizes. Read marks only from the figure itself, viewed at a size where its parts can
    be told apart.
@@ -53,7 +53,7 @@ says so with a reason):
      <function>". No paper panel is put beside it.
 
    A remake is computed at the highest
-   [reproduction level](../../reading-reference/references/methods.md#reproducing-the-papers-figures)
+   [reproduction level](../../../reading-reference/references/methods.md#reproducing-the-papers-figures)
    reached, said in words ("substitute data: …", not a code such as L3), with
    the earlier method on the same input beside it. Every run has the [run card](fidelity.md#say-what-was-run)
    (calls, whose code, from control to drawing with the code re-shown, where in the method) and the

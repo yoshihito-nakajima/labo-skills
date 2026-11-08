@@ -1,14 +1,15 @@
 # Setup and checks
 
-Apply the [publication boundary](../SKILL.md#publication-boundary): only the
-independent policy Git is sendable by default. Parent history and everything
-else in the workspace remain local. `.claude` is an alias of that policy, not
-a second upload or a reason to publish the parent.
+Apply the [publication boundary](../SKILL.md#publication-boundary): the independent
+policy Git is the only skills destination, and its content is reviewed before a push. The parent research
+repository goes to the user's own private remote as usual and never to a public one. `.claude` is an alias
+of the policy, not a second upload.
 
 ## Local research repository
 
-Run `python3 <policy>/scripts/publication_guard.py install --repo <workspace>
---role local-only`. It rejects every ordinary push, including URL pushes,
+Optional, only when the user wants a repository kept off every remote: run
+`python3 <policy>/scripts/publication_guard.py install --repo <workspace> --role local-only`.
+It rejects every ordinary push, including URL pushes,
 tags and deletions, while preserving local commits. Existing source privacy
 hooks are refreshed through their installer; other executable hooks are
 preserved and chained. Custom hook paths need inspection. Repeat installation
@@ -69,7 +70,7 @@ For an authorized push use
 For an authorized PR, push its reviewed policy branch as needed, then use
 `gh pr create --repo <upstream> --head <fork-owner>:<topic> --base <base-branch>
 --title ... --body-file <local-body-file>` with explicitly verified policy
-repositories. Do not push the parent or create a parent PR. Its local commit
+repositories. Do not create a parent PR to contribute. The parent's own commit, push
 and gitlink state are not prerequisites for either operation. A push alone
 does not trigger a PR. Already upstream changes need no reverse/reapply PR.
 

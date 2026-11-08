@@ -1,9 +1,9 @@
 ---
 name: reading-proof-review
-description: Turn a mathematical result's proof, either your own manuscript or someone else's paper, into one private HTML page that separates the key steps from the standard ones, shows the review findings and the difference from prior work, and gives a hedged paper-viability indicator. Builds a sourced step ledger, a dependency diagram, folded proofs, a key-versus-standard comparison and rule-capped verdict. Also builds a proof-centred reading book: blocks, reason-before-formula derivations, cross-linked HTML and one PDF. Not the adversarial review itself, not slides, not a public page.
+description: Read an existing paper or proof (your own manuscript or someone else's) and turn what the reading establishes into an explanation page for yourself — a proof review (key versus standard steps, findings, difference from prior work, a hedged viability indicator), a proof book to follow a proof line by line, a companion to present a method-and-code paper by seeing and moving it, or a prose explanation — as a private Reader page on your site or as one standalone HTML. Builds a sourced step ledger, dependency diagram, folded proofs and rule-capped verdict. Not the adversarial review itself, not slides, not a public page.
 ---
 
-# Proof-review reading page
+# Read, prove, review, and explain on a page
 
 Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
 
@@ -15,13 +15,29 @@ personal facts there rather than in skill text; update only explicit durable
 facts or corrections from the user, or facts they ask to save, with source
 context. Apply this skill's normal verification rules.
 
-Use when the user wants to see, on one page, where a result's proof is decisive and where it is
-routine, whether it has holes, how it differs from prior work, and whether it looks like a paper.
-The result can be the user's own manuscript or a published paper. The page is for understanding
-and deciding; it is a local single file, not a web publication and not a certificate.
+Use when the user has read, or wants to read, an existing paper or proof and wants a page that makes
+the reading usable: where a result's proof is decisive and where it is routine, whether it has holes,
+how it differs from prior work, how to follow it line by line, how a method's figures come from its
+code, or simply an explanation to read. The page is for understanding and deciding; it is private
+(a Reader page or a local file), not a web publication and not a certificate. Long courses from books
+are [reading-book](../reading-book/SKILL.md); reading and explaining a source in general is
+[reading-reference](../reading-reference/SKILL.md).
 
-Resolve `<scripts>` to this skill's real `scripts/` directory (follow symlinks first); pass paths
-as arguments instead of relying on the shell's current directory.
+Resolve `<scripts>` to this skill's `scripts/` directory (`.agents/skills/reading-proof-review/scripts`
+from the workspace root); pass paths as arguments instead of relying on the shell's current directory.
+
+## Choose what to make, and read only what applies
+
+| The user wants | Kind | Read |
+|---|---|---|
+| to see where a proof is decisive, whether it has holes, how it differs from prior work, whether it looks like a paper | **proof review** | the stages below; [ledger](references/ledger.md), [prior work](references/prior-art.md), [indicator](references/indicator.md), [page](references/page.md) |
+| to follow a proof line by line, every transformation traceable | **proof book** | [proof book](references/proof-book.md) |
+| to present a method-and-code paper by seeing and moving its figures | **companion** | [companion](references/companion/overview.md) and the files it links |
+| to understand a concept, result or paper by reading | **prose page** | [prose](references/prose.md) |
+
+For every kind: the [honesty rules](references/honesty.md), and [where the page goes](references/routes.md)
+(the private site's Reader page when the workspace has a site, otherwise one standalone HTML whose master
+stays in `reading/<slug>/` with a copy in `output/`). Do not mix the two routes for one page.
 
 ## Stages
 
@@ -40,11 +56,11 @@ user's reaction after each unless the user has asked to run through to the page.
    unread, never filled in from memory.
 4. **Indicator.** Fill the axes and facts under [the indicator rules](references/indicator.md) and
    check them with `python3 <scripts>/indicator.py review.json`.
-5. **Page.** Write the step bodies and the review data, build with
-   `python3 <scripts>/build_review_page.py <spec-dir> --out <page.html> --lang <user's language>`
-   and verify with `check_review_page.py`, then look at the rendered page
-   ([page contract](references/page.md)). Math needs KaTeX: `fetch_katex.py` downloads a pinned,
-   integrity-checked copy into a cache once the user agrees.
+5. **Page.** Write the step bodies and the review data, then build the page by the
+   [route that applies](references/routes.md): on the site, `export_site_page.py` writes the same spec as
+   a Reader page; standalone, `build_review_page.py <spec-dir> --out <page.html> --lang <user's language>`
+   and `check_review_page.py`, then look at the rendered page ([page contract](references/page.md)). Math
+   needs KaTeX: `fetch_katex.py` downloads a pinned, integrity-checked copy into a cache once the user agrees.
 
 ## Proof-centred mode: follow the proof itself
 
@@ -65,16 +81,8 @@ range checked, the risk map and the findings with their fate, a box per block, a
 
 ## Rules that keep the page honest
 
-- Every claim carries a locator in the source. Mark each statement as confirmed, suspected or
-  unchecked; never write "correct". The strongest allowed statement is "no gap found within the
-  stated scope".
-- State who checked what: reviewers that are language models are not an expert's check or a formal
-  proof, and the page says so near the verdict.
-- Novelty is judged only against the sources actually read. For someone else's paper, the novelty
-  claim is the paper's own claim, and a gap found in it is reported, not repaired.
-- The class of a step is provisional until the prior-work stage; the page may change it.
-- Leave the source manuscript untouched. Corrections found by the review are listed for the
-  author to accept; edit only after agreement.
-- Keep private research content out of anything that is later published: the page, ledger and
-  findings of a real project stay in the project's private workspace. Only generic rules and
-  fictional fixtures belong in this skill.
+They are in [honesty](references/honesty.md) and apply to every kind. The ones a proof review leans on
+most: every claim has a locator and a status (confirmed, suspected, unchecked); the strongest statement
+is "no gap found within the stated scope"; model reviewers are not an expert's check; novelty is judged
+only against sources actually read; the class of a step is provisional until the prior-work stage; the
+source manuscript is never edited by this skill.

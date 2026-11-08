@@ -1,4 +1,4 @@
-# Fictional "ordering method" used only to exercise the reading-companion skeleton.
+# Fictional "ordering method" used only to exercise the companion skeleton.
 import math
 
 def neighbour_graph(points, k=3, boost=1.5):

@@ -70,7 +70,7 @@ and the code read from the first line, as in [step unit](feature-unit.md).
    with its meaning and the figures that use it (`encodings`). The reader can read every later figure
    from the primer alone; an encoding a figure uses that the primer does not introduce is a defect.
 2. **Summary, Introduction and lineage** (taken from the note's
-   [overview table](../../reading-reference/references/lineage-and-comparison.md#overview-table)).
+   [overview table](../../../reading-reference/references/lineage-and-comparison.md#overview-table)).
    The paper's Summary in plain words; the obstacles and novelties its Introduction declares; the
    families of earlier methods as the paper sorts them (good at, weak at, where compared); one card
    per earlier work: made for, the weakness, kept / changed by the method, what checking the
@@ -93,7 +93,7 @@ and the code read from the first line, as in [step unit](feature-unit.md).
    step units link back to the figures that rely on them.
 6. **Sources used.** Every code repository (URL, commit, licence, files used), every dataset
    (source page, accession, hash, preprocessing, level), every paper figure (page and crop), and
-   the open [request list](../../reading-reference/references/resource-ledger.md#request-list).
+   the open [request list](../../../reading-reference/references/resource-ledger.md#request-list).
 7. **Parameter table, limits and glossary.** Every parameter (name, default, stated in the paper
    or code only, grid with the values added to show an effect, effect, code line); what the page
    does not show; every term with the unit that defines it.

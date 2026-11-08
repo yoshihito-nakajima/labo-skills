@@ -55,7 +55,7 @@ Slides are built in stages, with the user's reaction at each gate: see [staged b
    `paper-referee`; paper compilation → `labo-build`; slides →
    `slide-authoring` (talk plan for a paper → `paper-talk-planning`; slides in the
    manner of example decks → `deck-from-references`); a private interactive HTML companion to a method
-   paper's reading note → `reading-companion`; research positioning, source collection, paper/book
+   paper's reading note → `reading-proof-review` (companion mode); research positioning, source collection, paper/book
    explanation and reading notes → `reading-reference`; website →
    `website-publishing`; adversarial review of a finished explanation, page or
    note (flow and passage-level critique) → `exposition-review`; continuous Japanese reading translations →
@@ -125,13 +125,9 @@ The artifact's skill still owns writing or review; `reading-reference` owns the
 investigation and reusable memo. Initial blind readings precede memo access;
 routine edits and report-only tasks keep the protocol's scope boundaries.
 
-GitHub operations follow [labo-git's publication boundary](../labo-git/SKILL.md#publication-boundary):
-by default only the independent policy Git is eligible for push or PR;
-everything outside it remains local.
-
 The research plan supplies human context; a skill supplies the operational
 rules. Neither is an excuse to expose private material in public changes.
 
 GitHub operations follow [labo-git's publication boundary](../labo-git/SKILL.md#publication-boundary):
-by default only the independent policy Git is eligible for push or PR;
-everything outside it remains local.
+the independent policy Git is the only skills destination (content-reviewed before a push or PR);
+the parent research repository goes to the user's private remote, never a public one.

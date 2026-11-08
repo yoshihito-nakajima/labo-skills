@@ -79,12 +79,10 @@ review, not state-machine transitions or automatic deletion.
 Apply accepted changes with Git history, preserve all original sources, and
 run `python3 <labo-script> research check`.
 
-Resolve `<labo-script>` to the absolute `../../scripts/labo.py` path relative
-to this skill's **real directory** (follow symlinks first), not the shell's
-current directory. This executes the policy checkout being used, without
-installing the project. The launcher detects the private Git superproject;
-use `--workspace /absolute/path/to/labo` to override it or when using a
-standalone policy checkout. For a frontmatter-only inventory, run
+`<labo-script>` is the checkout-local launcher `scripts/labo.py` of this policy checkout: from the workspace root it is
+`.agents/scripts/labo.py` (or the same file through the `.claude` mount). Use it rather than a globally installed `labo`
+command. It finds the workspace from its own location, so neither the working directory nor an absolute path matters;
+`--workspace <dir>` (relative or absolute) is only for overriding that or for a standalone policy checkout. This executes the policy checkout being used, without installing the project. For a frontmatter-only inventory, run
 `python3 <labo-script> research list --format json`.
 For an adopted evidence catalog or review, run `evidence check` on those
 explicit paths; do not make unrelated research pass a new mandatory gate.

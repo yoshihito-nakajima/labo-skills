@@ -66,7 +66,7 @@ the code of the paper. State what the comparison did not cover.
 ## Overview table
 
 Collect the entries in one table near the note's introduction, so a reader (and a
-[companion page](../../reading-companion/SKILL.md), which takes it over) sees the history
+[companion page](../../reading-proof-review/references/companion/overview.md), which takes it over) sees the history
 before the code: the work and year, what it was made for, the weakness the paper names, what
 the method keeps or changes, what checking the primary source found (including where the
 paper's characterisation does not match the source), and the section that treats it. Lineages

@@ -62,8 +62,7 @@ Every skill in `skills/`, grouped by what it is for. Each entry links to its `SK
 - [reading-book](skills/reading-book/SKILL.md) — Build long courses from books with one canonical body.
 - [reading-book-math-review](skills/reading-book-math-review/SKILL.md) — Review mathematical claims in a frozen long-course version.
 - [reading-book-output-review](skills/reading-book-output-review/SKILL.md) — Review indexes, rendering and navigation in a frozen course PDF.
-- [reading-companion](skills/reading-companion/SKILL.md) — Private interactive HTML companion for a method-and-code paper.
-- [reading-proof-review](skills/reading-proof-review/SKILL.md) — Private HTML page (or proof book) from a proof: key vs standard steps, findings, viability indicator.
+- [reading-proof-review](skills/reading-proof-review/SKILL.md) — Read a paper or proof and make a private explanation page: proof review, proof book, method-and-code companion or prose page, on the site or as one HTML.
 - [japanese-translation](skills/japanese-translation/SKILL.md) — Continuous Japanese reading translation of a manuscript.
 
 ### Explanation and navigation
@@ -87,7 +86,7 @@ Every skill in `skills/`, grouped by what it is for. Each entry links to its `SK
 
 ### Build, Git and skill maintenance
 
-- [labo-build](skills/labo-build/SKILL.md) — Compile TeX into slug-named PDF and SyncTeX outputs.
+- [labo-build](skills/labo-build/SKILL.md) — Compile TeX into PDF and SyncTeX outputs named after the project slug and the root.
 - [labo-git](skills/labo-git/SKILL.md) — Set up and verify local research Git and the skills fork.
 - [labo-sync](skills/labo-sync/SKILL.md) — Review and selectively adopt shared labo-skills changes.
 - [labo-pr](skills/labo-pr/SKILL.md) — Contribute selected skill improvements upstream.
@@ -106,11 +105,13 @@ frozen versions in separate result areas under the shared
 
 - Public: this repository, its skills, numbered reviewing rules, software,
   fictional examples, and generic changes proposed by pull request.
-- Local-only by default: your research repository, with research plans, original
+- Private, in your own repository: your research repository, with research plans, original
   inbox material, Lean files, manuscripts, references, presentations, personal
-  skills, and any unpublished writing. Everything outside the independent
-  `.agents` policy Git stays off GitHub, even private GitHub repositories.
-  Both push and PR use the policy Git only; the parent retains local history.
+  skills, and any unpublished writing. Commit and push it to your own **private**
+  remote as you work; never to a public one. The source archive `reference/` and the
+  corpus `writing/.corpus/` have their own Gits and stay local. Skill pushes and PRs go
+  through the independent `.agents` policy Git, whose content is reviewed first; neither
+  needs a parent commit or push, and a parent push publishes no skill.
   The local `.claude -> .agents` alias is not a second publication target.
   See the [publication boundary](skills/labo-git/SKILL.md#publication-boundary).
 - The distribution model is **fork, use, improve, and selectively contribute
@@ -182,7 +183,7 @@ shared labo-skills ← selected pull requests ← improvements in your fork
    problem and check the change with a small reproducible example.
 2. When adopting that version, record its commit in the local parent gitlink.
    When a push is requested, send the reviewed policy branch from its own Git
-   to the verified fork. Neither action requires the other or a parent push.
+   to the verified fork. Neither action requires the other or the parent's own push.
 3. When an improvement would help others, propose a focused PR from a branch
    in your fork to the shared upstream. Include the reusable change and
    synthetic examples, independently of manuscripts and fork-specific choices.
@@ -461,8 +462,8 @@ decks from one plan: a dense reading deck for understanding and a light, arrow-b
 stage deck for presenting (`talkstyle.sty`, `flowstyle.sty`; rules in `two-decks.md`).
 
 For understanding a method paper's detailed reading note by seeing and moving it,
-[reading-companion](skills/reading-companion/SKILL.md) builds a private, single-file HTML
-companion: feature by feature, the background, the selling point, the earlier method with its
+[reading-proof-review](skills/reading-proof-review/SKILL.md) builds a private, single-file HTML
+companion (its companion kind): feature by feature, the background, the selling point, the earlier method with its
 code, and the authors' code with parameter values bound to controls beside figures computed by
 running the authors' code on a parameter grid (`build_companion.py`, `check_companion.py`).
 The page stays local; it is not a web publication.
@@ -644,8 +645,9 @@ No mathematical assertion is certified by this tooling.
 `output build` delegates to `latexmk`, writing intermediate files to
 `writing/<paper>/.temp` and PDF/SyncTeX outputs directly to `output/`, named
 `<paper>.pdf` and `<paper>.synctex.gz` so all projects can be selected together.
-The project slug names the output pair; roots in the same project overwrite
-the same pair. Named sources keep separate intermediate cache names.
+A built standalone HTML page is copied into `output/` with `output copy-html`; its master stays under `reading/<slug>/` or `writing/<slug>/`. A source root's output pair is named after the root: its file stem when that
+begins with the project slug, otherwise `<slug>-<stem>`; a root called `main.tex` takes the slug.
+Roots of one project keep separate pairs and separate intermediate cache names.
 `--dry-run` prints the invocation.
 Real compilation requires a TeX distribution with `latexmk`. Success requires
 both PDF and SyncTeX; a missing SyncTeX
@@ -658,8 +660,8 @@ without compiling. A retained workspace-level lock serializes concurrent builds
 and cleanup through native POSIX or Windows locking.
 
 For existing document names, use `output build --source` with a TeX root under
-`writing/<slug>/` or `reading/<slug>/`. Its output pair is named by the project
-slug, so multiple roots under that slug overwrite one another. The source stays
+`writing/<slug>/` or `reading/<slug>/`. Its output pair uses the root stem when that starts with the project
+slug, otherwise `<slug>-<stem>`; `main.tex` uses the slug. Multiple roots keep separate pairs. The source stays
 in place and its cache stays in `.temp/`. Engine directives and packages such
 as `xeCJK` are detected; `--engine` can override them. The
 [build contract](skills/labo-build/references/build-contract.md) describes

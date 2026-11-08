@@ -1,4 +1,4 @@
-"""Shared loading and validation for reading-companion specs (used by build and check).
+"""Shared loading and validation for companion specs (used by build and check).
 
 Spec shape (paths relative to the spec's directory):
   title, lang, paper{citation, main_figures}, note{pdf, aux}, background{picture, summary, question, context, terms, figure?},

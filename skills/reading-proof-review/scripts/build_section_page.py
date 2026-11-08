@@ -9,7 +9,7 @@ panels), DIR/codecards/c<ID>.tex (Steps and comparison cards) and DIR/overview.t
 paths in the record are relative to BASE (default: the record's directory). With --original,
 sections that give `heading_word` get the original page region (heading to next heading) as an
 embedded image beside the translation file `translation_html` (optional, a path to an HTML
-fragment). See references/section-page.md and reading-reference/references/survey-profile.md.
+fragment). See references/companion/section-page.md and reading-reference/references/survey-profile.md.
 Needs only the standard library; pandoc (math to MathML), pdftotext and pdftoppm are used when present.
 """
 import argparse, base64, html, json, os, re, shutil, subprocess, sys, tempfile

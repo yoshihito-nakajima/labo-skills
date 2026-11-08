@@ -23,12 +23,10 @@ mathematician outside the immediate specialty. A section-only request stays
 local; a whole-paper request must account for the whole paper, even when read
 in parts. Reviewing does not authorize rewriting, building, or publishing.
 
-Resolve `<labo-script>` below to the absolute `../../scripts/labo.py` path
-relative to this skill's **real directory** (follow symlinks first). Do not
-use a globally installed `labo` command or infer the workspace from the
-shell's current directory. The launcher uses its private Git superproject;
-pass `--workspace /absolute/path/to/labo` to override it or when using a
-standalone policy checkout.
+`<labo-script>` is the checkout-local launcher `scripts/labo.py` of this policy checkout: from the workspace root it is
+`.agents/scripts/labo.py` (or the same file through the `.claude` mount). Use it rather than a globally installed `labo`
+command. It finds the workspace from its own location, so neither the working directory nor an absolute path matters;
+`--workspace <dir>` (relative or absolute) is only for overriding that or for a standalone policy checkout. Do not infer the workspace from the shell's current directory.
 
 The `paper map` and `paper section` commands below apply to the standard Labo
 TeX layout with `main.tex` and `sections/`. For Markdown, a single TeX file or

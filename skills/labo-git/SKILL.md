@@ -7,16 +7,20 @@ description: Set up and verify local research Git and a separate publishable ski
 
 ## Publication boundary
 
-By default, only the independent policy Git normally mounted at `.agents`
-is eligible for GitHub push or PR. Everything outside it stays local, including
-the parent repository's files and history, regardless of whether a remote is
-public or private. This is the common boundary for setup, improvement, push,
-PR and upstream adoption workflows.
+Two kinds of destination are kept apart.
 
-Both push and PR operate within that policy Git and independently of the parent.
-Select its verified fork URL, commits and branch; never push the parent, create
-a parent PR, or require a parent commit/gitlink update to publish a skill.
-Local parent commits and selected gitlink updates remain separate local work.
+- **Public**: the independent policy Git normally mounted at `.agents` (the user's skills fork and
+  any upstream PR), and any public repository such as the website's `website/public`. Only reusable
+  instructions, tools and fictional tests go to the policy Git, after the content review below.
+- **The parent research repository**: commit it and push it to the user's own **private** remote as
+  the work proceeds; this is routine and needs no per-push permission. Never push it to a public
+  remote or open a PR from it. It excludes, by design, the archives with their own Gits
+  (`reference/`, `writing/.corpus/`), which stay local.
+
+Both push and PR for skills operate within the policy Git and independently of the parent: select its
+verified fork URL, commits and branch; a parent commit, gitlink update or parent push is not required to
+publish a skill, and pushing the parent publishes no skill. Parent commits and selected gitlink updates are
+recorded as ordinary parent work.
 A push request alone does not request a PR; an authorized PR includes the
 necessary push of its reviewed policy branch, without a second approval.
 
@@ -42,9 +46,10 @@ gitlinks. Resolve the policy checkout from this skill's real location; it can
 be mounted at `.agents` or `.claude`.
 
 Read [setup and checks](references/setup.md) when installing or repairing this
-boundary. The guard disables all parent pushes while preserving local commits,
-and requires a reviewed head plus an exact destination for policy pushes.
-Install only in repositories covered by the user's setup request. Existing
+boundary. The guard requires a reviewed head plus an exact destination for policy pushes. Its
+`local-only` role, which disables every push of a repository while preserving local commits, is optional
+and for repositories the user wants kept off all remotes (the source archives; the parent only if the user
+asks). Install only in repositories covered by the user's setup request. Existing
 remote history is not erased by these guards or ignore rules.
 
 Review content as well as paths, including commit messages. The push guard

@@ -292,7 +292,7 @@ repair. Do not invent a defect quota or mark human understanding as achieved.
   and leaves the reader to ask "what is that, what is known, why does it matter" fails.
   Locate failures at the sentence, not at the section.
 - **R32 Figure readiness** — For a method paper, judge whether the reader could present each
-  main-text figure, and whether a [companion page](../../reading-companion/SKILL.md) could be
+  main-text figure, and whether a [companion page](../../reading-proof-review/references/companion/overview.md) could be
   built for it. For every main-text figure, and every supplementary figure the main text cites
   where understanding a main figure depends on it, check in the note: (a) what the figure
   claims (the main-text sentence that cites it and the caption, with locators) and how to read

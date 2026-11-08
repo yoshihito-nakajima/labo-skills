@@ -113,7 +113,8 @@ wording without silently rewriting the document.
 Ordinary chat stays in chat. For requested files, reuse the existing destination.
 In Labo, an own-manuscript translation normally belongs in
 `writing/<paper>/ja/`; other persistent reading translations belong in
-`reading/<slug>/`. Record the source version and covered scope compactly in
+`reading/<slug>/`, in the directory of that source (a translation and an explanation of one source share
+one directory; name the roots `<slug>-ja.tex`, `<slug>-ja-expansion.tex`). Record the source version and covered scope compactly in
 existing metadata, a source comment, or an accompanying reference record.
 On updates, check which source passages changed rather than claiming a stale
 translation matches the current manuscript.

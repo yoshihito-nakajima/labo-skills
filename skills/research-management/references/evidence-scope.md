@@ -12,8 +12,8 @@ claim or whether a reviewer actually read a file. An `ok` result means only that
 the supported diagnostics found no issue.
 
 The loaded policy checkout owns this reference and the implementation in
-`src/labo_tools/evidence_scope.py`. Resolve `<labo-script>` to the absolute
-`../../scripts/labo.py` path from the real `research-management` skill directory.
+`src/labo_tools/evidence_scope.py`. Run it with the checkout-local launcher (`<labo-script>`: `.agents/scripts/labo.py` from the workspace root,
+or `../../scripts/labo.py` from the `research-management` skill directory).
 Do not copy the resolver into the private research workspace or substitute an
 unrelated installed executable. The same code serves writing sources, reading
 sources, and other explicitly selected TeX roots inside the host workspace.

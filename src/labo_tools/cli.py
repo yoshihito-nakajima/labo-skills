@@ -18,6 +18,7 @@ from .build import (
     prune_output,
     run_build,
     run_source_build,
+    copy_html,
     record_postprocess,
     run_postprocess,
     verify_current,
@@ -200,9 +201,9 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
     )
     _workspace(init)
     init.add_argument("--dry-run", action="store_true")
-    new = layout_actions.add_parser("new", help="create a research, paper, or reference source template")
+    new = layout_actions.add_parser("new", help="create a research, paper, reference or reading source template")
     kinds = new.add_subparsers(dest="kind", required=True)
-    for kind in ("research", "paper", "reference"):
+    for kind in ("research", "paper", "reference", "reading"):
         sub = kinds.add_parser(kind)
         sub.add_argument("slug")
         _workspace(sub)
@@ -386,6 +387,12 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
     post_target.add_argument("--paper")
     post_target.add_argument("--source", type=Path)
     output_post.add_argument("--step", required=True, help="the post-processing command, for the record")
+    output_html = output_actions.add_parser(
+        "copy-html",
+        help="copy a built HTML page from reading/<slug>/ or writing/<slug>/ into output/ (the master stays in place)",
+    )
+    _workspace(output_html)
+    output_html.add_argument("--source", type=Path, required=True, help="HTML page under reading/<slug>/ or writing/<slug>/")
     output_prune = output_actions.add_parser("prune", help="remove the oldest managed PDF/SyncTeX outputs")
     _workspace(output_prune)
     output_prune.add_argument("--max-files", type=int, default=DEFAULT_OUTPUT_MAX_FILES,
@@ -581,6 +588,8 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
             _build(args)
         elif args.area == "output" and args.action == "record-postprocess":
             print(record_postprocess(args.workspace, args.step, paper=args.paper, source=args.source))
+        elif args.area == "output" and args.action == "copy-html":
+            print(f"Copied to {copy_html(args.workspace, args.source)}")
         elif args.area == "output" and args.action == "verify-current":
             ok, message = verify_current(args.workspace, paper=args.paper, source=args.source)
             print(message, file=sys.stdout if ok else sys.stderr)

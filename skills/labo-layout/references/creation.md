@@ -37,11 +37,11 @@ create forks, initialize submodules, or update their pinned versions.
 
 ## Create only the requested structure
 
-In these examples `<labo-script>` means the absolute path to
-`../../scripts/labo.py` from the real `labo-layout` skill directory.
+In these examples `<labo-script>` means the checkout-local launcher: `.agents/scripts/labo.py`
+from the workspace root (it is `../../scripts/labo.py` from the `labo-layout` skill directory).
 The launcher defaults to its Git superproject from any working directory.
 For a standalone policy checkout or a different destination, add
-`--workspace /absolute/path/to/workspace` to each command. The selected
+`--workspace <dir>` (relative or absolute) to each command. The selected
 workspace must be outside the public policy checkout.
 
 ```sh
@@ -52,6 +52,7 @@ python3 <labo-script> layout new research finite-observations \
   --next 'Compare two elementary examples with the same observations.'
 python3 <labo-script> layout new paper reconstruction
 python3 <labo-script> layout new reference example-source
+python3 <labo-script> layout new reading example-source
 ```
 
 - `layout init` adds `inbox/`, `research/`, `lean/`, `writing/`,
@@ -86,6 +87,10 @@ python3 <labo-script> layout new reference example-source
 - `layout new reference` creates `reference/<key>/reference.md` for identity
   and version provenance and ensures `/reference/` is ignored in the parent.
   Fill it from the source; do not invent metadata.
+- `layout new reading` creates `reading/<slug>/README.md` and `reference.md`: the one directory of a source
+  ([one source, one directory](layout.md#one-source-one-reading-directory)). The README lists the kinds of material
+  and their roots and outputs, and has a `Route:` line for a private HTML page (site, standalone or none).
+  Fill both from the source and what was actually made.
 
 Names use lowercase kebab-case. New-item commands refuse an existing target,
 including an empty directory; inspect and complete it directly when appropriate.

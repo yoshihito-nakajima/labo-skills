@@ -29,7 +29,7 @@ The tree is an example of the **whole workspace layout**. When showing an existi
       index.md
     writing/.rules/           # workspace-level, user-maintained writing rules
       README.md
-    reading/                  # lecture notes, literature notes, derived exposition
+    reading/<slug>/           # one directory per source (paper, book, topic); all its notes and derived exposition
     reference/<key>/          # local-only source Git; excluded from parent Git
     output/                  # ignored PDFs + same-stem SyncTeX, directly selectable
     website/                  # optional source pages/config
@@ -88,6 +88,44 @@ programs gain that structure when accepted plan-editing or exploration work
 needs it, following [safe migration](research-migration.md). A program without
 a tree retains its plan, claims and proof statuses; inventories and report-only
 work do not write one. Structure and Lean-evidence status are independent.
+
+### One source, one `reading/` directory
+
+`reading/` exists to read a source and to put what is learned into `output/`. Everything
+made from the same source lives in **one** directory, `reading/<slug>/`: its Japanese
+translation, its explanation, an English version, a companion page, notes, figures. Do
+not split a source into `reading/<slug>-ja/`, `reading/<slug>-en/`, `reading/<slug>-expansion/`
+and the like. A kind of material is told apart by the **file name of its TeX root**, which
+also names its output: a root whose stem begins with `<slug>` (`<slug>-ja.tex`,
+`<slug>-ja-expansion.tex`) publishes `output/<stem>.pdf`; another stem is published as
+`<slug>-<stem>` (see the [build contract](../../labo-build/references/build-contract.md)).
+Keep in that directory one `README.md` (what exists and its status), one `reference.md`
+(source identity, version and covered scope) and one source-fingerprint record. Roots of
+different kinds share them instead of copying them. Sections or data belonging to one
+kind go in a subdirectory of that name (`sections/`, `companion/`). The slug names the
+source, not the language or the kind of the note.
+
+### Private HTML: the site route and the standalone route
+
+A private page for reading is made by exactly one of two routes, and the two are not mixed.
+
+- **Site route.** When the workspace has a private site (`website/content/private/` with its
+  generator), the page is a private Reader page: authored Markdown at
+  `website/content/private/<slug>.md`, built by the site generator into `website/private/`. Do
+  not also build a standalone HTML for the same content, and keep no copy of the Markdown in
+  `reading/`; link to it from the source's `README.md`. The route belongs to
+  [website-publishing](../../website-publishing/SKILL.md).
+- **Standalone route.** When there is no private site, or the page needs behaviour the generator
+  cannot express (controls that run code, for example), the page is a standalone, self-contained
+  HTML built from a structured spec by `reading-proof-review` (a proof review, a method-and-code companion, or a prose page), with KaTeX
+  embedded. Its **master stays in `reading/<slug>/`** beside its spec, and a **copy** goes to
+  `output/` with `output copy-html --source <page.html>`; `output/` is disposable, so never keep
+  the only copy there. Name it like a TeX root: its stem when that begins with the slug,
+  otherwise `<slug>-<stem>`; a page called `index.html` takes its directory's name.
+
+Say which route a page uses in the source's `README.md` (`layout new reading` creates it with a `Route:` line). Do not put generator output in
+`output/`, and do not put a standalone page under `website/`. Moving a page from one route to
+the other is a separate request, not a silent conversion.
 
 `research/`, `lean/`, `writing/`, `reading/`, and `reference/` may reference
 one another using relative links or identifiers but do not have to share the

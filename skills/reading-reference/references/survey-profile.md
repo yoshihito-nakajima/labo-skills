@@ -42,7 +42,7 @@ A record field is a claim about the paper. Check each against the page it cites:
 ## Code per section
 
 Every section that has code gets a flow paragraph, its **Steps** (each read line by line, with the specification of the functions it calls), an account of what the result means, and, when a predecessor exists, a comparison card
-([comparison](../../reading-companion/references/comparison.md)); a section without a
+([comparison](../../reading-proof-review/references/companion/comparison.md)); a section without a
 predecessor says "no comparison" with the reason and still gives its Steps. Original, author or
 official code is the main code. AI-written code is allowed only where no original can be
 obtained and the user has permitted it for that resource; it is labelled as a stand-in, recorded
@@ -51,6 +51,6 @@ run it and say so.
 
 ## Checks
 
-`reading-companion/scripts/check_section_record.py` checks the record: edges resolve and carry a
+`reading-proof-review/scripts/check_section_record.py` checks the record: edges resolve and carry a
 substantive label, figures are used and colour-checked, evidence carries page locators, every code
 section has Steps and a comparison or a reasoned "no comparison", stand-in code is labelled.

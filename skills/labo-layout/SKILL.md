@@ -96,7 +96,8 @@ Use `layout new paper` or `layout new reference` when a new item is needed.
 Creating a paper also initializes the shared writing corpus and rules guides
 when they are missing and appends `/writing/.corpus/` to the parent ignore
 rules even without a prior `layout init`. Reference creation likewise ensures
-`/reference/` is ignored. Create reading notes under `reading/`, formalizations
+`/reference/` is ignored. Create reading notes under `reading/<slug>/` with `layout new reading`, one directory per source
+([layout](references/layout.md#one-source-one-reading-directory)), formalizations
 under `lean/`, and optional website/profile material only when those tasks
 arise. The directory contract explains their relationships; output slugs need
 not match programs.

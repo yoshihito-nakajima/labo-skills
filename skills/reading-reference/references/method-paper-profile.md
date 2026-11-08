@@ -41,7 +41,7 @@ Completion is checked with `scripts/check_coverage.py` on the coverage data (inc
 [review](review.md).
 
 To prepare the presentation by seeing and moving the paper, build a private HTML companion with
-[reading-companion](../../reading-companion/SKILL.md). Plan it while writing the note: the
+[the companion page](../../reading-proof-review/references/companion/overview.md). Plan it while writing the note: the
 companion adds no claim the note does not carry, so it is built from the parts above: the
 lineage overview (its introduction), the code-block notes (its same/changed lists), the
 difference sources and the figure part (its figure units) and the values table (its controls).

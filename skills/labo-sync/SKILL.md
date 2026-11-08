@@ -30,8 +30,8 @@ material before sharing anything.
 Follow the [publication boundary](../labo-git/SKILL.md#publication-boundary).
 Treat policy adoption, policy push/PR and local parent gitlink recording as
 independent operations. Advance the parent pin only to the selected policy
-commit when adoption is requested; retain that record locally. Do not push the
-parent or create a parent PR. Fork pushes and upstream PRs operate only in the
+commit when adoption is requested and record it in the parent's own history
+(pushed to its private remote as usual). The parent has no PR. Fork pushes and upstream PRs operate only in the
 policy Git and follow the user's request, not merely an upstream fetch. A
 selected upstream change does not imply that every upstream commit belongs
 in the fork.

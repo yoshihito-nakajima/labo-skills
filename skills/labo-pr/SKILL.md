@@ -27,10 +27,10 @@ An unqualified PR request in this workflow refers to reusable skills/tools;
 do not turn it into manuscript publication. For repository setup or push
 protection use [labo-git](../labo-git/SKILL.md). Its
 [publication boundary](../labo-git/SKILL.md#publication-boundary) applies to
-both push and PR: only the independent policy Git is sendable by default;
-everything outside it stays local, even with a private parent remote.
+both push and PR: the independent policy Git is the only skills destination; the parent
+research repository goes to the user's private remote, never to a public one.
 Operate inside the loaded policy checkout, normally the `.agents` submodule.
-Do not push the parent or create a parent PR to contribute. The local `.claude`
+Do not create a parent PR to contribute; a parent push is not part of it. The local `.claude`
 alias and parent gitlink are not publication targets or prerequisites.
 Resolve that checkout from this skill's real directory rather than the shell's
 current directory. Inspect its status and remotes, and the private parent's

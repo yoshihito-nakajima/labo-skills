@@ -46,12 +46,10 @@ an acyclic graph or from a tool's successful exit.
 
 ## Run the checked-out harness
 
-Resolve `<labo-script>` to the absolute `../../scripts/labo.py` path from this
-skill's **real directory**, following symlinks. This uses the implementation
-beside the loaded skills under `.agents`, `.claude`, or another mount. It does
-not rely on a globally installed command or the invocation directory.
-For a standalone checkout or explicit selection, append
-`--workspace /absolute/path/to/labo` to the leaf command.
+`<labo-script>` is the checkout-local launcher `scripts/labo.py` of this policy checkout: from the workspace root it is
+`.agents/scripts/labo.py` (or the same file through the `.claude` mount). Use it rather than a globally installed `labo`
+command. It finds the workspace from its own location, so neither the working directory nor an absolute path matters;
+`--workspace <dir>` (relative or absolute) is only for overriding that or for a standalone policy checkout. This uses the implementation beside the loaded skills, under `.agents`, `.claude`, or another mount.
 
 ```sh
 python3 <labo-script> dependencies check --graph research/example/dependencies.yaml

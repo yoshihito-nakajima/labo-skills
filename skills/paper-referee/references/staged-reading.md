@@ -33,7 +33,7 @@ Resolve `<labo-script>` and select the private workspace as directed by the
 owning [skill](../SKILL.md). Paths below are normalized workspace-relative POSIX
 paths; the existing parent of the private session must already exist. Never put
 a private source or session in the policy checkout. Each command accepts
-`--workspace /absolute/private/workspace` and `--format text|json`.
+`--workspace <private workspace>` and `--format text|json`.
 
 ```sh
 python3 <labo-script> paper reading start --source writing/example/sections/01-introduction.tex --session research/reviews/first-reader.json --reader reader-one --mode independent --format json

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a single-file companion HTML from companion.json and its result files.
 
-  build_companion.py companion.json --out reading/<slug>-companion/index.html [--template T]
+  build_companion.py companion.json --out reading/<slug>/companion/index.html [--template T]
 
 Refuses to build when the spec is incomplete (missing background, provenance, grid points,
 code excerpts that do not contain the stated parameter tokens, ...); fix the spec rather than

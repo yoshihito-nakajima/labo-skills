@@ -64,10 +64,10 @@ used when the user has agreed (record the wording and date in the plan), under t
 
 Run on the authors' data when it can be obtained; otherwise obtain the same data from its primary
 source, or use a substitute dataset of the same kind, under the levels L1–L4 and the labelling
-rules of [reproducing figures](../../reading-reference/references/methods.md#reproducing-the-papers-figures).
+rules of [reproducing figures](../../../reading-reference/references/methods.md#reproducing-the-papers-figures).
 Every result file records its level, the data's identity (source page, accession, hash,
 preprocessing) and the figure and panel it corresponds to, with what does not transfer. What would
-raise a level goes into the [request list](../../reading-reference/references/resource-ledger.md#request-list).
+raise a level goes into the [request list](../../../reading-reference/references/resource-ledger.md#request-list).
 
 ## Say what was run
 

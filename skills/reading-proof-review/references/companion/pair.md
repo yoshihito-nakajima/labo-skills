@@ -2,7 +2,7 @@
 
 The note and the companion are built from the same understanding and kept as one pair: the PDF is
 the source of truth read front to back, the HTML takes its lineage, values, code-block notes and
-figure differences from it ([method-paper profile](../../reading-reference/references/method-paper-profile.md)).
+figure differences from it ([method-paper profile](../../../reading-reference/references/method-paper-profile.md)).
 `PAIR.json`, kept beside the note, ties them together so that a change in one is noticed in the other.
 
 ```json
@@ -28,14 +28,14 @@ figure differences from it ([method-paper profile](../../reading-reference/refer
 ## Slides
 
 Slides are taken from the companion, not from the note: see
-[decks from one plan](../../deck-from-references/references/two-decks.md). Unit ids for the page tags are
+[decks from one plan](../../../deck-from-references/references/two-decks.md). Unit ids for the page tags are
 listed by `deck-from-references/scripts/link_companion.py list`.
 
 ## Starting and building a pair (provisional)
 
-- `scripts/new_pair.py SLUG --workspace <root> [--paper ...]` creates `reading/SLUG/` (note skeleton, `intake.json`,
-  `coverage.json`, `PAIR.json`) and `reading/SLUG-companion/` (an empty spec whose build lists what is still to
-  fill). It refuses to run when the parent Git does not ignore `reading/`, or a directory exists.
+- `scripts/new_pair.py SLUG --workspace <root> [--paper ...]` creates `reading/SLUG/` (note skeleton `SLUG.tex`, `intake.json`,
+  `coverage.json`, `PAIR.json`) with `reading/SLUG/companion/` inside it (an empty spec whose build lists what is
+  still to fill): one source, one directory. It refuses to run when the parent Git does not ignore `reading/`, or a directory exists.
 - `scripts/build_pair.py PAIR.json --workspace <root> [--skip-note]` builds the note PDF, then the companion
   (the PDF's labels and pages come from its aux, so the PDF is first), runs the companion check, the coverage gate
   and the pair check, and records the build. `companion.template` in `PAIR.json` names a project template when the

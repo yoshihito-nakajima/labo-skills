@@ -29,7 +29,7 @@ def main():
     py = sys.executable
     if not a.skip_note:
         labo = os.path.join(ws, '.venv', 'bin', 'python')
-        run([labo if os.path.exists(labo) else py, os.path.join(ws, '.agents', 'scripts', 'labo.py'), 'output', 'build', '--source', os.path.relpath(os.path.join(rel(note['source_dir']), 'main.tex'), ws)], 'note PDF')
+        run([labo if os.path.exists(labo) else py, os.path.join(ws, '.agents', 'scripts', 'labo.py'), 'output', 'build', '--source', os.path.relpath(os.path.join(rel(note['source_dir']), note.get('root', 'main.tex')), ws)], 'note PDF')
     cmd = [py, '-I', os.path.join(HERE, 'build_companion.py'), rel(comp['spec']), '--out', rel(comp['html'])]
     if comp.get('template'):
         cmd += ['--template', rel(comp['template'])]
