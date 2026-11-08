@@ -42,10 +42,24 @@
    "glossary": [
     [
      "graph smoothing",
-     "Replacing each node's value by something closer to its neighbours'; it removes noise that varies quickly between neighbours.",
+     "Replacing each node's value by something closer to its neighbours'. It removes noise that varies quickly between neighbours, at the price of blurring real sharp edges, so the amount of smoothing is a trade-off to choose.",
      "§1 (p.1)",
      "statistics"
     ]
+   ],
+   "concepts": [
+    "K1"
+   ],
+   "claims": [
+    {
+     "id": "T1",
+     "text": "The weighted average minimises $\\sum_i w_i\\|x_i-c\\|^2$ over $c$.",
+     "proof": "Set the derivative in $c$ to zero.",
+     "status": "A",
+     "concepts": [
+      "K1"
+     ]
+    }
    ]
   },
   {
@@ -240,5 +254,14 @@
  ],
  "title": "Smoothing on graphs (fictional survey)",
  "source": "A. Author, Smoothing on graphs, 2020 (fictional)",
- "figure_links": []
+ "figure_links": [],
+ "concepts": [
+  {
+   "id": "K1",
+   "name": "weighted average $\\bar x_w$",
+   "gist": "A mean in which some points count more than others; it is how the toy method lets near points speak louder than far ones.",
+   "explain": "With weights $w_i\\ge0$ summing to 1, the weighted average moves toward the heavily weighted points. In the toy method the weights come from distance, so a point's smoothed value is dominated by its neighbours; this is what removes noise that changes quickly from one neighbour to the next. A common slip is to forget to divide by the sum of the weights, which silently rescales the result.",
+   "definition": "$\\bar x_w=\\sum_i w_ix_i/\\sum_i w_i$."
+  }
+ ]
 }

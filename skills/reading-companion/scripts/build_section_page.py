@@ -179,7 +179,43 @@ CSS = """body{font-family:system-ui,sans-serif;max-width:1200px;margin:0 auto;pa
 .panel2 table{width:100%;border-collapse:collapse}.panel2 th{width:8rem;text-align:left;vertical-align:top;font-size:.85rem;color:#055}.by{font-size:.72rem;padding:0 .35rem;border-radius:3px;margin-right:.2rem;background:#eee}.by-author,.by-official{background:#d8f0dc}.by-lib{background:#e3eaf8}.by-ai{background:#fbe3d0}
 .cb{background:#fbfbfd;border:1px solid #dde;padding:.3rem .5rem;font-size:.78rem;overflow:auto;white-space:pre}.cb .ln{color:#999;margin-right:.5rem}.cb.same{background:#eef8ee}.cb.chg{background:#fff8dc}.cb.onl{background:#eaf1fb}.cb.none{color:#999}.step{border-left:3px solid #9bc;padding:0 .6rem;margin:.6rem 0}.cmprow{margin:.5rem 0;padding:.3rem .5rem;border-radius:4px}
 .cmprow.same{background:#f2faf2}.cmprow.chg{background:#fffbe9}.cmprow.onl{background:#f1f6fc}.cmpgrid,.otgrid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}.otgrid img{max-width:100%;border:1px solid #ccd}.stl{font-size:.75rem;padding:0 .4rem;border-radius:3px;font-weight:700}.stl.same{background:#bfe3c1}.stl.chg{background:#f3dd7c}.stl.onl{background:#b9d0ee}.muted{color:#777}.small{font-size:.85rem}
-.lead,.bridge,.flow{background:#f7fbf9;border-left:4px solid #6b9;padding:.4rem .8rem;margin:.5rem 0}.bridge,.flow.after{border-left-color:#c96;background:#fcf9f5}.apic{border:1px solid #dde;padding:.3rem .5rem;margin:.3rem 0;font-size:.88rem}.lines td{border:1px solid #eee;padding:.1rem .4rem}.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
+.gist{background:#eef7f3;border-left:3px solid #4a9;padding:.25rem .5rem}.gistlist{background:#f6faf8;border:1px solid #cde;border-radius:6px;padding:.3rem .7rem;margin:.4rem 0}.lead,.bridge,.flow{background:#f7fbf9;border-left:4px solid #6b9;padding:.4rem .8rem;margin:.5rem 0}.bridge,.flow.after{border-left-color:#c96;background:#fcf9f5}.apic{border:1px solid #dde;padding:.3rem .5rem;margin:.3rem 0;font-size:.88rem}.lines td{border:1px solid #eee;padding:.1rem .4rem}.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
+
+
+def ledger_parts(R, s):
+    """Concepts and claims of a section from the record (optional). A reference to a concept never shows an id alone:
+    the name and the one-line gist travel with it, so the reader need not open the ledger."""
+    cb = {c["id"]: c for c in R.d.get("concepts", [])}
+    cs = [cb[c] for c in s.get("concepts", []) if c in cb]
+    return cb, cs, s.get("claims", [])
+
+
+def ledger_auto_html(R, s):
+    cb, cs, ss = ledger_parts(R, s)
+    if not (cs or ss): return ""
+    h = []
+    if cs: h.append('<div class="gistlist"><b>Concepts of this section, one line each:</b><ul>' + "".join(f'<li><b>{m(c["name"])}</b> \u2014 {m(c["gist"])}</li>' for c in cs) + '</ul></div>')
+    for c in cs:
+        h.append(f'<div class="ledcard" id="c-{esc(c["id"])}"><h4>{esc(c["id"])} {m(c["name"])}</h4><p class="gist"><b>In short:</b> {m(c["gist"])}</p><p><b>Explanation:</b> {m(c["explain"])}</p><p><b>Precise definition:</b> {m(c.get("definition", ""))}</p></div>')
+    for x in ss:
+        refs = "".join(f'<li><a href="#c-{esc(r)}">{esc(r)}</a> <b>{m(cb[r]["name"])}</b> \u2014 {m(cb[r]["gist"])}</li>' for r in x.get("concepts", []) if r in cb)
+        h.append(f'<div class="ledcard"><h4>{esc(x["id"])} (status {esc(x.get("status", "?"))})</h4><p><b>Claim:</b> {m(x["text"])}</p>' + (f'<p><b>Proof or locator:</b> {m(x["proof"])}</p>' if x.get("proof") else "") + (f'<div class="small"><b>Concepts used:</b><ul>{refs}</ul></div>' if refs else "") + '</div>')
+    return "".join(h)
+
+
+def ledger_auto_tex(R, s):
+    cb, cs, ss = ledger_parts(R, s)
+    if not (cs or ss): return ""
+    t = []
+    if cs:
+        t.append(r"{\small\textbf{Concepts of this section, one line each}}\begin{itemize}\small")
+        t += [f"\\item {tx(c['name'])} --- {tx(c['gist'])}" for c in cs]; t.append(r"\end{itemize}")
+    for c in cs:
+        t.append(f"\\paragraph{{{c['id']}\\ {tx(c['name'])}}}\\begin{{itemize}}\\small\\item In short: {tx(c['gist'])}\\item Explanation: {tx(c['explain'])}\\item Definition: {tx(c.get('definition', ''))}\\end{{itemize}}")
+    for x in ss:
+        refs = "; ".join(f"{r} {tx(cb[r]['name'])} ({tx(cb[r]['gist'])})" for r in x.get("concepts", []) if r in cb)
+        t.append(f"\\paragraph{{{x['id']}}}\\begin{{itemize}}\\small\\item Claim: {tx(x['text'])}" + (f"\\item Proof or locator: {tx(x['proof'])}" if x.get("proof") else "") + (f"\\item Concepts used: {refs}" if refs else "") + "\\end{itemize}")
+    return "\n".join(t) + "\n"
 
 
 def section_html(R, s, pdf, words):
@@ -197,6 +233,7 @@ def section_html(R, s, pdf, words):
             fig += f'<div class="figin"><div>{img}</div><div><h4>{esc(f)} (p.{d["page"]})</h4><p>{m(d["what"])}</p><p>{m(d.get("text", ""))}</p><p><b>Colour:</b> {m(d["color"])}</p>{"<ul>" + rel + "</ul>" if rel else ""}</div></div>'
         parts.append(f'<details class="blk"><summary>Figures of this section</summary><div class="inner">{fig}</div></details>')
     if s.get("steps"): parts.append(f'<details class="blk" id="cu-{i}"><summary>Code: Steps and comparison</summary><div class="inner">{card_html(R, s)}</div></details>')
+    if not s.get("ledger_html"): s = dict(s, ledger_html=ledger_auto_html(R, s))
     if s.get("ledger_html"): parts.append(f'<details class="blk" id="led-{i}"><summary>Math ledger of this section</summary><div class="inner">{s["ledger_html"]}</div></details>')
     kids = "".join(section_html(R, k, pdf, words) for k in R.kids(i))
     bridge = f'<div class="bridge"><b>To the next section</b><p>{m(s["bridge"])}</p></div>' if s.get("bridge") else ""
@@ -277,6 +314,9 @@ def main(argv=None):
             (out / "glossary").mkdir(exist_ok=True)
             rows = "".join(f"{tx(w)} & {tx(d)} & {tx(wh)} & {tx(fl)} \\\\\n" for w, d, wh, fl in s["glossary"])
             (out / "glossary" / f"g{s['id']}.tex").write_text(r"{\footnotesize\begin{longtable}{@{}p{2.8cm}p{9.2cm}p{1.8cm}p{1.2cm}@{}}\toprule term&explanation and use&where&field\\\midrule\endhead" + "\n" + rows + r"\bottomrule\end{longtable}}" + "\n")
+        lt = ledger_auto_tex(R, s)
+        if lt:
+            (out / "ledger").mkdir(exist_ok=True); (out / "ledger" / f"l{s['id']}.tex").write_text(lt)
         if s.get("bridge"):
             (out / "bridge").mkdir(exist_ok=True); (out / "bridge" / f"br{s['id']}.tex").write_text(r"\par\medskip\noindent{\small\textbf{To the next section.} %s}\par" % tx(s["bridge"]) + "\n")
     print(f"built {len(R.S)} sections -> {out}")

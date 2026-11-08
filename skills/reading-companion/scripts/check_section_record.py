@@ -34,6 +34,12 @@ def check(rec):
         if not what or len(what.strip()) < 4 or what.strip() in (secs[b]["title"], b):
             err.append(f"edge {a}->{b}: label must state what is passed, not the target's name")
 
+    for c in rec.get("concepts", []):
+        for k in ("gist", "explain", "definition"):
+            if not c.get(k): err.append(f"concept {c.get('id')}: '{k}' is required (gist: one or two lines; explain: role, intuition, where it appears; definition: precise)")
+        if c.get("explain") and c["explain"].strip() == c.get("definition", "").strip():
+            warn.append(f"concept {c['id']}: explain repeats the definition; say what it is for and where it appears")
+        if c.get("gist") and len(c["gist"]) > 200: warn.append(f"concept {c['id']}: gist is longer than two lines")
     used = set()
     for s in rec["sections"]:
         i = s["id"]
@@ -44,6 +50,14 @@ def check(rec):
                 warn.append(f"{i}: no '{k}' paragraph (entrance and bridge carry the connections)")
         if not s.get("glossary") and s.get("weights", [1])[0] + s.get("weights", [0, 1])[1] > 0:
             warn.append(f"{i}: no glossary (terms and what they are good for)")
+        cids = {c["id"] for c in rec.get("concepts", [])}
+        for r in s.get("concepts", []):
+            if r not in cids: err.append(f"{i}: concept {r} is not defined in the record's concepts")
+        for x in s.get("claims", []):
+            for r in x.get("concepts", []):
+                if r not in cids: err.append(f"{i}: claim {x.get('id')} refers to unknown concept {r}")
+        for w, d, *_ in s.get("glossary", []):
+            if len(d.strip()) < 3 * len(w.strip()): warn.append(f"{i}: glossary term {w!r} is explained in fewer words than a name needs; give one or two lines (what it is, what it is good for)")
         if not s.get("answer") or not s.get("question"):
             err.append(f"{i}: question and answer are required")
         a, b = s["pages"]
