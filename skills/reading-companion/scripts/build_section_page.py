@@ -179,7 +179,7 @@ CSS = """body{font-family:system-ui,sans-serif;max-width:1200px;margin:0 auto;pa
 .panel2 table{width:100%;border-collapse:collapse}.panel2 th{width:8rem;text-align:left;vertical-align:top;font-size:.85rem;color:#055}.by{font-size:.72rem;padding:0 .35rem;border-radius:3px;margin-right:.2rem;background:#eee}.by-author,.by-official{background:#d8f0dc}.by-lib{background:#e3eaf8}.by-ai{background:#fbe3d0}
 .cb{background:#fbfbfd;border:1px solid #dde;padding:.3rem .5rem;font-size:.78rem;overflow:auto;white-space:pre}.cb .ln{color:#999;margin-right:.5rem}.cb.same{background:#eef8ee}.cb.chg{background:#fff8dc}.cb.onl{background:#eaf1fb}.cb.none{color:#999}.step{border-left:3px solid #9bc;padding:0 .6rem;margin:.6rem 0}.cmprow{margin:.5rem 0;padding:.3rem .5rem;border-radius:4px}
 .cmprow.same{background:#f2faf2}.cmprow.chg{background:#fffbe9}.cmprow.onl{background:#f1f6fc}.cmpgrid,.otgrid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}.otgrid img{max-width:100%;border:1px solid #ccd}.stl{font-size:.75rem;padding:0 .4rem;border-radius:3px;font-weight:700}.stl.same{background:#bfe3c1}.stl.chg{background:#f3dd7c}.stl.onl{background:#b9d0ee}.muted{color:#777}.small{font-size:.85rem}
-.gist{background:#eef7f3;border-left:3px solid #4a9;padding:.25rem .5rem}.gistlist{background:#f6faf8;border:1px solid #cde;border-radius:6px;padding:.3rem .7rem;margin:.4rem 0}.lead,.bridge,.flow{background:#f7fbf9;border-left:4px solid #6b9;padding:.4rem .8rem;margin:.5rem 0}.bridge,.flow.after{border-left-color:#c96;background:#fcf9f5}.apic{border:1px solid #dde;padding:.3rem .5rem;margin:.3rem 0;font-size:.88rem}.lines td{border:1px solid #eee;padding:.1rem .4rem}.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
+.ledcard{border:1px solid #cdd;border-radius:6px;margin:.35rem 0;background:#fff}.ledcard>summary{cursor:pointer;padding:.35rem .6rem;background:#f6f9fa}.ledcard>.inner{padding:.4rem .8rem}.sumgist{font-weight:400;font-size:.88rem;color:#345}.ledctl{margin:.4rem 0}.gist{background:#eef7f3;border-left:3px solid #4a9;padding:.25rem .5rem}.gistlist{background:#f6faf8;border:1px solid #cde;border-radius:6px;padding:.3rem .7rem;margin:.4rem 0}.lead,.bridge,.flow{background:#f7fbf9;border-left:4px solid #6b9;padding:.4rem .8rem;margin:.5rem 0}.bridge,.flow.after{border-left-color:#c96;background:#fcf9f5}.apic{border:1px solid #dde;padding:.3rem .5rem;margin:.3rem 0;font-size:.88rem}.lines td{border:1px solid #eee;padding:.1rem .4rem}.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
 
 
 def ledger_parts(R, s):
@@ -190,16 +190,68 @@ def ledger_parts(R, s):
     return cb, cs, s.get("claims", [])
 
 
+def _used(R):
+    u = {}
+    for sec in R.S:
+        for x in sec.get("claims", []):
+            for r in x.get("concepts", []): u.setdefault(r, []).append((x, sec))
+    return u
+
+
+def _home(R):
+    return {r: sec for sec in R.S for r in sec.get("concepts", [])}
+
+
+def _cdetails(c, sec_id, body, scope):
+    """One folded concept: id prefix 'sc-' in the section ledger, 'a-' in the appendix. The folded line carries the gist."""
+    pre = "sc" if scope == "sec" else "a"
+    return (f'<details class="ledcard" id="{pre}-{esc(c["id"])}"><summary><b>{esc(c["id"])}</b> {m(c["name"])}'
+            f'<div class="sumgist">{m(c["gist"])}</div></summary><div class="inner">{body}</div></details>')
+
+
+def _cbody(R, c, scope):
+    used = _used(R).get(c["id"], []); home = _home(R).get(c["id"])
+    us = ", ".join(f'<a href="#ss-{esc(x["id"])}">{esc(x["id"])}</a> (\u00a7{esc(sec["id"])})' for x, sec in used) or "(none)"
+    back = (f'<a href="#a-{esc(c["id"])}">see in the appendix ledger</a>' if scope == "sec"
+            else (f'<a href="#sc-{esc(c["id"])}">see in the ledger of \u00a7{esc(home["id"])}</a>' if home else ""))
+    return (f'<p class="gist"><b>In short:</b> {m(c["gist"])}</p><p><b>Explanation:</b> {m(c["explain"])}</p>'
+            f'<p><b>Precise definition:</b> {m(c.get("definition", ""))}</p><p class="small"><b>Claims that use it:</b> {us}</p>'
+            + (f'<p class="small">\u2197 {back}</p>' if back else ""))
+
+
+def _sdetails(R, x, sec, scope):
+    cb = {c["id"]: c for c in R.d.get("concepts", [])}; home = _home(R)
+    pre = "ss" if scope == "sec" else "as"
+    # a reference goes to the ledger of the same scope: the concept's home section, or the appendix entry
+    def tgt(r): return f"#sc-{esc(r)}" if scope == "sec" else f"#a-{esc(r)}"
+    refs = "".join(f'<li><a href="{tgt(r)}">{esc(r)}</a> <b>{m(cb[r]["name"])}</b> \u2014 {m(cb[r]["gist"])}</li>' for r in x.get("concepts", []) if r in cb)
+    back = f'<a href="#as-{esc(x["id"])}">see in the appendix ledger</a>' if scope == "sec" else f'<a href="#ss-{esc(x["id"])}">see in the ledger of \u00a7{esc(sec["id"])}</a>'
+    return (f'<details class="ledcard" id="{pre}-{esc(x["id"])}"><summary><b>{esc(x["id"])}</b> <span class="muted small">\u00a7{esc(sec["id"])} status {esc(x.get("status", "?"))}</span>'
+            f'<div class="sumgist">{m(x["text"])}</div></summary><div class="inner"><p><b>Claim:</b> {m(x["text"])}</p>'
+            + (f'<p><b>Proof or locator:</b> {m(x["proof"])}</p>' if x.get("proof") else "")
+            + (f'<div class="small"><b>Concepts used:</b><ul>{refs}</ul></div>' if refs else "") + f'<p class="small">\u2197 {back}</p></div></details>')
+
+
+LEDCTL = '<div class="ledctl small"><button onclick="ledAll(this,true)">open all</button> <button onclick="ledAll(this,false)">close all</button></div>'
+
+
 def ledger_auto_html(R, s):
     cb, cs, ss = ledger_parts(R, s)
     if not (cs or ss): return ""
-    h = []
-    if cs: h.append('<div class="gistlist"><b>Concepts of this section, one line each:</b><ul>' + "".join(f'<li><b>{m(c["name"])}</b> \u2014 {m(c["gist"])}</li>' for c in cs) + '</ul></div>')
-    for c in cs:
-        h.append(f'<div class="ledcard" id="c-{esc(c["id"])}"><h4>{esc(c["id"])} {m(c["name"])}</h4><p class="gist"><b>In short:</b> {m(c["gist"])}</p><p><b>Explanation:</b> {m(c["explain"])}</p><p><b>Precise definition:</b> {m(c.get("definition", ""))}</p></div>')
-    for x in ss:
-        refs = "".join(f'<li><a href="#c-{esc(r)}">{esc(r)}</a> <b>{m(cb[r]["name"])}</b> \u2014 {m(cb[r]["gist"])}</li>' for r in x.get("concepts", []) if r in cb)
-        h.append(f'<div class="ledcard"><h4>{esc(x["id"])} (status {esc(x.get("status", "?"))})</h4><p><b>Claim:</b> {m(x["text"])}</p>' + (f'<p><b>Proof or locator:</b> {m(x["proof"])}</p>' if x.get("proof") else "") + (f'<div class="small"><b>Concepts used:</b><ul>{refs}</ul></div>' if refs else "") + '</div>')
+    h = [LEDCTL]
+    if cs: h.append('<div class="gistlist"><b>Concepts of this section, one line each:</b><ul>' + "".join(f'<li><a href="#sc-{esc(c["id"])}">{esc(c["id"])}</a> <b>{m(c["name"])}</b> \u2014 {m(c["gist"])}</li>' for c in cs) + '</ul></div>')
+    for c in cs: h.append(_cdetails(c, s["id"], _cbody(R, c, "sec"), "sec"))
+    for x in ss: h.append(_sdetails(R, x, s, "sec"))
+    return "".join(h)
+
+
+def appendix_ledger_html(R):
+    """The overall ledger: folded as a whole and per entry, linked both ways with the section ledgers."""
+    cs = R.d.get("concepts", [])
+    if not cs: return ""
+    claims = [(x, sec) for sec in R.S for x in sec.get("claims", [])]
+    h = [f'<details class="blk"><summary><b>Concepts</b> ({len(cs)})</summary><div class="inner">{LEDCTL}' + "".join(_cdetails(c, None, _cbody(R, c, "app"), "app") for c in cs) + '</div></details>']
+    h.append(f'<details class="blk"><summary><b>Claims</b> ({len(claims)})</summary><div class="inner">{LEDCTL}' + "".join(_sdetails(R, x, sec, "app") for x, sec in claims) + '</div></details>')
     return "".join(h)
 
 
@@ -252,9 +304,12 @@ def build_html(R, pdf=None):
     def top(i, t, b, op=False): return f'<details class="blk" id="{i}"{" open" if op else ""}><summary>{t}</summary><div class="inner">{b}</div></details>'
     body = (top("overview", "1 Overview", ov, True) + top("figs", "2 Figure list", f"<table><tr><th>figure</th><th>page</th><th>content</th><th>colour legend</th></tr>{frows}</table>")
             + top("codes", "3 Code list", f"<table><tr><th>section</th><th>code</th><th>kind</th><th>source</th><th>state</th><th>licence</th></tr>{crow}</table>")
-            + top("ledger", "3' Ledger (concepts, claims)", R.d.get("ledger_html", "<p class=muted>(attach the ledger here)</p>"))
+            + top("ledger", "3' Ledger (concepts, claims)", R.d.get("ledger_html") or appendix_ledger_html(R) or "<p class=muted>(attach the ledger here)</p>")
             + top("secs", "4 Sections", secs) + top("appx", "5 Appendix", R.d.get("appendix_html", "<p class=muted>materials, acquisition state, request list</p>")))
-    js = "<script>addEventListener('hashchange',function(){var e=document.getElementById(location.hash.slice(1));while(e){if(e.tagName==='DETAILS')e.open=true;e=e.parentElement}});</script>"
+    js = ("<script>function ledAll(b,o){b.parentElement.parentElement.querySelectorAll('details.ledcard').forEach(function(d){d.open=o})}"
+          "function openTo(h){var e=document.getElementById(h);while(e){if(e.tagName==='DETAILS')e.open=true;e=e.parentElement}}"
+          "addEventListener('hashchange',function(){var h=location.hash.slice(1);if(h){openTo(h);var t=document.getElementById(h);if(t)t.scrollIntoView()}});"
+          "if(location.hash)openTo(location.hash.slice(1));</script>")
     return f'<!doctype html><html><head><meta charset="utf-8"><title>{esc(R.d.get("title", ""))}</title><style>{CSS}</style></head><body><h1>{esc(R.d.get("title", ""))}</h1><p class="small muted">{esc(R.d.get("source", ""))}. Private page; do not publish.</p>{body}{js}</body></html>'
 
 

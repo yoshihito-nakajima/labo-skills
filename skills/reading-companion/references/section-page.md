@@ -81,6 +81,20 @@ paraphrase of the name is a defect. `check_section_record.py` rejects a concept 
 when `explain` repeats `definition`, when a gist exceeds two lines, or when a glossary entry is shorter than its name needs;
 the builder expands references automatically (`concepts`, `claims` in the record).
 
+### Two ledgers, linked both ways, folded
+
+The section ledger and the appendix ledger describe the same entries and must reach each other in one click.
+Fixed id scheme: section concept `sc-<id>`, section claim `ss-<id>`, appendix concept `a-<id>`, appendix claim `as-<id>`.
+Every entry ends with a link to its twin; every concept lists the claims that use it (linking to the claim's section entry);
+every claim lists its concepts (linking within the same ledger); the section head's concept list links to the
+section entries. Each concept belongs to one home section (`concepts` of that section) — a concept in no section
+cannot be linked, and the checker rejects it.
+
+Folding: the appendix ledger is folded as a whole (concepts, claims) and entry by entry; the section ledger is folded entry by entry.
+The folded line always shows the id, the name and the gist (for a claim, its statement), so the ledger is readable
+without opening anything; each ledger has "open all / close all". Hash links open every ancestor block, also on first load.
+The builder's `ledger_auto_html` and `appendix_ledger_html` do this from the record; a project that builds its own ledger keeps the same ids and folding.
+
 ## Writing for a reader who knows the definitions but not the code or the field
 
 No length quotas: write as long as it takes to carry the connection, the colours and what each term

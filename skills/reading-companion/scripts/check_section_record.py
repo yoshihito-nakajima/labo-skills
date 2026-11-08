@@ -40,6 +40,9 @@ def check(rec):
         if c.get("explain") and c["explain"].strip() == c.get("definition", "").strip():
             warn.append(f"concept {c['id']}: explain repeats the definition; say what it is for and where it appears")
         if c.get("gist") and len(c["gist"]) > 200: warn.append(f"concept {c['id']}: gist is longer than two lines")
+    homed = {r for sec in rec["sections"] for r in sec.get("concepts", [])}
+    for c in rec.get("concepts", []):
+        if c["id"] not in homed: err.append(f"concept {c['id']}: not listed in any section's 'concepts' (the two ledgers link through the home section)")
     used = set()
     for s in rec["sections"]:
         i = s["id"]
