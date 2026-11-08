@@ -17,6 +17,10 @@ Two kinds of destination are kept apart.
   remote or open a PR from it. It excludes, by design, the archives with their own Gits
   (`reference/`, `writing/.corpus/`), which stay local.
 
+Which workspace folders may be committed at all, and which stay local, is decided per folder
+in a [placement policy](references/placement.md). It has no public kind: research material goes
+only to a remote verified private, and an unverifiable remote counts as not private.
+
 Both push and PR for skills operate within the policy Git and independently of the parent: select its
 verified fork URL, commits and branch; a parent commit, gitlink update or parent push is not required to
 publish a skill, and pushing the parent publishes no skill. Parent commits and selected gitlink updates are
