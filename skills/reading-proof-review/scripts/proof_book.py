@@ -111,8 +111,14 @@ def numbering(blk):
 
 
 # ---------------------------------------------------------------- context (who uses whom)
+def origin_label(o):
+    """Ledger origin text; any key starting with "inherited" (e.g. "inherited(AB)") reads as inherited from prior work."""
+    o = o or ""
+    return ORIGIN.get("inherited" if o.startswith("inherited") else o, "?")
+
+
 TIER = {"key": "鍵", "semi": "準鍵", "standard": "標準"}
-ORIGIN = {"inherited(LS)": "Li–Salgado から引き継ぎ", "standard": "標準", "adapted": "既存の手法の適用・一般化", "new": "原稿が新しいと主張"}
+ORIGIN = {"inherited": "先行研究から引き継ぎ", "standard": "標準", "adapted": "既存の手法の適用・一般化", "new": "原稿が新しいと主張"}
 
 
 def usage():
@@ -164,7 +170,7 @@ def step_ctx(st, here_block, merged, uses, used_by):
     led = ledger_entry(st.get("ledger", ""))
     cls = ""
     if led:
-        cls = "%s・%s（暫定）" % (TIER.get(led.get("tier"), "?"), ORIGIN.get(led.get("origin"), "?"))
+        cls = "%s・%s（暫定）" % (TIER.get(led.get("tier"), "?"), origin_label(led.get("origin")))
     rows = []
     if why:
         rows.append("<div><b>なぜここで要るか</b>　%s %s</div>" % (to_html(why), diff_chips(ds, merged)))
@@ -520,7 +526,7 @@ def ctx_tex(st, uses, used_by):
     if uses.get(st["id"]):
         rows.append(r"\textbf{\textcolor{blue}{前提にする段}}\quad %s\par" % r"\quad ".join(r"\hyperref[%s]{%s}" % (x, x) for x in uses[st["id"]]))
     if led:
-        rows.append(r"\textbf{\textcolor{blue}{分類}}\quad 台帳 %s：%s・%s（暫定）\par" % (st.get("ledger", ""), TIER.get(led.get("tier"), "?"), ORIGIN.get(led.get("origin"), "?")))
+        rows.append(r"\textbf{\textcolor{blue}{分類}}\quad 台帳 %s：%s・%s（暫定）\par" % (st.get("ledger", ""), TIER.get(led.get("tier"), "?"), origin_label(led.get("origin"))))
     rv = rv_tex_row(st["id"])
     if rv:
         rows.append(rv)
