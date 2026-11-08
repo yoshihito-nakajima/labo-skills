@@ -5,13 +5,11 @@ description: Review and selectively adopt shared labo-skills changes into the us
 
 # Adopt upstream labo-skills changes
 
-Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](../research-router/references/editing-capability.md).
 
 Use this skill when the user wants newer shared Labo skills or tools in their
 fork. A routine `git pull` of the private research repository is a separate
 Git task and does not need this workflow.
-
-For each request, follow the [required consultation](../research-router/references/consultation.md).
 Read the repository's [fork and submodule policy](../../README.md) first.
 
 Inspect the parent repository and `.agents` separately: confirm the parent

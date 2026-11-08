@@ -34,6 +34,8 @@ def render_roles(workspace: Path, host: str, model: str | None = None, effort: s
         relative = ".claude"
     if model is not None and (not model.strip() or "\n" in model or "\r" in model):
         raise ValueError("runtime model override must be a nonempty single line")
+    if model is not None and any(name in model.lower() for name in ("luna", "haiku")):
+        raise ValueError("Luna and Haiku are restricted to evidence/coordination")
     allowed = {"low", "medium", "high", "xhigh", "max", "ultra"}
     if effort is not None and (effort not in allowed or (host == "claude" and effort == "ultra")):
         raise ValueError("unsupported effort spelling; verify support for the selected model")

@@ -5,8 +5,7 @@ description: Design or reassess the whole-paper architecture of a mathematical m
 
 # Mathematical paper structure
 
-Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
-For each request, follow the [required consultation](../research-router/references/consultation.md).
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](../research-router/references/editing-capability.md).
 
 Use this skill for a new paper's architecture, an existing paper's structural
 diagnosis, or a proposed merge, split or relocation of sections. Infer the

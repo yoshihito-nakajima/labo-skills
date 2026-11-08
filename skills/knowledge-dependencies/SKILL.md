@@ -5,8 +5,7 @@ description: Build and audit sourced dependencies among mathematical definitions
 
 # Mathematical knowledge dependencies
 
-Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
-For each request, follow the [required consultation](../research-router/references/consultation.md).
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](../research-router/references/editing-capability.md).
 
 Use an explicit graph when the user wants dependency management or when it
 materially clarifies the requested proof or paper structure. Keep adopted

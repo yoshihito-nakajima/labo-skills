@@ -5,9 +5,7 @@ description: Organize mathematical exploration into nested categories and stable
 
 # Mathematical exploration trees
 
-Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
-For each user request, follow the [required consultation](../research-router/references/consultation.md).
-Reuse consultation and model provenance already established for this request.
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](../research-router/references/editing-capability.md).
 
 Use for persistent categories, candidate theorems, questions, experiments,
 obstacles and next actions beneath `research/<slug>/`. `research-management`

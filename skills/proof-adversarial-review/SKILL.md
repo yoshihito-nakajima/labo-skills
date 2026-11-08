@@ -5,9 +5,7 @@ description: Run an independent, adversarial multi-viewpoint review of a frozen 
 
 # Adversarial proof review
 
-Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
-
-For each user request, follow the [required consultation](../research-router/references/consultation.md).
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](../research-router/references/editing-capability.md).
 
 When author identity, voice, or preferences matter, consult the Labo workspace
 [author profile](../../../profile/author-identity.md) when available. Keep

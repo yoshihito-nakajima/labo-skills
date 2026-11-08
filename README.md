@@ -35,7 +35,7 @@ Every skill in `skills/`, grouped by what it is for. Each entry links to its `SK
 
 ### Routing, workspace and research programs
 
-- [research-router](skills/research-router/SKILL.md) — Route a request to the right skill and require a short consultation first.
+- [research-router](skills/research-router/SKILL.md) — Route a request to the right skill; a short consultation is required only when Luna or Haiku coordinates.
 - [labo-layout](skills/labo-layout/SKILL.md) — Initialize or locate the research workspace layout; migrate old layouts safely.
 - [research-management](skills/research-management/SKILL.md) — Start or resume story-centered research; keep plans and evidence.
 - [research-exploration](skills/research-exploration/SKILL.md) — Organize exploration into nested categories and stable theorem/question nodes.

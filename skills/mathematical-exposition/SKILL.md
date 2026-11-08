@@ -5,9 +5,7 @@ description: Explain mathematical papers, proofs and concepts, or improve the cl
 
 # Explain the mathematics clearly
 
-Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
-
-For each request, follow the [research-router consultation](../research-router/references/consultation.md).
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](../research-router/references/editing-capability.md).
 
 Use this skill when the task centers on explaining a mathematical argument,
 bridging a needed concept, or improving how mathematical prose guides its

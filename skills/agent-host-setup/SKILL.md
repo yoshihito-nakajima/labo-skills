@@ -5,9 +5,7 @@ description: Configure and validate Codex or Claude Code host settings and mathe
 
 # Agent host setup
 
-Follow [eligibility](../research-router/references/editing-capability.md) and
-the [request consultation](../research-router/references/consultation.md).
-Reuse the check already completed for the same assignment.
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](../research-router/references/editing-capability.md).
 
 Use this skill for actual host configuration. For an ordinary research task,
 use the selected research skill and [invocation contract](../research-router/references/subagent-invocation.md).

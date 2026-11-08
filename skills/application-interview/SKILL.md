@@ -5,7 +5,7 @@ description: Help create, revise or complete CVs, academic bios, publication lis
 
 # Build application documents from confirmed information
 
-Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](../research-router/references/editing-capability.md).
 
 Use for a request to create, edit, fill or continue an application document.
 For a narrow edit, stay within that edit instead of starting a full interview.

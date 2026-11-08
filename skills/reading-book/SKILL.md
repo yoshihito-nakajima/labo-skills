@@ -5,7 +5,7 @@ description: Build, integrate corrections into, and hand off long mathematical c
 
 # Reading Book
 
-実作業の前に[役割と引継ぎ](../research-router/references/editing-capability.md)を確認し、今回の依頼について[相談手順](../research-router/references/consultation.md)を適用する。既に行った同じ依頼の相談は引き継いで使う。
+Luna と Haiku は証拠の収集だけを行い、実質的な作業は別のエージェントへ渡す（[役割](../research-router/references/editing-capability.md)）。
 
 本を主資料として、正確で自然に読める数学講義を節ごとに作り、再開する。講義本文を唯一の数学的正本とする。全訳、独立した証明部品庫、仮版と厳密版の二重執筆は通常の成果物にしない。忠実な翻訳を明示的に求められた場合は、その指定に従う。
 
@@ -15,8 +15,7 @@ description: Build, integrate corrections into, and hand off long mathematical c
 
 このスキルと教材の指示書・引継ぎには具体的なモデル名や固定の推論設定を指定しない。
 役割は原著読解・本文制作・証明・検証の責任として記す。モデルや起動方法は各ホストの
-実際の機能に任せる。[相談の代替手順](../research-router/references/consultation.md)と
-[担当範囲](../research-router/references/editing-capability.md)に従い、相談役・証明役の
+実際の機能に任せる。[担当範囲](../research-router/references/editing-capability.md)に従い、証明役の
 登録や別エージェント機能がないだけで執筆を停止しない。現在の担当が原著照合・証明補完・
 本文執筆・自己点検を順に進める。独立確認ができなければ未実施と記録し、後で確認する
 正確な主張と位置を残す。自己点検を独立確認と呼ばず、実際の証明上の未解決は区別する。

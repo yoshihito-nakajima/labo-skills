@@ -131,7 +131,7 @@ class HostRoleTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryDirectory() as outside:
             root = Path(directory)
             policy = self.mounted(root, ".agents")
-            for model in ("", "invalid\nselection"):
+            for model in ("", "invalid\nselection", "gpt-6-luna", "claude-haiku-5-5"):
                 with self.assertRaises(ValueError):
                     roles.render_roles(root, "codex", model, "high", policy)
             files = roles.render_roles(root, "codex", "fixture-runtime-a", "high", policy)

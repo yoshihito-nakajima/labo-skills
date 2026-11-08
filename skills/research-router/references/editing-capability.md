@@ -1,61 +1,90 @@
-# Task assignment and substantive-work boundaries
+# Assigned roles and substantive-work handoff
 
-The user's current request assigns the primary/general-purpose agent the authorized
-production work, including source reading, drafting, routine proof reconstruction,
-artifact edits and checks. Named host presets are optional implementations of roles,
-not prerequisites for these responsibilities. Respect explicit host/user restrictions
-such as evidence-only or read-only assignments; never infer those restrictions from
-a model brand, family, tier or an adapter belonging to another host.
+**Restricted models: Luna and Haiku.** At every reasoning effort they collect
+literal evidence and coordinate; they do not do substantive work and they do not
+apply patches that others proposed. Every other model (Opus, Sonnet, Fable,
+Codex models and the like) may do substantive work as the primary agent under
+the user's request, with no further qualification and no consultation. Raising
+the effort of a restricted model does not widen its role. This is an operational
+assignment, not a judgment of anyone's mathematical ability or a guarantee of
+correctness.
 
-## Portable instructions and runtime choices
+Substantive work means interpretation, synthesis, mathematical reasoning, chat
+explanations, drafting replacement prose, and editing or deciding changes to any
+artifact (research, manuscripts, code, configuration, skills, prose), including
+checking correctness and interpreting validation results.
 
-Shared skills, task instructions, templates and handoffs must not prescribe concrete
-model IDs, provider-specific model aliases, fixed reasoning levels or model-name-based
-eligibility rules. Describe the responsibility, required evidence, tools, limits and
-independent-review boundary instead. Keep optional concrete runtime choices in the
-consuming host's configuration or actual native invocation, outside portable task
-instructions. Never copy them into a manuscript or course handoff.
+## Who is restricted
 
-When delegating, use a callable host role or assign a general-purpose worker the
-bounded responsibility. Native defaults and inheritance are valid. Record selection
-or reasoning metadata only when actually exposed; record unavailable information as
-unknown/unsupported rather than guessing. Missing metadata, selection controls or
-named presets alone do not disqualify the current worker or block authorized work.
-Do not change host configuration or permissions to manufacture availability.
+The model comes from the host: a configured role preset with explicit
+model/effort fields, the current session's metadata, or the parent's native
+selection conveyed in the packet. A model name or persona written only in a
+prompt does not select a model. Unknown stays unknown: if the host gives no
+self-metadata, continue within the directly assigned scope; do not infer from a
+provider catalogue, a global default or a self-description. A worker inherits the
+assignment its parent established and does not requalify. Conflicting provenance
+is resolved with the parent before substantive work. Record an unsupported
+effort control as unsupported.
 
-## Responsibilities and fallback
+## If you are restricted
 
-- Evidence/coordination: collect literal evidence and dispatch within its assigned scope.
-- Content/production: read, explain, draft and edit the requested artifact.
-- Proof: construct or reconstruct arguments, fill gaps, test assumptions and find
-  counterexamples. Use the proof-worker instructions for a bounded obligation. A
-  producer may do this sequentially when no separate worker is available; it remains
-  author work, not independent verification.
-- Verification: independently check a frozen statement and proof in a separate fresh
-  context. The producer cannot become its own independent verifier by changing labels.
+Hand the whole substantive task to a configured non-restricted worker through the
+[subagent invocation contract](subagent-invocation.md), after the
+[consultation](consultation.md). Forward the original request, constraints and
+literal evidence; the worker supplies the interpretation. Relay its progress and
+result; do not produce your own substantive version.
 
-Delegate useful bounded subproblems when permitted and available, following the
-[invocation contract](subagent-invocation.md). Otherwise continue sequentially in the
-current authorized production/proof assignment and self-check. Named-role absence
-is not a mathematical obstruction. An explicitly evidence-only worker must still
-hand substantive work back to the parent or user if no permitted producer is available.
+## Route by the work required
 
-Before adopting a newly established decisive mathematical conclusion as a research
-result or decisive proof dependency, obtain the separate fresh verification required
-by the owning skill. If unavailable, keep that adoption pending, identify the exact
-unreviewed claim, and continue permitted drafting, exploration or unrelated work.
-Routine source-based teaching is not all subject to this research-result adoption
-check. Apply its artifact skill's selective review requirements and distinguish
-self-checked text, review pending, and independently checked scope.
+- Literal source collection and coordination: evidence/coordination role.
+- Explaining a supplied argument, synthesizing sources, ordinary drafting and
+  artifact editing: content/production; the primary agent does this itself.
+- Constructing a new proof, filling a missing argument, finding a counterexample
+  or testing hypotheses: the configured proof role. Use a decomposer when there
+  are useful bounded subproblems.
+- Before recording a newly established decisive mathematical conclusion as a
+  research result or using it as a decisive proof dependency, obtain a separate
+  fresh verifier's check of the exact statement and proof, within the owning
+  skill's review rules. Routine explanations of supplied arguments, tentative
+  reasoning and accurately marked unresolved work follow their assigned scope. A
+  proof role and a verifier may share a model; their assignments and contexts
+  must be separate.
 
-## Concrete obstacles
+A mathematical explanation that needs a missing proof step moves that step to the
+proof role. Dispatch the configured role by the work required; do not first judge
+which model is generally good at mathematics. Model/effort choices belong to host
+setup.
 
-A missing source, insufficient tool/permission, unresolved proof step, unsupported
-hypothesis, contradictory example or actual inability to discharge the assigned work
-is a reason to narrow, delegate or pause the affected part. State the exact obstacle
-and supported scope. Do not silently strengthen a theorem or certify an unresolved
-claim. A known conflict affecting permissions or the assignment must be resolved;
-missing model identity alone is not such a conflict. Continue unaffected work.
+## Report concrete obstacles
 
-These are behavioral instructions, not technical enforcement or a correctness
-certificate. Report actual artifacts, proof checks, isolation and tool restrictions.
+Escalate or split a bounded subproblem when a hypothesis is missing, a proof step
+cannot be discharged, a claimed conclusion conflicts with an example, permitted
+sources do not support a needed claim, or the work exceeds the assigned scope or
+remaining budget. State the exact obstacle and what has already been established.
+
+If the required role or native dispatch is unavailable, preserve artifacts and
+report the established scope, remaining obligations, and missing role or host
+support. Do not certify the unresolved claim. The owning skill's authorized
+fallback still applies.
+
+## Behavioral limits
+
+This is a behavioral instruction, not a sandbox or a runtime write barrier. Skill
+links and project instructions make it discoverable; they do not prove
+compliance. Report observed handoffs and checks separately from any claim of
+technical enforcement.
+
+## Native defaults and sequential work
+
+Named host presets are optional implementations of responsibilities. Native defaults
+and inheritance are valid for non-restricted producers. Keep concrete runtime model
+IDs and reasoning overrides in the consuming host configuration or native invocation,
+not in mathematical task packets. Record unavailable runtime metadata as unknown.
+
+When delegation is unavailable, a non-restricted producer may decompose and prove
+sequentially within the user's authorized assignment, following the owning proof
+skill. This is author work and self-checking, never independent verification.
+Before adopting a newly established decisive mathematical result, retain the owning
+skill's separate fresh verification requirement. If that review is unavailable, hold
+that adoption and continue unaffected drafting or exploration. A restricted or
+explicitly evidence-only worker still hands substantive work back.

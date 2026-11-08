@@ -5,9 +5,7 @@ description: Draft or revise mathematical research manuscripts from research pla
 
 # Mathematical paper writing
 
-Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
-
-For each request, follow the [required consultation](../research-router/references/consultation.md).
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](../research-router/references/editing-capability.md).
 
 For substantive mathematical explanation or revisions to exposition, also use
 [mathematical-exposition](../mathematical-exposition/SKILL.md) as a clarity

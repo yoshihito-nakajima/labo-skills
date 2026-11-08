@@ -5,9 +5,7 @@ description: Run an adversarial review loop on a finished explanatory artifact (
 
 # Review an exposition before anyone else reads it
 
-Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
-
-For each user request, follow the [required consultation](../research-router/references/consultation.md).
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](../research-router/references/editing-capability.md).
 
 A draft written in one pass always has defects its author cannot see: passages
 that make sense only to someone who already knows the argument, near topics

@@ -1,13 +1,18 @@
 # Mathematical responsibilities across hosts
 
-Decomposition, proof and verification describe work, not required preset names or
-model families. Apply [task assignment](editing-capability.md). When native delegation
-is available, use a matching callable adapter or a fresh general-purpose worker with
-the exact role instructions. Otherwise a producer may decompose and prove sequentially
-in its current authorized assignment. Missing adapter files, model controls or metadata
-do not stop source-based writing. Never present sequential self-check as independent
-verification. New decisive research-result adoption retains the separate fresh review
-requirement; if unavailable, hold that adoption and continue unaffected work.
+Use the host's configured decomposition, proof and verification roles for the
+corresponding work. Apply [assignment and provenance](editing-capability.md)
+without asking each worker to assess its general mathematical competence.
+Record the role configuration or explicit assignment source and native
+model/effort selection. Luna and Haiku remain evidence/coordination only.
+The assignment permits the work; its correctness still needs proof and checks.
+Use separate fresh verification before adopting newly established decisive
+mathematical claims as research results or decisive proof dependencies,
+following the owning skill's review rules and the adoption scope in the linked
+routing rule. When native delegation is unavailable, a non-restricted producer may
+work sequentially under the linked assignment fallback, keeping independent result
+adoption pending if no fresh verifier is callable. Restricted workers return the
+established scope and remaining obligations to the parent.
 
 ## Packet shared by all roles
 
@@ -36,10 +41,9 @@ The role bodies and descriptions live in these skills:
 - [math-verifier](../../math-verifier/SKILL.md)
 
 The owning artifact skill still controls sources, write scope, formal evidence
-and review requirements. Reuse the completed consultation for this assignment;
-an unavailable advisor uses the consultation fallback. Missing substantive packet
-fields (statement, hypotheses, sources or permissions) must be resolved; unknown
-runtime model metadata is not a missing mathematical premise.
+and review requirements. Resolve missing substantive packet fields (statement,
+hypotheses, sources or permissions) with the parent; unknown runtime metadata alone
+is not a missing mathematical premise. Do not recursively commission advisors.
 
 ## Host entry boundaries
 

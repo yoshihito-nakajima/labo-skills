@@ -5,8 +5,7 @@ description: Create or revise a Japanese translation that can be read on its own
 
 # Japanese translations for continuous reading
 
-Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
-For each request, follow the [required consultation](../research-router/references/consultation.md).
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](../research-router/references/editing-capability.md).
 
 Give the reader a natural, faithful Japanese text they can read continuously
 without switching to the source language. Reading the Japanese alone should

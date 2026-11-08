@@ -1,13 +1,11 @@
 ---
 name: research-router
-description: Route mathematical research tasks to the appropriate labo skill and check request understanding and the next action using available consultation.
+description: Route mathematical research tasks to the appropriate labo skill; consultation is required only when a restricted model (Luna, Haiku) coordinates.
 ---
 
 # Research routing
 
-Before substantive work, follow
-[substantive-work eligibility and handoff](references/editing-capability.md).
-Apply this check to your own role as well as delegated workers.
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](references/editing-capability.md).
 
 ## Lightweight workspace preflight
 
@@ -17,7 +15,7 @@ substantive work: inspect the branch, tracking remote, status and submodule
 pins; fetch the tracking remote once and fast-forward only when it is safe;
 locate the existing target for file-producing tasks. It never stashes, resets,
 rebases or updates a submodule to its remote tip. Do not repeat it when the
-same request passes through consultation or another skill.
+same request passes through another skill.
 
 ## Surface relevant capabilities
 
@@ -42,7 +40,18 @@ presets or runtime metadata alone are not reasons to stop. Follow
 [invocation contract](references/subagent-invocation.md). Actual host setup is a
 separate task, not a routine prerequisite for writing.
 
-For each user request, follow the [consultation and its availability fallback](references/consultation.md).
+Before making any subagent call, follow
+the [subagent invocation contract](references/subagent-invocation.md) for
+thread isolation, assignment packets, and independent-review boundaries.
+
+Route by the responsibility the task requires, using the configured roles.
+Use existing explicit model/effort selections rather than ranking model
+families or asking workers to judge their general mathematical ability.
+Creating or revising those selections belongs to `agent-host-setup`, with user
+constraints and current host availability as inputs. Apply the eligibility
+rule to work you keep, and hand off work outside your assigned role. If the
+needed role is unavailable, report the completed scope and missing role.
+
 Slides are built in stages, with the user's reaction at each gate: see [staged build of slides](../deck-from-references/references/staged-build.md).
 
 1. Identify the **artifact and reader**: research story, Lean, manuscript,
@@ -66,7 +75,7 @@ Slides are built in stages, with the user's reaction at each gate: see [staged b
    [labo-git](../labo-git/SKILL.md); selected upstream
    contributions → `labo-pr`; selective upstream adoption into the fork →
    `labo-sync`.
-4. After the scope check, if task-specific delegation is useful,
+4. If task-specific delegation is useful,
    formulate a short task-specific assignment *from the selected skill* and
    follow the [subagent invocation contract](references/subagent-invocation.md).
    Host role presets are optional; the selected skill and current packet control

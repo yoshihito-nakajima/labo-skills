@@ -5,10 +5,7 @@ description: Discover and shape the research story of a mathematical or scientif
 
 # Discover the question; earn the introduction
 
-Before substantive work, follow [eligibility and handoff](../research-router/references/editing-capability.md).
-
-Follow the [required consultation](../research-router/references/consultation.md)
-once for the request; reuse a completed consultation when passing between skills.
+Luna and Haiku only collect evidence here and hand substantive work to another agent: [roles](../research-router/references/editing-capability.md).
 
 Keep ownership clear:
 
