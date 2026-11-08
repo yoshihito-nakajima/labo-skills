@@ -80,7 +80,11 @@ itself is generic and public; its examples are fictional.
    data and a `check` for every *learn*. Take explanations from the note and its glossary, and the
    lineage, code-block notes, difference sources and values from the note's matching parts
    ([method-paper profile](../reading-reference/references/method-paper-profile.md)); a part the
-   note lacks is added to the note first.
+   note lacks is added to the note first. Write the storyline layer of `companion.json` first and
+   check it alone with `scripts/check_outline.py`: the shared introduction, the method map, and the
+   `difficulties` (the obstacles the paper names, each saying why the obvious route or the earlier
+   method fails) with, for every step, `why` it is needed here and the `answers` it gives. Fix the
+   story before writing units; the page then shows each obstacle with the steps that answer it.
 3. **Runs** (about a minute each, at most five: [compute budget](references/fidelity.md#compute-budget-understanding-not-exact-restoration)). Run the authors' code and the earlier method's code over their grids, on the same
    input, at the highest reproduction level available, in an isolated environment
    ([execution](../reading-reference/references/methods.md#execution-environments)); save one small
@@ -92,7 +96,8 @@ itself is generic and public; its examples are fictional.
    unit is shown first as a trial. (Understanding material is built in one pass; only slides are built
    in stages: [staged build of slides](../deck-from-references/references/staged-build.md).)
 5. **Check** the whole page with `scripts/check_companion.py` (no pending units; privacy, no
-   external resources, size; every main-text figure in order with claim, reading, presenter's notes
+   external resources, size, duplicate ids and in-page links that lead nowhere in the rendered page
+   (needs Chrome/Chromium; skipped with a note otherwise); every main-text figure in order with claim, reading, presenter's notes
    and the data it was run with; every run with its run card; every figure link resolving to a step;
    comparison ranges inside the excerpts; terms and labels for every parameter; presets on grid
    points; labels present in the note; code excerpts verbatim; grid coverage for both methods;

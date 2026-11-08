@@ -333,6 +333,33 @@ def load(spec_path):
             if blank(st.get(k)):
                 P(f"overview step {st.get('id', '?')}", f'missing {k}')
     step_ids = {st.get('id') for st in steps}
+    # ---- storyline layer (optional, written before the units): the obstacles the paper names and the steps that answer them
+    diffs = spec.get('difficulties')
+    if diffs is not None:
+        diff_ids = [d.get('id') for d in diffs]
+        if blank(diffs):
+            P('difficulties', 'empty (list the obstacles the paper names, or omit the layer)')
+        if len(set(diff_ids)) != len(diff_ids):
+            P('difficulties', 'ids must be unique')
+        for d in diffs:
+            for k in ('id', 'title', 'text'):
+                if blank(d.get(k)):
+                    P(f"difficulty {d.get('id', '?')}", f'missing {k} (text = why the obvious route or the earlier method fails, not only what is hard)')
+        answered = set()
+        for st in steps:
+            if blank(st.get('why')):
+                P(f"overview step {st.get('id', '?')}", 'missing why (why this step is needed here; the storyline layer is on)')
+            ans = st.get('answers')
+            if blank(ans):
+                P(f"overview step {st.get('id', '?')}", "missing answers (ids of the difficulties it answers, or 'n/a: reason')")
+            elif not na(ans):
+                for x in ans:
+                    if x not in diff_ids:
+                        P(f"overview step {st.get('id', '?')}", f'answers {x!r}, which is not a difficulty id')
+                    answered.add(x)
+        for i in diff_ids:
+            if i not in answered:
+                P(f'difficulty {i}', 'no step answers it (an obstacle the method never meets, or a step is missing from the map)')
     labels = {}
     note = spec.get('note') or {}
     if note.get('aux'):
@@ -667,6 +694,7 @@ def load(spec_path):
 
     data = {k: spec.get(k) for k in ('title', 'lang', 'paper', 'claims', 'overview', 'requests', 'unobtained')}
     data['background'] = bg
+    data['difficulties'] = diffs
     data['datasets'] = list(datasets.values())
     data['note'] = {'pdf': note.get('pdf', ''), 'deck_pdf': (spec.get('deck') or {}).get('pdf', '')}
     data['methods'] = {k: {kk: v.get(kk) for kk in ('name', 'repo', 'url', 'commit', 'license', 'source', 'files')}

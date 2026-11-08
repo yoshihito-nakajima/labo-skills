@@ -29,6 +29,72 @@ run offline after course and writing/reading builds, using Python and `qpdf`.
 Structural results, rendered-page comparisons and representative viewer checks
 are recorded separately; unchanged work need not repeat a full click-through.
 
+## Skill map
+
+Every skill in `skills/`, grouped by what it is for. Each entry links to its `SKILL.md`; the sections below describe how the main ones work together.
+
+### Routing, workspace and research programs
+
+- [research-router](skills/research-router/SKILL.md) — Route a request to the right skill and require a short consultation first.
+- [labo-layout](skills/labo-layout/SKILL.md) — Initialize or locate the research workspace layout; migrate old layouts safely.
+- [research-management](skills/research-management/SKILL.md) — Start or resume story-centered research; keep plans and evidence.
+- [research-exploration](skills/research-exploration/SKILL.md) — Organize exploration into nested categories and stable theorem/question nodes.
+- [knowledge-dependencies](skills/knowledge-dependencies/SKILL.md) — Sourced dependencies among definitions, assumptions and results; order, cycles, change impact.
+
+### Papers and review
+
+- `paper-introduction` — Discover and shape the story of an introduction.
+- [paper-structure](skills/paper-structure/SKILL.md) — Design or reassess the whole-paper architecture.
+- [paper-writing](skills/paper-writing/SKILL.md) — Draft or revise manuscripts from plans, sources and proof evidence.
+- [paper-referee](skills/paper-referee/SKILL.md) — Audit papers, decisive proofs and exposition against numbered criteria.
+- [proof-adversarial-review](skills/proof-adversarial-review/SKILL.md) — Independent multi-viewpoint adversarial review of a frozen proof.
+- [undergraduate-lecture](skills/undergraduate-lecture/SKILL.md) — Lecture notes for undergraduate readers (an overlay on paper-writing).
+
+### Mathematical workers
+
+- [math-decomposer](skills/math-decomposer/SKILL.md) — Decompose a proof task into precise lemmas and integrate the results.
+- [math-proof-worker](skills/math-proof-worker/SKILL.md) — Prove one bounded statement or give a counterexample.
+- [math-verifier](skills/math-verifier/SKILL.md) — Independently check a frozen proof against its exact statement.
+
+### Reading and references
+
+- [reading-reference](skills/reading-reference/SKILL.md) — Research positioning, prior work, notation lineage, source-grounded reading notes.
+- [reading-book](skills/reading-book/SKILL.md) — Build long courses from books with one canonical body.
+- [reading-book-math-review](skills/reading-book-math-review/SKILL.md) — Review mathematical claims in a frozen long-course version.
+- [reading-book-output-review](skills/reading-book-output-review/SKILL.md) — Review indexes, rendering and navigation in a frozen course PDF.
+- [reading-companion](skills/reading-companion/SKILL.md) — Private interactive HTML companion for a method-and-code paper.
+- [reading-proof-review](skills/reading-proof-review/SKILL.md) — Private HTML page (or proof book) from a proof: key vs standard steps, findings, viability indicator.
+- [japanese-translation](skills/japanese-translation/SKILL.md) — Continuous Japanese reading translation of a manuscript.
+
+### Explanation and navigation
+
+- [mathematical-exposition](skills/mathematical-exposition/SKILL.md) — Explain mathematics and improve clarity, emphasis and pacing.
+- [exposition-review](skills/exposition-review/SKILL.md) — Adversarial review loop on a finished explanatory artifact.
+- [exposition-critique](skills/exposition-critique/SKILL.md) — Independent reader-side critique of a frozen explanatory artifact.
+- [exposition-flow-review](skills/exposition-flow-review/SKILL.md) — Rebuild the actual flow of an exposition and propose reconnections.
+- [mathematical-navigation](skills/mathematical-navigation/SKILL.md) — Numbering, heading colors, cross-references and indexes; PDF link audits.
+
+### Talks and slides
+
+- [slide-authoring](skills/slide-authoring/SKILL.md) — Create, revise or review talk slides and paper-reading decks.
+- [paper-talk-planning](skills/paper-talk-planning/SKILL.md) — Plan a talk that introduces a paper, page by page.
+- [deck-from-references](skills/deck-from-references/SKILL.md) — Build Beamer decks that follow supplied example decks.
+
+### Web and applications
+
+- [website-publishing](skills/website-publishing/SKILL.md) — Web expositions, paper pages and academic profiles; publishing the research site.
+- [application-interview](skills/application-interview/SKILL.md) — CVs, bios, publication lists and grant applications by focused questions.
+
+### Build, Git and skill maintenance
+
+- [labo-build](skills/labo-build/SKILL.md) — Compile TeX into slug-named PDF and SyncTeX outputs.
+- [labo-git](skills/labo-git/SKILL.md) — Set up and verify local research Git and the skills fork.
+- [labo-sync](skills/labo-sync/SKILL.md) — Review and selectively adopt shared labo-skills changes.
+- [labo-pr](skills/labo-pr/SKILL.md) — Contribute selected skill improvements upstream.
+- [labo-self-improve](skills/labo-self-improve/SKILL.md) — Create or improve skills in your fork through actual use.
+- [skill-tuning](skills/skill-tuning/SKILL.md) — Tune a skill together with a concrete artifact through previews.
+- [agent-host-setup](skills/agent-host-setup/SKILL.md) — Configure and validate Codex/Claude host settings and subagent roles.
+
 ## Separation and ownership
 
 For long book-based courses, [reading-book](skills/reading-book/SKILL.md) owns

@@ -13,6 +13,15 @@ before the detailed reading note and leads into it. The note stays the source of
 explanation, picture and example on the page is taken from the note or computed with code and
 labelled, and every unit points back to the note's section and page.
 
+## Fix the story first (optional storyline layer)
+
+Before any unit is written, `companion.json` carries the story in a few fields, checked by
+`scripts/check_outline.py`: the shared introduction (`background`), the method map (`overview`) and
+`difficulties` — numbered obstacles, each saying *why the obvious route or the earlier method fails*,
+not only what is hard. Each overview step gives `why` it is needed here and `answers`, the ids of the
+difficulties it answers (or `n/a: reason`). Every difficulty must be answered by some step, and every
+step must answer one or say why not. The page shows each obstacle with the steps that answer it.
+
 ## What the reader can answer
 
 For the paper as a whole:

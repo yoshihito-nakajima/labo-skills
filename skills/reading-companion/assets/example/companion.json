@@ -627,14 +627,22 @@
    "name": "Neighbour graph",
    "role": "join each point to its near points, with costly edges across gaps",
    "input": "points",
-   "output": "weighted graph"
+   "output": "weighted graph",
+   "why": "Makes the shortcut across the gap expensive, so the next step cannot use it.",
+   "answers": [
+    "1"
+   ]
   },
   {
    "id": "path",
    "name": "Shortest path",
    "role": "read the order along the cheapest path",
    "input": "weighted graph",
-   "output": "ordering of the points"
+   "output": "ordering of the points",
+   "why": "Reads the order from the cheapest path in the graph the first step built.",
+   "answers": [
+    "2"
+   ]
   }
  ],
  "datasets": [
@@ -888,5 +896,17 @@
     "note_labels": []
    }
   ]
- }
+ },
+ "difficulties": [
+  {
+   "id": "1",
+   "title": "A short edge across a gap joins distant parts",
+   "text": "In a plain nearest-neighbour graph, two groups of points separated by a gap can still be joined by one short edge, so the shortest path skips the steps in between and the order along the path is wrong."
+  },
+  {
+   "id": "2",
+   "title": "The order is read from the path, so the path must not skip",
+   "text": "The ordering of the points is only as good as the path it is read from; a graph that allows shortcuts gives an ordering that does not follow the process."
+  }
+ ]
 }

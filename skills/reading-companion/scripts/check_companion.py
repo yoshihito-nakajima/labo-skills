@@ -7,9 +7,12 @@ Reports: spec problems (as build does); code excerpts in the page that no longer
 source files; any external resource the page would load (script/link/img/iframe src, CSS
 url(), fetch/XMLHttpRequest); a page over the size limit; and, with --workspace, an output
 path that the workspace's Git does not ignore (companions are private); and figure units still
-pending, unless --allow-pending (used while units are built one at a time). Exit 1 on problems.
+pending, unless --allow-pending (used while units are built one at a time). The page draws itself
+in the browser, so a headless Chrome/Chromium (CHROME, google-chrome, chromium) is used to look at the
+rendered page for duplicate ids and in-page links (#...) that point nowhere; without a browser that
+part is skipped and says so (--no-dom skips it on purpose). Exit 1 on problems.
 """
-import argparse, json, os, re, subprocess, sys
+import argparse, collections, json, os, re, shutil, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from companion_lib import load  # noqa: E402
 
@@ -18,12 +21,68 @@ EXTERNAL = [r'<script[^>]+src\s*=\s*["\']?(https?:)?//', r'<link[^>]+href\s*=\s*
             r'url\(\s*["\']?(https?:)?//', r'@import', r'\bfetch\s*\(', r'XMLHttpRequest']
 
 
+def find_chrome():
+    c = os.environ.get('CHROME')
+    if c and os.path.exists(c):
+        return c
+    for name in ('google-chrome', 'chromium', 'chromium-browser', 'chrome'):
+        found = shutil.which(name)
+        if found:
+            return found
+    return None
+
+
+def dom_problems(html_path):
+    """Duplicate ids and dangling #links in the rendered page. Returns (problems, note)."""
+    chrome = find_chrome()
+    if not chrome:
+        return [], 'rendered-page check skipped: no Chrome/Chromium found (set CHROME)'
+    def dump(path):
+        try:
+            r = subprocess.run([chrome, '--headless=new', '--disable-gpu', '--no-sandbox', '--virtual-time-budget=30000',
+                                '--dump-dom', 'file://' + os.path.abspath(path)],
+                               capture_output=True, text=True, timeout=120)
+        except (OSError, subprocess.TimeoutExpired) as e:
+            return '', f'rendered-page check skipped: browser did not run ({type(e).__name__})'
+        return r.stdout, ''
+    dom, note = dump(html_path)
+    if note:
+        return [], note
+    if '<main' not in dom or len(dom) < 500:
+        # a confined (snap) browser can only read under the home directory: retry on a copy there
+        tmp = os.path.join(os.path.expanduser('~'), '.cache', 'labo-skills', 'tmp')
+        os.makedirs(tmp, exist_ok=True)
+        copy = os.path.join(tmp, f'companion-check-{os.getpid()}.html')
+        try:
+            shutil.copyfile(html_path, copy)
+            dom, note = dump(copy)
+        finally:
+            if os.path.exists(copy):
+                os.remove(copy)
+        if note:
+            return [], note
+    if '<main' not in dom or len(dom) < 500:
+        return [], 'rendered-page check skipped: browser produced no page'
+    dom = re.sub(r'<(script|style)\b.*?</\1>', '', dom, flags=re.S | re.I)  # templates in script text are not the page
+    ids = re.findall(r'\bid="([^"]*)"', dom)
+    probs = []
+    for i, n in collections.Counter(ids).items():
+        if n > 1:
+            probs.append(f'page: id "{i}" appears {n} times')
+    have = set(ids)
+    for target in sorted(set(re.findall(r'href="#([^"]+)"', dom))):
+        if target not in have:
+            probs.append(f'page: link #{target} points to no element')
+    return probs, ''
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('spec')
     ap.add_argument('html')
     ap.add_argument('--max-kb', type=int, default=8000)
     ap.add_argument('--workspace')
+    ap.add_argument('--no-dom', action='store_true', help='skip the rendered-page check (ids, in-page links)')
     ap.add_argument('--allow-pending', action='store_true', help='accept figure units not built yet (while building one at a time)')
     a = ap.parse_args()
     data, probs = load(a.spec)
@@ -51,7 +110,13 @@ def main():
         r = subprocess.run(['git', '-C', a.workspace, 'check-ignore', '-q', os.path.abspath(a.html)])
         if r.returncode != 0:
             probs.append('page: output path is not ignored by the workspace Git (companions are private)')
+    note = ''
+    if not a.no_dom:
+        more, note = dom_problems(a.html)
+        probs += more
     print('\n'.join(probs) if probs else 'ok')
+    if note:
+        print(note)
     print(f'{len(probs)} problem(s)')
     sys.exit(1 if probs else 0)
 

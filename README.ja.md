@@ -18,6 +18,72 @@
 [japanese-translation](skills/japanese-translation/SKILL.md) を使う。
 日本語で言い回しや推論を吟味できる。
 
+## スキル一覧
+
+`skills/` の全スキルを、用途ごとに並べた。各項目は `SKILL.md` へのリンクで、主なスキルの連携は以降の節で説明する。
+
+### ルーティング・作業場・研究プログラム
+
+- [research-router](skills/research-router/SKILL.md) — 依頼を適切なスキルへ振り分け、最初に短い相談を求める。
+- [labo-layout](skills/labo-layout/SKILL.md) — 作業場の初期化・配置の確認、旧い配置の安全な移行。
+- [research-management](skills/research-management/SKILL.md) — 物語を軸にした研究の開始・再開、計画と証拠の管理。
+- [research-exploration](skills/research-exploration/SKILL.md) — 探索を入れ子のカテゴリと安定した定理・問いの節点で整理する。
+- [knowledge-dependencies](skills/knowledge-dependencies/SKILL.md) — 定義・仮定・結果の出典つき依存関係。順序、循環、変更の影響。
+
+### 論文と査読
+
+- `paper-introduction` — 序文の物語を見つけて整える。
+- [paper-structure](skills/paper-structure/SKILL.md) — 論文全体の構成を設計・見直す。
+- [paper-writing](skills/paper-writing/SKILL.md) — 計画・出典・証明の証拠から原稿を書く・直す。
+- [paper-referee](skills/paper-referee/SKILL.md) — 番号つき基準で論文・決定的な証明・説明を監査する。
+- [proof-adversarial-review](skills/proof-adversarial-review/SKILL.md) — 固定した証明を、独立した複数の視点で敵対的に査読する。
+- [undergraduate-lecture](skills/undergraduate-lecture/SKILL.md) — 学部生向けの講義ノート（paper-writing の補助）。
+
+### 数学ワーカー
+
+- [math-decomposer](skills/math-decomposer/SKILL.md) — 証明の課題を正確な補題に分解し、結果を統合する。
+- [math-proof-worker](skills/math-proof-worker/SKILL.md) — 一つの命題を証明する、または反例を示す。
+- [math-verifier](skills/math-verifier/SKILL.md) — 固定した証明を、正確な命題に照らして独立に検証する。
+
+### 読むこと・文献
+
+- [reading-reference](skills/reading-reference/SKILL.md) — 研究の位置づけ、先行研究、記法の系譜、出典に基づく読書ノート。
+- [reading-book](skills/reading-book/SKILL.md) — 本から長いコースを、一つの正本で作る。
+- [reading-book-math-review](skills/reading-book-math-review/SKILL.md) — 固定した長いコースの数学的主張を査読する。
+- [reading-book-output-review](skills/reading-book-output-review/SKILL.md) — 固定したコース PDF の索引・描画・ナビゲーションを査読する。
+- [reading-companion](skills/reading-companion/SKILL.md) — 手法とコードの論文のための、私的な対話型 HTML 読み物。
+- [reading-proof-review](skills/reading-proof-review/SKILL.md) — 証明から作る私的な HTML（または証明の読み物）。要所と標準手順、指摘、見込みの指標。
+- [japanese-translation](skills/japanese-translation/SKILL.md) — 原稿を通して読める日本語訳にする。
+
+### 説明とナビゲーション
+
+- [mathematical-exposition](skills/mathematical-exposition/SKILL.md) — 数学を説明し、明晰さ・強調・テンポを整える。
+- [exposition-review](skills/exposition-review/SKILL.md) — 完成した解説物に対する敵対的な査読の反復。
+- [exposition-critique](skills/exposition-critique/SKILL.md) — 固定した解説物への、読者側からの独立した批評。
+- [exposition-flow-review](skills/exposition-flow-review/SKILL.md) — 解説物の実際の流れを再構成し、つなぎ直しを提案する。
+- [mathematical-navigation](skills/mathematical-navigation/SKILL.md) — 番号づけ、見出しの色、相互参照、索引。PDF のリンク検査。
+
+### 講演とスライド
+
+- [slide-authoring](skills/slide-authoring/SKILL.md) — 講演スライドと論文紹介デッキの作成・改訂・点検。
+- [paper-talk-planning](skills/paper-talk-planning/SKILL.md) — 論文を紹介する講演を、ページ単位で計画する。
+- [deck-from-references](skills/deck-from-references/SKILL.md) — 例示デッキに倣った Beamer を作る。
+
+### ウェブと応募書類
+
+- [website-publishing](skills/website-publishing/SKILL.md) — ウェブ上の解説、論文ページ、研究者プロフィール、サイトの公開。
+- [application-interview](skills/application-interview/SKILL.md) — 履歴書・略歴・業績一覧・申請書を、質問を通して作る。
+
+### ビルド・Git・スキルの保守
+
+- [labo-build](skills/labo-build/SKILL.md) — TeX を slug 名の PDF と SyncTeX にビルドする。
+- [labo-git](skills/labo-git/SKILL.md) — 研究用の Git とスキルの fork を整えて確認する。
+- [labo-sync](skills/labo-sync/SKILL.md) — 共有 labo-skills の変更を確認し、選んで取り込む。
+- [labo-pr](skills/labo-pr/SKILL.md) — 選んだスキルの改善を upstream へ PR で出す。
+- [labo-self-improve](skills/labo-self-improve/SKILL.md) — 実際の利用を通して、fork の中でスキルを作り・改善する。
+- [skill-tuning](skills/skill-tuning/SKILL.md) — 具体的な成果物と一緒に、プレビューを見ながらスキルを調整する。
+- [agent-host-setup](skills/agent-host-setup/SKILL.md) — Codex/Claude のホスト設定とサブエージェントの役割を設定・検証する。
+
 ## 公開と非公開の分離、所有
 
 長大な本由来の教材は [reading-book](skills/reading-book/SKILL.md) が正本文、訂正の統合、

@@ -109,3 +109,6 @@ Ask for exact frame evidence and the smallest repair, while preserving a
 concise correct frame as a control. Follow the project's source-access rules;
 a source-aware reviewer and an isolated cold reader have different packets.
 Do not set a criticism quota.
+To iterate until the frames carry the talk without the speaker (a cold read of the
+rendered frames, flow review, slide critique, fresh re-review), follow the
+[standalone review loop](references/standalone-review-loop.md).

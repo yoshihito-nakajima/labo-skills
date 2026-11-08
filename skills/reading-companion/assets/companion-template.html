@@ -96,7 +96,7 @@ const DATA = /*__COMPANION_DATA__*/null;
 (function(){
 const D = DATA; if(!D){document.body.textContent='No data: build this page with build_companion.py.';return;}
 const ja = (D.lang||'ja')==='ja';
-const T = ja ? {intro:'はじめに：何を見ているのか',picture:'何を測り、何を見たいのか',question:'この論文の問い',context:'文脈',terms:'用語',claims:'論文の主張',
+const T = ja ? {intro:'はじめに：何を見ているのか',obstacles:'この論文が挙げる難所',answeredby:'答える手順',picture:'何を測り、何を見たいのか',question:'この論文の問い',context:'文脈',terms:'用語',claims:'論文の主張',
   hub:'対応表：本文の図の売り ↔ コードの売り',fig:'図',figpoint:'図の売り',codepoint:'コードの売り',earlier:'既存の方法',level:'再現',steps:'手順の流れ',
   input:'入力',output:'出力',notbuilt:'未作成',where:'現在地',recv:'受け取るもの',hand:'渡すもの',usedby:'この手順を使う図',
   main:'本文の図（主線）',claim:'この図の主張',reading:'読み方',see:'見る',learn:'分かる',trouble:'困りごと',handoff:'次へ',points:'図の売り ↔ コードの売り',
@@ -115,7 +115,7 @@ const T = ja ? {intro:'はじめに：何を見ているのか',picture:'何を�
   remake:'論文の図の作り直し',codeblocks:'動かしている手順のコード（全体のコード地図の該当ブロック）',datactl:'データの性質（コードの引数ではない）',demo:'つまみで確かめる（AI 作成の合成データ。コードは著者・既存手法のものをそのまま使う）',truth:'この合成データの正解',primer:'図の読み方の準備（この後の図を読むために）',primerlearn:'木から分かること',mark:'記号・大きさ・色',meaning:'意味',usedin:'使う図',calledsum:'この実行が呼ぶ関数の全体（★＝図の売り、橙の枠＝つまみの行）',selllab:'売り',valnote:'論文の図との値の違い',codemap:'手法の全体のコード（手順ごとに色分け）',codemapnote:'この頁の各節は、この中のどのブロックを動かしているかを示す',here:'ここを動かしている',checkbtn:'確かめる',checked:'確かめた結果',paperonly:'論文のみ',checkdemo:'つまみで確かめる',runtime:'実行時間',scaledown:'論文より少ない所',overbudget:'時間の基準超過',runsteps:'この図で動かしている手順（濃い色）',notrun:'ここでは動かしていないもの',calls:'実行したもの',flow:'つまみから図まで',output:'変わる出力',drawn:'図での描き方',reshown:'該当コード（再掲。つまみの行といまの値）',noknob:'この図につまみはない（実行の設定は上の「実行したもの」に書いた値で固定）。',byauthor:'著者のコード',byearlier:'既存手法のコード',byai:'AI が書いた実行用のコード',unob:'入手を諦めたもの',tried:'試した所',instead:'代わりに使うもの',compare:'比べるところ',forcode:'コードの理解用（論文の図にはない）',knob:'画面のつまみ',arg:'コードの引数',symbol:'論文の記号',symtab:'つまみ・コード・論文の対応',
   summary:'論文の要旨（Summary と Introduction を平たく）',lineage:'既存手法の系譜：何のために作られ、どこが弱かったか',linnote:'コードの比較（下の各図）は、ここに書いた弱みへの答えとして読む。',families:'論文による既存手法の分け方',fam:'族',good:'得意',weak:'不得意（論文の言い分）',fwhere:'論文で比べる所',madefor:'何のために作られたか',weakness:'論文の言う弱み',kept:'この手法が受け継いだもの・変えたもの',verified:'原典で確かめたこと',refrow:'参考（コードには現れない系譜）',after:'補助：論文の後の展開（論文の主張ではない）',difference:'図の差の出どころ（コードのどこが効いているか）',bypaper:'論文の記述',bynote:'詳細版の読み',byspeaker:'このページの読み',remakeref:'参考：実データでの作り直し（つまみなし。論文の図と見比べる用）',does:'何をするか',lin:'由来',diff:'違いと効き目',runsyn:'動かす（合成データ。著者と既存手法のコードをそのまま、同じデータ・同じつまみで）',
   privacy:'私用のページ（公開しない）。'}
- : {intro:'Introduction: what we are looking at',picture:'What is measured and what we want to see',question:'Question of the paper',context:'Context',terms:'Terms',claims:'Claims of the paper',
+ : {intro:'Introduction: what we are looking at',obstacles:'Obstacles the paper names',answeredby:'Answered by',picture:'What is measured and what we want to see',question:'Question of the paper',context:'Context',terms:'Terms',claims:'Claims of the paper',
   hub:'Map: figure selling points ↔ code selling points',fig:'Figure',figpoint:'Figure selling point',codepoint:'Code selling point',earlier:'Earlier method',level:'Reproduced',steps:'Steps of the method',
   input:'Input',output:'Output',notbuilt:'not built',where:'Where we are',recv:'Receives',hand:'Hands on',usedby:'Figures using this step',
   main:'Main-text figures (main line)',claim:'What the figure claims',reading:'How to read it',see:'See',learn:'Learn',trouble:'Trouble',handoff:'Next',points:'Figure selling point ↔ code selling point',
@@ -303,12 +303,18 @@ function primerHTML(pr){ if(!pr||typeof pr==='string') return '';
   return `<h3>${T.primer}</h3><div class="picture">${para(pr.object)}</div>${termTable(pr.parts)}<p><b>${T.primerlearn}</b>: ${esc(pr.learn)}</p>
   <table class="small"><tr><th>${T.mark}</th><th>${T.meaning}</th><th>${T.usedin}</th></tr>${(pr.encodings||[]).map(e=>`<tr><td>${esc(e.mark)}</td><td>${esc(e.meaning)}</td><td>${fl(e.figures)}</td></tr>`).join('')}</table>`;}
 
+// ---- obstacles and the steps that answer them (optional storyline layer)
+const obstaclesHTML=()=>{ if(!(D.difficulties||[]).length) return '';
+  const stepLink=st=>{const f=featOf[st.id]; return f&&f.kind!=='run'?`<a href="#${esc(f.id)}">${esc(st.name)}</a>`:esc(st.name);};
+  return `<h3>${T.obstacles}</h3><ol>${D.difficulties.map(d=>{const ans=steps.filter(st=>Array.isArray(st.answers)&&st.answers.includes(d.id));
+    return `<li><b>${esc(d.title)}</b>: ${esc(d.text)}${ans.length?`<div class="small muted">${T.answeredby}: ${ans.map(st=>`${stepLink(st)} (${esc(st.why)})`).join(' / ')}</div>`:''}</li>`;}).join('')}</ol>`;};
 // ---- header: introduction and the map
 const top=document.getElementById('top'); const bg=D.background||{};
 top.innerHTML=`<h1>${esc(D.title)}</h1><div class="muted small">${esc((D.paper||{}).citation||'')}</div>
 <h2>${T.intro}</h2>
 <div class="picture"><b>${T.picture}</b>${para(bg.picture)}${figHTML(bg.figure)}</div>
 <div class="panel"><b>${T.question}</b>: ${esc(bg.question)}</div>
+${obstaclesHTML()}
 ${bg.summary?`<h3>${T.summary}</h3>${para(bg.summary)}`:''}
 <h3>${T.context}</h3>${para(bg.context)}
 ${lineageHTML()}
@@ -415,6 +421,9 @@ ${(D.unobtained||[]).length?`<h3>${T.unob}</h3><table><tr><th>${T.what}</th><th>
 <h2>${T.gloss}</h2><table><tr><th>${T.terms}</th><th></th><th>${T.defined}</th></tr>${gl.map(([t,f])=>`<tr><th>${esc(t.term)}</th><td>${esc(t.meaning)}</td><td>${f?`<a href="#${esc(f.id)}">${esc(f.title)}</a>`:`<a href="#top">${T.intro}</a>`}</td></tr>`).join('')}</table>`;
 main.appendChild(tail);
 document.getElementById('foot').innerHTML=`<p>${T.privacy}</p>`;
+// run units have no section of their own: show their name where a list or table links to them, without a dead link
+const runIds=new Set(D.features.filter(f=>f.kind==='run').map(f=>f.id));
+document.querySelectorAll('a[href^="#"]').forEach(a=>{ if(runIds.has(a.getAttribute('href').slice(1))){ const s=document.createElement('span'); s.innerHTML=a.innerHTML; a.replaceWith(s); } });
 })();
 </script>
 </body>
