@@ -237,7 +237,7 @@ def orig_html(R, s, pdf, words, same=None):
 
 CSS = """body{font-family:system-ui,sans-serif;max-width:1200px;margin:0 auto;padding:0 1rem;line-height:1.5}details.blk{border:1px solid #cdd;border-radius:6px;margin:.5rem 0}details.blk>summary{cursor:pointer;padding:.4rem .7rem;font-weight:600;background:#f3f6f8}.inner{padding:.5rem .8rem}
 .panel2 table{width:100%;border-collapse:collapse}.panel2 th{width:8rem;text-align:left;vertical-align:top;font-size:.85rem;color:#055}.by{font-size:.72rem;padding:0 .35rem;border-radius:3px;margin-right:.2rem;background:#eee}.by-author,.by-official{background:#d8f0dc}.by-lib{background:#e3eaf8}.by-ai{background:#fbe3d0}
-.say{background:#fff8e6;border-left:4px solid #e0a030;padding:.3rem .7rem;margin:.4rem 0}.rd{margin:1.2rem 0;border-top:1px solid #dde}.cb{background:#fbfbfd;border:1px solid #dde;padding:.3rem .5rem;font-size:.78rem;overflow:auto;white-space:pre}.cb .ln{color:#999;margin-right:.5rem}.cb.same{background:#eef8ee}.cb.chg{background:#fff8dc}.cb.onl{background:#eaf1fb}.cb.none{color:#999}.step{border-left:3px solid #9bc;padding:0 .6rem;margin:.6rem 0}.cmprow{margin:.5rem 0;padding:.3rem .5rem;border-radius:4px}
+.figcard{border:1px solid #cdd;border-radius:6px;margin:.8rem 0;padding:.4rem .8rem}.fromprev{background:#fff8e6;border-left:4px solid #e0a030;padding:.25rem .6rem;margin:.3rem 0}.say{background:#fff8e6;border-left:4px solid #e0a030;padding:.3rem .7rem;margin:.4rem 0}.rd{margin:1.2rem 0;border-top:1px solid #dde}.cb{background:#fbfbfd;border:1px solid #dde;padding:.3rem .5rem;font-size:.78rem;overflow:auto;white-space:pre}.cb .ln{color:#999;margin-right:.5rem}.cb.same{background:#eef8ee}.cb.chg{background:#fff8dc}.cb.onl{background:#eaf1fb}.cb.none{color:#999}.step{border-left:3px solid #9bc;padding:0 .6rem;margin:.6rem 0}.cmprow{margin:.5rem 0;padding:.3rem .5rem;border-radius:4px}
 .cmprow.same{background:#f2faf2}.cmprow.chg{background:#fffbe9}.cmprow.onl{background:#f1f6fc}.cmpgrid,.otgrid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}.otgrid img{max-width:100%;border:1px solid #ccd}.stl{font-size:.75rem;padding:0 .4rem;border-radius:3px;font-weight:700}.stl.same{background:#bfe3c1}.stl.chg{background:#f3dd7c}.stl.onl{background:#b9d0ee}.muted{color:#777}.small{font-size:.85rem}
 .ledcard{border:1px solid #cdd;border-radius:6px;margin:.35rem 0;background:#fff}.ledcard>summary{cursor:pointer;padding:.35rem .6rem;background:#f6f9fa}.ledcard>.inner{padding:.4rem .8rem}.sumgist{font-weight:400;font-size:.88rem;color:#345}.ledctl{margin:.4rem 0}.origscroll{max-height:85vh;overflow-y:auto;border:1px solid #ccd}.origscroll.full{max-height:none}.gist{background:#eef7f3;border-left:3px solid #4a9;padding:.25rem .5rem}.gistlist{background:#f6faf8;border:1px solid #cde;border-radius:6px;padding:.3rem .7rem;margin:.4rem 0}.lead,.bridge,.flow{background:#f7fbf9;border-left:4px solid #6b9;padding:.4rem .8rem;margin:.5rem 0}.bridge,.flow.after{border-left-color:#c96;background:#fcf9f5}.apic{border:1px solid #dde;padding:.3rem .5rem;margin:.3rem 0;font-size:.88rem}.acode{margin:.3rem 0}.ablk{margin:.1rem 0 .5rem}.anote{background:#f3f7fb;border-left:3px solid #6a9fd0;padding:.25rem .6rem;line-height:1.7}.alab{font-size:.75rem;color:#356;font-weight:700;margin-right:.3rem}.cnote{padding:.2rem .6rem;font-size:.88rem;border-left:3px solid #aaa}.cnote.same{background:#eef8ee}.cnote.chg{background:#fff8dc}.cnote.onl{background:#eaf1fb}.ablk .cb{margin:0}.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
 
@@ -384,17 +384,28 @@ def reading_html(R, pdf=None, words=None):
     return folds + pic
 
 
-def flow_html(R):
-    fs = [s for s in R.S if s.get("figures")]
-    o = ['<h4>Figures in paper order</h4><table><tr><th>section</th><th>figure</th><th>what it shows</th></tr>' + "".join(
-        f'<tr><td><a href="#sec-{s["id"]}">§{s["id"]}</a></td><td>' + "<br>".join(f'<a href="#figs-{s["id"]}">{esc(f)}</a>' for f in s["figures"]) + '</td><td>' + "<br>".join(m(R.FIGS[f]["what"]) for f in s["figures"]) + '</td></tr>' for s in fs) + '</table>']
+def fig_flow_html(R):
+    """One card per figure, in the order of R.FIGS (verify it against the page order of the source). Order inside a card:
+    what it follows from, the original figure, what to look at and how to read it, colours, terms (with their basis), where it occurs."""
+    o = ['<p class="small muted">Figures in the paper\'s page order. Each card: link from the previous figure, original figure, what it shows and how to read it, colours, terms needed to read it, sections where it occurs. A term whose basis is not the paper itself is marked as such and unchecked.</p>']
     rel = R.d.get("figure_links", [])
-    if rel: o.append('<h4>Links between figures</h4><table><tr><th>from</th><th>to</th><th>relation</th><th>what stays and what changes</th></tr>' + "".join(f"<tr><td>{esc(a)}</td><td>→ {esc(b)}</td><td>{esc(k)}</td><td>{m(d)}</td></tr>" for a, b, k, d in rel) + '</table>')
-    cs = [s for s in R.S if s.get("steps")]
-    if cs:
-        o.append('<h4>Code in paper order</h4><table><tr><th>section</th><th>main code</th><th>goal (first sentence)</th></tr>' + "".join(
-            f'<tr><td><a href="#cu-{s["id"]}">§{s["id"]}</a></td><td>' + " ".join(badge(c["kind"]) + " " + esc(c["name"]) for c in s.get("code", []) if c.get("kind") != "none") + f'</td><td>{m((s.get("flow") or "").split(". ")[0])}</td></tr>' for s in cs) + '</table>')
+    for f, d in R.FIGS.items():
+        prev = "".join(f'<div class="fromprev"><b>From {m(a)}</b>: {esc(k)}. {m(dd)}</div>' for a, b, k, dd in rel if b == f)
+        img = f'<img src="{esc(d["image"])}" alt="{esc(f)}">' if d.get("image") else ""
+        terms = d.get("terms") or []
+        tt = ('<table><tr><th>term</th><th>what it is and what it is good for</th><th>basis</th></tr>' + "".join(f'<tr><td><b>{m(w)}</b></td><td>{m(ds)}</td><td class="small">{esc(bs)}</td></tr>' for w, ds, bs in terms) + '</table>') if terms else '<p class="muted small">(no terms recorded)</p>'
+        where = ", ".join(f'<a href="#sec-{s["id"]}">§{s["id"]}</a> (<a href="#figs-{s["id"]}">its figure notes</a>)' for s in R.S if f in s.get("figures", [])) or "—"
+        o.append(f'<div class="figcard" id="ff-{esc(f)}"><h4>{esc(f)} (p.{d["page"]})</h4>{prev}'
+                 f'<div class="figin"><div>{img}</div><div><p>{m(d["what"])}</p><p>{m(d.get("text", ""))}</p><p><b>Colour:</b> {m(d["color"])}</p></div></div>'
+                 f'<div class="figterms"><b>Terms for reading this figure</b>{tt}</div><p class="small">Occurs in: {where}.</p></div>')
     return "".join(o)
+
+
+def code_flow_html(R):
+    cs = [s for s in R.S if s.get("steps")]
+    if not cs: return '<p class="muted">(no code)</p>'
+    return ('<table><tr><th>section</th><th>main code</th><th>goal (first sentence)</th></tr>' + "".join(
+        f'<tr><td><a href="#cu-{s["id"]}">§{s["id"]}</a></td><td>' + " ".join(badge(c["kind"]) + " " + esc(c["name"]) for c in s.get("code", []) if c.get("kind") != "none") + f'</td><td>{m((s.get("flow") or "").split(". ")[0])}</td></tr>' for s in cs) + '</table>')
 
 
 def build_html(R, pdf=None):
@@ -405,9 +416,10 @@ def build_html(R, pdf=None):
     crow = "".join(f'<tr><td><a href="#sec-{s["id"]}">§{s["id"]}</a></td><td>{esc(c["name"])}</td><td>{badge(c["kind"])}</td><td>{esc(c.get("src", ""))}</td><td>{esc(c.get("state", ""))}</td><td>{esc(c.get("lic", ""))}</td></tr>' for s in R.S for c in s.get("code", []) if c.get("kind") != "none")
     def top(i, t, b, op=False): return f'<details class="blk" id="{i}"{" open" if op else ""}><summary>{t}</summary><div class="inner">{b}</div></details>'
     body = (top("reading", "1 Reading (original and faithful translation, section by section; the whole picture at the end)", reading_html(R, pdf, words), True)
-            + top("flow", "2 Flow (how the figures and the code connect; read beside Reading)", flow_html(R))
-            + top("secs", "3 Deep dive (per section: what it says, original and translation, figures, code, terms, ledger)", secs)
-            + top("appx", "4 Appendix (indexes and materials)",
+            + top("figflow", "2 Figure flow (per figure: link from the previous figure, original, how to read it, colours, terms, where it occurs)", fig_flow_html(R))
+            + top("codeflow", "3 Code flow (sections with code, in paper order)", code_flow_html(R))
+            + top("secs", "4 Deep dive (per section: what it says, original and translation, figures, code, terms, ledger)", secs)
+            + top("appx", "5 Appendix (indexes and materials)",
                   top("figs", "Figure list", f"<table><tr><th>figure</th><th>page</th><th>content</th><th>colour legend</th></tr>{frows}</table>")
                   + top("codes", "Code list", f"<table><tr><th>section</th><th>code</th><th>kind</th><th>source</th><th>state</th><th>licence</th></tr>{crow}</table>")
                   + top("ledger", "Ledger (concepts, claims)", R.d.get("ledger_html") or appendix_ledger_html(R) or "<p class=muted>(attach the ledger here)</p>")

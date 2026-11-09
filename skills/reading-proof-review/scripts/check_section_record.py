@@ -118,6 +118,15 @@ def check(rec):
             err.append(f"figure {f} is not used by any section")
         if not d.get("color_checked"):
             err.append(f"figure {f}: colour legend not checked against the image and caption")
+        if not (d.get("text") or "").strip():
+            warn.append(f"figure {f}: no reading text (what to look at, panel by panel)")
+        terms = d.get("terms") or []
+        if not terms:
+            warn.append(f"figure {f}: no terms for reading it (each as [term, what it is and is good for, basis])")
+        for t in terms:
+            if not (isinstance(t, list) and len(t) == 3 and all(str(x).strip() for x in t)):
+                err.append(f"figure {f}: a term must be [term, explanation, basis] (basis: the caption or text, or 'AI lookup, unchecked')")
+                break
     return err, warn
 
 

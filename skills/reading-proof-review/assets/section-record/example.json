@@ -246,7 +246,19 @@
    "what": "values before and after three averaging steps",
    "color": "blue = before, orange = after (caption)",
    "color_checked": true,
-   "text": "Read the blue points as the values before smoothing and the orange points as the values after three steps; the orange curve is visibly smoother, and the largest change happens where neighbours differ most."
+   "text": "Read the blue points as the values before smoothing and the orange points as the values after three steps; the orange curve is visibly smoother, and the largest change happens where neighbours differ most.",
+   "terms": [
+    [
+     "averaging step",
+     "replace each value by the mean of its neighbours' values; repeating it smooths the signal",
+     "caption"
+    ],
+    [
+     "neighbour",
+     "a node joined to this one by an edge; which nodes are neighbours decides what is averaged",
+     "AI lookup, unchecked"
+    ]
+   ]
   }
  },
  "edges": [
