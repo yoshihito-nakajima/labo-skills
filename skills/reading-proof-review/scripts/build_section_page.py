@@ -358,9 +358,11 @@ def section_html(R, s, pdf, words):
 
 def reading_html(R, pdf=None, words=None):
     """First read, no preconceptions: per section the original (left) and the faithful translation (right), then what the section says; the whole picture comes last."""
-    out = []
+    chapters = []  # [(top section, [parts])]: one fold per top-level section; subsections stay inside it, unfolded
     for s in R.S:
         i = s["id"]; lv = i.count("."); h = 3 + min(lv, 2)
+        if not s.get("parent") or not chapters: chapters.append((s, []))
+        out = chapters[-1][1]
         has_text = bool(s.get("translation_html") or s.get("translation"))
         head = f'<h{h}>§{i} {esc(s["title"])} <span class="muted small">{pages(s)}</span></h{h}>'
         if not has_text:
@@ -378,7 +380,8 @@ def reading_html(R, pdf=None, words=None):
     pic = ('<div class="rd" id="whole"><h3>The whole picture (read after all sections)</h3>'
            + (f'<p>{m(R.d["whole_picture"])}</p>' if R.d.get("whole_picture") else "")
            + "<ol>" + "".join(f'<li>§{s["id"]} <b>{esc(s["title"])}</b>: {m(s["question"])} → {m(s["answer"])}' + (f'<br><span class="small">→ next chapter: {m(chb(s))}</span>' if chb(s) else "") + '</li>' for s in tops) + '</ol></div>')
-    return "".join(out) + pic
+    folds = "".join(f'<details class="blk rdch" id="rdc-{t["id"]}"{" open" if n == 0 else ""}><summary>§{t["id"]} {esc(t["title"])} <span class="muted small">{pages(t)}</span></summary><div class="inner">{"".join(parts)}</div></details>' for n, (t, parts) in enumerate(chapters))
+    return folds + pic
 
 
 def flow_html(R):
