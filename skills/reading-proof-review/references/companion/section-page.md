@@ -116,7 +116,7 @@ does. A one-line item that only names a thing is a defect, not a summary.
   short; spend words on code, statistics, computing and the application field.
 - **Code**: opening the code shows first a foldable **goal** block: what the code does as a whole
   and why this function, method or way of writing it is used rather than another (`flow` and `why` in the
-  record), at the length and explanatory level of the links between sections. Then the Steps. **Inside
+  record), at the length and explanatory level of the links between sections. Then **the whole code with nothing added**: one heading per Step and the verbatim lines, shown open, so a reader can take in the shape before any commentary. Directly after it, the **annotated version** (folded in HTML): the Steps below. **Inside
   each Step the explanation lives in the code, not in a separate table**: every line has a note directly
   above it saying what it does, which symbol or formula of the source it is, and what trips a beginner
   (axis, shape, zero-based index, transpose, sign). Blank, import and closing-bracket lines may share a

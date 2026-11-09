@@ -119,9 +119,11 @@
      "lines": [
       [
        2,
+       2,
        "`neighbours` returns the indices j with a non-zero entry in row i of A."
       ],
       [
+       3,
        3,
        "The list comprehension keeps those j."
       ]
@@ -137,9 +139,11 @@
      "lines": [
       [
        4,
+       4,
        "`mean_step` defines one smoothing step."
       ],
       [
+       5,
        5,
        "Sum the neighbours' values and divide by their count."
       ]

@@ -133,14 +133,26 @@ def annotated_code(R, st, cm):
     return f'<div class="acode">{"".join(out)}</div><div class="muted small">{esc(f)} {st["first"]}-{st["last"]} (notes are display only; the file is unchanged)</div>'
 
 
+def plain_code(R, s):
+    """The whole code with nothing added: one heading per Step, then the verbatim lines. Shown open, before the annotated version."""
+    out = []
+    for st in s["steps"]:
+        body = "\n".join(f'<span class="ln">{st["first"] + i}</span> {esc(l)}' for i, l in enumerate(R.lines(st["file"], st["first"], st["last"])))
+        out.append(f'<div class="step plain"><h4>{esc(st["title"])}</h4><pre class="cb">{body}</pre><div class="muted small">{esc(st["file"])} {st["first"]}-{st["last"]}</div></div>')
+    return "".join(out)
+
+
 def card_html(R, s):
     out = [f'<p>Steps below show verbatim lines; the math correspondence follows each code block.</p>']
     if s.get("flow"): out.append(f'<details class="flow goal" open><summary><b>Goal of this code as a whole, and why this tool</b></summary><p>{m(s["flow"])}</p>' + (f'<p>{m(s["why"])}</p>' if s.get("why") else "") + '</details>')
+    out.append(f'<details class="plaincode" open><summary><b>The code as a whole, with nothing added</b></summary>{plain_code(R, s)}</details>')
+    out.append('<details class="annotated"><summary><b>The same code with a note above every line (and the comparison counterpart)</b></summary>')
     for st in s["steps"]:
         ap = "".join(f'<div class="apic"><b><code>{esc(x["name"])}</code></b> <code class="small">{esc(x.get("sig", ""))}</code><br><b>returns:</b> {m(x.get("ret", ""))}<br><b>note:</b> {m(x.get("note", ""))}' + (f'<br><b>cost:</b> {m(x["cost"])}' if x.get("cost") else "") + (f'<div class="small muted">{esc(x["quote"])}</div>' if x.get("quote") else "") + '</div>' for x in st.get("apis", []))
         out.append(f'<div class="step"><h4>{esc(st["title"])}</h4><p>{m(st["what"])}</p>{annotated_code(R, st, s.get("comparison"))}'
                    + (f'<details class="blk"><summary>Functions used in this Step ({len(st["apis"])})</summary><div class="inner">{ap}</div></details>' if ap else "")
                    + f'<p class="mapto"><b>Math:</b> {m(st["math"])}</p></div>')
+    out.append('</details>')
     if s.get("after"): out.append(f'<div class="flow after"><b>Meaning of the result, and where it leads</b><p>{m(s["after"])}</p></div>')
     cm = s.get("comparison")
     if cm:
@@ -373,6 +385,10 @@ def lst(R, x, tag, litdir):
 def card_tex(R, s, litdir):
     L = [r"\par\medskip\noindent{\large\bfseries \S%s Code: Steps%s}\par" % (s["id"], " and comparison" if s.get("comparison") else " (no comparison)")]
     if s.get("flow"): L.append(r"\par{\small\textbf{Goal of this code as a whole, and why this tool.} %s%s}\par" % (tx(s["flow"]), (r"\par " + tx(s["why"])) if s.get("why") else ""))
+    L.append(r"\par\smallskip\noindent\textbf{The code as a whole, with nothing added}\par")
+    for st in s["steps"]:
+        L += [r"\par\smallskip\noindent\textbf{%s}" % tx(st["title"]), lst(R, (st["file"], st["first"], st["last"]), "", litdir)]
+    L.append(r"\par\smallskip\noindent\textbf{The same code with a note above every line}\par")
     for st in s["steps"]:
         L.append(r"\par\smallskip\noindent\textbf{%s}\quad %s\par" % (tx(st["title"]), tx(st["what"])))
         for a, b, text in st["lines"]:
