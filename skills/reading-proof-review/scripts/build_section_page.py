@@ -395,28 +395,32 @@ def _chapter_folds(R, items, label):
     out = []
     for n, root in enumerate(sorted(by, key=lambda r: order[r])):
         t = R.BY[root]
-        out.append(f'<details class="blk" id="{label}-{root}"{" open" if n == 0 else ""}><summary>§{root} {esc(t["title"])} <span class="muted small">{pages(t)}</span> — {esc(", ".join(nm for _, nm in by[root]))}</summary><div class="inner">{"".join(c for c, _ in by[root])}</div></details>')
+        out.append(f'<details class="blk" id="{label}-{root}"{" open" if n == 0 else ""}><summary>§{root} {esc(t["title"])} <span class="muted small">{pages(t)}</span> — {esc(", ".join(dict.fromkeys(x for _, nm in by[root] for x in nm.split(", "))))}</summary><div class="inner">{"".join(c for c, _ in by[root])}</div></details>')
     return "".join(out)
 
 
 def fig_flow_html(R):
-    """One card per figure, folded per chapter (the chapter that discusses the figure: its `sec`, else the first section listing it). Order of cards = order of R.FIGS
-    (verify it against the page order of the source). Inside a card: what it follows from, the original figure, what to look at and how to read it, colours,
-    terms (with their basis), where it occurs."""
+    """Same build as Reading: sections in paper order, folded per chapter (first fold open), and under each section ALL of its figures
+    (a figure used in several sections appears, with the same content, under each). Sections without figures are skipped.
+    Card: what it follows from, the original figure, what to look at and how to read it, colours, terms (with basis), the other sections where it occurs."""
     rel = R.d.get("figure_links", []); items = []
-    for f, d in R.FIGS.items():
-        home = d.get("sec") or next((s["id"] for s in R.S if f in s.get("figures", [])), None)
-        if not home: continue
+    def card(sid, f):
+        d = R.FIGS[f]
         prev = "".join(f'<div class="fromprev"><b>From {m(a)}</b>: {esc(k)}. {m(dd)}</div>' for a, b, k, dd in rel if b == f)
         img = f'<img src="{esc(d["image"])}" alt="{esc(f)}">' if d.get("image") else ""
         terms = d.get("terms") or []
         tt = ('<table><tr><th>term</th><th>what it is and what it is good for</th><th>basis</th></tr>' + "".join(f'<tr><td><b>{m(w)}</b></td><td>{m(ds)}</td><td class="small">{esc(bs)}</td></tr>' for w, ds, bs in terms) + '</table>') if terms else '<p class="muted small">(no terms recorded)</p>'
-        where = ", ".join(f'<a href="#sec-{s["id"]}">§{s["id"]}</a> (<a href="#figs-{s["id"]}">its figure notes</a>)' for s in R.S if f in s.get("figures", [])) or "—"
-        card = (f'<div class="figcard" id="ff-{esc(f)}"><h4>{esc(f)} (p.{d["page"]})</h4>{prev}'
+        others = [s["id"] for s in R.S if f in s.get("figures", []) and s["id"] != sid]
+        where = ("Also in: " + ", ".join(f'<a href="#sec-{o}">§{o}</a>' for o in others) + ".") if others else "This figure occurs only in this section."
+        return (f'<div class="figcard" id="ff-{sid}-{esc(f)}"><h4>{esc(f)} (p.{d["page"]})</h4>{prev}'
                 f'<div class="figin"><div>{img}</div><div><p>{m(d["what"])}</p><p>{m(d.get("text", ""))}</p><p><b>Colour:</b> {m(d["color"])}</p></div></div>'
-                f'<div class="figterms"><b>Terms for reading this figure</b>{tt}</div><p class="small">Occurs in: {where}.</p></div>')
-        items.append((home, card, f))
-    note = '<p class="small muted">Figures in the paper\'s page order, folded per chapter (first fold open). Each card: link from the previous figure, original figure, what it shows and how to read it, colours, terms needed to read it, sections where it occurs. A term whose basis is not the paper itself is marked as such and unchecked.</p>'
+                f'<div class="figterms"><b>Terms for reading this figure</b>{tt}</div><p class="small">{where}</p></div>')
+    for s in R.S:
+        if not s.get("figures"): continue
+        i = s["id"]; h = 3 + min(i.count("."), 2)
+        head = f'<h{h}>§{i} {esc(s["title"])} <span class="muted small">{pages(s)}</span></h{h}><p class="small"><a href="#rd-{i}">Reading</a> / <a href="#sec-{i}">deep dive</a></p>'
+        items.append((i, f'<div class="rd" id="ffs-{i}">{head}' + "".join(card(i, f) for f in s["figures"]) + '</div>', ", ".join(s["figures"])))
+    note = '<p class="small muted">Built like Reading: sections in paper order, folded per chapter (first fold open), each section carrying all of its figures; a figure used in several sections is shown in each, with the same content. A term whose basis is not the paper itself is marked as such and unchecked.</p>'
     return note + _chapter_folds(R, items, "ffc")
 
 
@@ -456,7 +460,7 @@ def build_html(R, pdf=None):
     crow = "".join(f'<tr><td><a href="#sec-{s["id"]}">§{s["id"]}</a></td><td>{esc(c["name"])}</td><td>{badge(c["kind"])}</td><td>{esc(c.get("src", ""))}</td><td>{esc(c.get("state", ""))}</td><td>{esc(c.get("lic", ""))}</td></tr>' for s in R.S for c in s.get("code", []) if c.get("kind") != "none")
     def top(i, t, b, op=False): return f'<details class="blk" id="{i}"{" open" if op else ""}><summary>{t}</summary><div class="inner">{b}</div></details>'
     body = (top("reading", "1 Reading (original and faithful translation, section by section; the whole picture at the end)", reading_html(R, pdf, words), True)
-            + top("figflow", "2 Figure flow (per figure: link from the previous figure, original, how to read it, colours, terms, where it occurs)", fig_flow_html(R))
+            + top("figflow", "2 Figure flow (same order as Reading: per section, all of its figures; link from the previous figure, original, how to read it, colours, terms)", fig_flow_html(R))
             + top("codeflow", "3 Code flow (sections with code, in paper order)", code_flow_html(R))
             + top("secs", "4 Deep dive (per section: what it says, original and translation, figures, code, terms, ledger)", secs)
             + top("appx", "5 Appendix (indexes and materials)",
