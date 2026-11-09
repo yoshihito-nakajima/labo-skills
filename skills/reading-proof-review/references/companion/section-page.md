@@ -5,30 +5,28 @@ For a paper read section by section (see the
 figure-spine order of [companion-ideal](companion-ideal.md) when figures are many but not the
 only spine; for a figure-centred paper keep that order and add only the section head panel.
 
-## Layout: one common form, everything collapsed
+## Layout: four tabs, folded, any number open at once
 
-Top level, in this order, all collapsed except the first:
+Top level, in the order the reader uses them. These are folds, not exclusive tabs: several can be open together so the reader can read in one and check in another.
 
-1. **Overview** — the paper's question, each chapter's question → answer, and a one-line list of all sections.
-2. **Figure list** — every figure with page, content and colour legend, the links between figures, and the figure units (view → understand → try).
-3. **Code list** — method × original/official/library/stand-in × source × licence × run state, each row linking to its section.
-4. **Ledger** — concept ↔ code ↔ figure correspondence and claim status, placed before the sections.
-5. **Sections** — nested as in the paper.
-6. **Appendix** — materials, acquisition state, request list.
+1. **Reading** (open at first) — the paper's question and each chapter's question → answer, then the **faithful translation of the whole paper from first to last**, one continuous column. Each section opens with a short **what this section says** line (its question and answer, one or two lines). Figures and code are not reproduced here; the end of each section links to its deep dive, its figures and its code.
+2. **Flow** — how the figures connect (the sections that have figures in paper order, with what each figure shows, and the links between figures) and how the code connects (the sections that have code in paper order, with the main code, the goal in one sentence, and the code sections it receives from and hands to). Every row links back to the section. Read it beside the Reading tab.
+3. **Deep dive** — the sections, nested as in the paper, each folded. Inside a section the order is the order of study: what it says → entrance → head panel → original and translation → figures (what to look at, colours, how it differs from neighbours — written once here so the reader need not look it up again) → code (whole code, then annotated, then comparison) → terms → ledger → explanation and older units.
+4. **Appendix** — figure list (with the figure units), code list, whole ledger, materials, acquisition state, request list. These are indexes; the reading order does not depend on them.
 
-Both reader types enter the same way; the weights decide only what the reader opens first.
+Both reader types enter the same way; the weights decide only what the reader opens first. A figure's colour legend and a code's reading belong to the section where they occur, not only to an index.
 
 ## Section unit (same order in every section)
 
-0. **Entrance** (a visible paragraph, not folded): what the previous sections gave, what is still missing, what this section does. A matching **bridge** closes the section and says what is handed on.
+0. **What this section says** (one or two lines: question → answer) and **entrance** (a visible paragraph, not folded): what the previous sections gave, what is still missing, what this section does. A matching **bridge** closes the section and says what is handed on.
 1. **Head panel**: position; question, answer, evidence; selling point; what it receives and
    hands on; its figures with colour legends; its code with kind and state; its materials.
-1b. **Explanation**: the long explanation of the note's PDF unit, converted to HTML from the same TeX, so both outputs carry the same length. **Terms** of the section sit beside it (see below).
 2. **Original and translation**: the original passage and the faithful translation side by side.
 3. **Figures** of the section (static copy with caption, colour legend, links to other figures; the
    interactive unit stays in the figure list, with a link — one interactive component per figure).
-4. **Code**: a foldable goal block (what the code does as a whole and why this tool), Steps whose code carries a note directly above every line, with the comparison counterpart on the line, the specification of the functions each Step calls, the meaning of the result, then the comparison card ([comparison](comparison.md)); math correspondence after the code.
-5. **Math ledger of the section** (concepts and claims in full, with proofs) — the overall ledger stays in the top-level list; then limits and next. The head of the section lists its concepts with a one-line gist each; see the next part.
+4. **Code**: a foldable goal block (what the code does as a whole and why this tool); then **the whole code with nothing added** (one heading per Step, open); then the **annotated version** (folded): Steps whose code carries a note directly above every line, with the comparison counterpart on the line, the specification of the functions each Step calls, math correspondence after each Step, the meaning of the result, then the comparison card ([comparison](comparison.md)).
+5. **Terms** of the section (see below), then the **math ledger of the section** (concepts and claims in full, with proofs) — the overall ledger stays in the appendix; the head of the section lists its concepts with a one-line gist each; see the next part.
+6. **Explanation**: the long explanation of the note's PDF unit, converted to HTML from the same TeX, so both outputs carry the same length; older units last.
 
 ## Original and translation
 
