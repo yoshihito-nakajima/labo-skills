@@ -57,6 +57,9 @@ class Rec:
 
     def kids(self, i): return [s for s in self.S if s.get("parent") == i]
 
+    def root(self, i):
+        a = self.anc(i); return a[-1] if a else i
+
     def edges_of(self, i, key):
         res = []
         for (a, b), w in self.edges.items():
@@ -384,28 +387,65 @@ def reading_html(R, pdf=None, words=None):
     return folds + pic
 
 
+def _chapter_folds(R, items, label):
+    """items: [(home section id, html card, name)] -> one fold per chapter (top-level section) in section order, the first open; the heading lists the names."""
+    order = {s["id"]: n for n, s in enumerate(R.S)}
+    by = {}
+    for sid, card, name in items: by.setdefault(R.root(sid), []).append((card, name))
+    out = []
+    for n, root in enumerate(sorted(by, key=lambda r: order[r])):
+        t = R.BY[root]
+        out.append(f'<details class="blk" id="{label}-{root}"{" open" if n == 0 else ""}><summary>§{root} {esc(t["title"])} <span class="muted small">{pages(t)}</span> — {esc(", ".join(nm for _, nm in by[root]))}</summary><div class="inner">{"".join(c for c, _ in by[root])}</div></details>')
+    return "".join(out)
+
+
 def fig_flow_html(R):
-    """One card per figure, in the order of R.FIGS (verify it against the page order of the source). Order inside a card:
-    what it follows from, the original figure, what to look at and how to read it, colours, terms (with their basis), where it occurs."""
-    o = ['<p class="small muted">Figures in the paper\'s page order. Each card: link from the previous figure, original figure, what it shows and how to read it, colours, terms needed to read it, sections where it occurs. A term whose basis is not the paper itself is marked as such and unchecked.</p>']
-    rel = R.d.get("figure_links", [])
+    """One card per figure, folded per chapter (the chapter that discusses the figure: its `sec`, else the first section listing it). Order of cards = order of R.FIGS
+    (verify it against the page order of the source). Inside a card: what it follows from, the original figure, what to look at and how to read it, colours,
+    terms (with their basis), where it occurs."""
+    rel = R.d.get("figure_links", []); items = []
     for f, d in R.FIGS.items():
+        home = d.get("sec") or next((s["id"] for s in R.S if f in s.get("figures", [])), None)
+        if not home: continue
         prev = "".join(f'<div class="fromprev"><b>From {m(a)}</b>: {esc(k)}. {m(dd)}</div>' for a, b, k, dd in rel if b == f)
         img = f'<img src="{esc(d["image"])}" alt="{esc(f)}">' if d.get("image") else ""
         terms = d.get("terms") or []
         tt = ('<table><tr><th>term</th><th>what it is and what it is good for</th><th>basis</th></tr>' + "".join(f'<tr><td><b>{m(w)}</b></td><td>{m(ds)}</td><td class="small">{esc(bs)}</td></tr>' for w, ds, bs in terms) + '</table>') if terms else '<p class="muted small">(no terms recorded)</p>'
         where = ", ".join(f'<a href="#sec-{s["id"]}">§{s["id"]}</a> (<a href="#figs-{s["id"]}">its figure notes</a>)' for s in R.S if f in s.get("figures", [])) or "—"
-        o.append(f'<div class="figcard" id="ff-{esc(f)}"><h4>{esc(f)} (p.{d["page"]})</h4>{prev}'
-                 f'<div class="figin"><div>{img}</div><div><p>{m(d["what"])}</p><p>{m(d.get("text", ""))}</p><p><b>Colour:</b> {m(d["color"])}</p></div></div>'
-                 f'<div class="figterms"><b>Terms for reading this figure</b>{tt}</div><p class="small">Occurs in: {where}.</p></div>')
-    return "".join(o)
+        card = (f'<div class="figcard" id="ff-{esc(f)}"><h4>{esc(f)} (p.{d["page"]})</h4>{prev}'
+                f'<div class="figin"><div>{img}</div><div><p>{m(d["what"])}</p><p>{m(d.get("text", ""))}</p><p><b>Colour:</b> {m(d["color"])}</p></div></div>'
+                f'<div class="figterms"><b>Terms for reading this figure</b>{tt}</div><p class="small">Occurs in: {where}.</p></div>')
+        items.append((home, card, f))
+    note = '<p class="small muted">Figures in the paper\'s page order, folded per chapter (first fold open). Each card: link from the previous figure, original figure, what it shows and how to read it, colours, terms needed to read it, sections where it occurs. A term whose basis is not the paper itself is marked as such and unchecked.</p>'
+    return note + _chapter_folds(R, items, "ffc")
 
 
 def code_flow_html(R):
+    """One card per code section, folded per chapter. Inside a card (same pattern as a figure card): what it follows from, the whole code with nothing added (folded),
+    goal and why this tool, the Steps, kind / state / comparison colours, functions and terms, math correspondence, where it occurs."""
     cs = [s for s in R.S if s.get("steps")]
     if not cs: return '<p class="muted">(no code)</p>'
-    return ('<table><tr><th>section</th><th>main code</th><th>goal (first sentence)</th></tr>' + "".join(
-        f'<tr><td><a href="#cu-{s["id"]}">§{s["id"]}</a></td><td>' + " ".join(badge(c["kind"]) + " " + esc(c["name"]) for c in s.get("code", []) if c.get("kind") != "none") + f'</td><td>{m((s.get("flow") or "").split(". ")[0])}</td></tr>' for s in cs) + '</table>')
+    ids = {s["id"] for s in cs}; items = []
+    for s in cs:
+        i = s["id"]
+        prev = "; ".join(f'<a href="#cf-{o}">§{o}</a>: {m(w)}' for o, w in R.edges_of(i, "recv") if o in ids)
+        fromprev = f'<div class="fromprev"><b>From the code of</b> {prev}</div>' if prev else '<div class="muted small">(no direct link from another code section)</div>'
+        kinds = " ".join(badge(c["kind"]) + f' {esc(c["name"])} <span class="muted small">[{esc(c.get("state", ""))}{", " + esc(c["lic"]) if c.get("lic") else ""}]</span>' for c in s.get("code", []) if c.get("kind") != "none")
+        cm = s.get("comparison")
+        legend = (f'<p class="small"><span class="stl same">same</span> <span class="stl chg">changed</span> <span class="stl onl">only on one side</span> {esc(cm["title"])}. {esc(summary(cm))}</p>') if cm else '<p class="small muted">(no comparison)</p>'
+        steps = "<ol>" + "".join(f'<li><b>{m(st["title"])}</b>: {m(st["what"])}</li>' for st in s["steps"]) + '</ol>'
+        apis = "".join(f'<li><code>{esc(x["name"])}</code> {esc(x.get("sig", ""))} → {m(x.get("ret", ""))}</li>' for st in s["steps"] for x in st.get("apis", []))
+        gl = s.get("glossary") or []
+        gt = ('<table><tr><th>term</th><th>what it is and what it is good for</th></tr>' + "".join(f'<tr><td><b>{m(w)}</b></td><td>{m(d)}</td></tr>' for w, d, _, _ in gl) + '</table>') if gl else ""
+        math = "<ul>" + "".join(f'<li><b>{m(st["title"])}</b>: {m(st["math"])}</li>' for st in s["steps"]) + '</ul>'
+        card = (f'<div class="figcard" id="cf-{i}"><h4>§{i} {esc(s["title"])}</h4>{fromprev}<p>{kinds}</p>'
+                f'<details class="blk"><summary>The code as a whole, with nothing added</summary><div class="inner">{plain_code(R, s)}</div></details>'
+                f'<div class="flow goal"><b>Goal, and why this tool</b><p>{m(s.get("flow", ""))}</p><p>{m(s.get("why", ""))}</p></div>'
+                f'<p><b>Steps</b></p>{steps}{legend}'
+                + (f'<p><b>Functions used</b></p><ul>{apis}</ul>' if apis else "") + (f'<div class="figterms"><b>Terms of this section</b>{gt}</div>' if gt else "")
+                + f'<p><b>Math correspondence</b></p>{math}<p class="small">Occurs in: <a href="#cu-{i}">§{i}, code in the deep dive</a>.</p></div>')
+        items.append((i, card, f"§{i}"))
+    return '<p class="small muted">Code sections in paper order, folded per chapter (first fold open). Same card pattern as the figure flow.</p>' + _chapter_folds(R, items, "cfc")
 
 
 def build_html(R, pdf=None):
