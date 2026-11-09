@@ -126,13 +126,42 @@ def compare_notes(R, cm, f, a, b):
     return "".join(out)
 
 
-def annotated_code(R, st, cm):
-    """Each note stands directly above the lines it explains; the comparison counterpart follows the note."""
-    f = st["file"]; L = R.lines(f, st["first"], st["last"]); out = []
+def api_card(x):
+    return (f'<div class="apic"><b><code>{esc(x["name"])}</code></b> <code class="small">{esc(x.get("sig", ""))}</code><br><b>returns:</b> {m(x.get("ret", ""))}<br><b>note:</b> {m(x.get("note", ""))}'
+            + (f'<br><b>cost:</b> {m(x["cost"])}' if x.get("cost") else "") + (f'<div class="small muted">{esc(x["quote"])}</div>' if x.get("quote") else "") + '</div>')
+
+
+def api_calls(x, text):
+    """True when the (comment-stripped) lines call the function: name followed by '(' and not part of a longer dotted name."""
+    return re.search(r"(?<![\w.])" + re.escape(x["name"]) + r"\s*\(", text) is not None
+
+
+def api_inline(R, st, a, b, seen):
+    """Specs of the functions called on lines a-b, matched automatically by name; the full card at the first line of the code section that calls it, a short pointer after."""
+    if not st.get("apis"): return ""
+    L = R.lines(st["file"], a, b)
+    txt = "\n".join(re.split(r"#|%|//", l)[0] for l in L)
+    out = []
+    for x in st["apis"]:
+        if not api_calls(x, txt): continue
+        if x["name"] in seen: out.append(f'<div class="apic small muted"><code>{esc(x["name"])}</code>: same as above (first call).</div>')
+        else: seen.add(x["name"]); out.append(api_card(x))
+    return "".join(out)
+
+
+def unplaced_apis(R, st):
+    """Specs whose function name is called on none of the Step's lines (the checker reports these)."""
+    txt = "\n".join(re.split(r"#|%|//", l)[0] for l in R.lines(st["file"], st["first"], st["last"]))
+    return [x["name"] for x in st.get("apis", []) if not api_calls(x, txt)]
+
+
+def annotated_code(R, st, cm, seen=None):
+    """Each note stands directly above the lines it explains; the comparison counterpart and the specs of the functions called on those lines follow the note."""
+    f = st["file"]; L = R.lines(f, st["first"], st["last"]); out = []; seen = set() if seen is None else seen
     for a, b, text in st["lines"]:
         body = "\n".join(f'<span class="ln">{n}</span> {esc(L[n - st["first"]])}' for n in range(a, b + 1))
         rng = f"line {a}" if a == b else f"lines {a}-{b}"
-        out.append(f'<div class="ablk"><div class="anote"><span class="alab">{rng}</span> {m(text)}</div>{compare_notes(R, cm, f, a, b)}<pre class="cb">{body}</pre></div>')
+        out.append(f'<div class="ablk"><div class="anote"><span class="alab">{rng}</span> {m(text)}</div>{compare_notes(R, cm, f, a, b)}{api_inline(R, st, a, b, seen)}<pre class="cb">{body}</pre></div>')
     return f'<div class="acode">{"".join(out)}</div><div class="muted small">{esc(f)} {st["first"]}-{st["last"]} (notes are display only; the file is unchanged)</div>'
 
 
@@ -145,16 +174,20 @@ def plain_code(R, s):
     return "".join(out)
 
 
+def annotated_body(R, s):
+    seen = set(); out = []
+    for st in s["steps"]:
+        for nm in unplaced_apis(R, st): print(f'warning: {s["id"]}: step {st["title"]!r}: the spec of {nm!r} matches no call on the Step\'s lines, so it is not shown', file=sys.stderr)
+        out.append(f'<div class="step"><h4>{m(st["title"])}</h4><p>{m(st["what"])}</p>{annotated_code(R, st, s.get("comparison"), seen)}<p class="mapto"><b>Math:</b> {m(st["math"])}</p></div>')
+    return "".join(out)
+
+
 def card_html(R, s):
     out = [f'<p>Steps below show verbatim lines; the math correspondence follows each code block.</p>']
     if s.get("flow"): out.append(f'<details class="flow goal" open><summary><b>Goal of this code as a whole, and why this tool</b></summary><p>{m(s["flow"])}</p>' + (f'<p>{m(s["why"])}</p>' if s.get("why") else "") + '</details>')
     out.append(f'<details class="plaincode" open><summary><b>The code as a whole, with nothing added</b></summary>{plain_code(R, s)}</details>')
-    out.append('<details class="annotated"><summary><b>The same code with a note above every line (and the comparison counterpart)</b></summary>')
-    for st in s["steps"]:
-        ap = "".join(f'<div class="apic"><b><code>{esc(x["name"])}</code></b> <code class="small">{esc(x.get("sig", ""))}</code><br><b>returns:</b> {m(x.get("ret", ""))}<br><b>note:</b> {m(x.get("note", ""))}' + (f'<br><b>cost:</b> {m(x["cost"])}' if x.get("cost") else "") + (f'<div class="small muted">{esc(x["quote"])}</div>' if x.get("quote") else "") + '</div>' for x in st.get("apis", []))
-        out.append(f'<div class="step"><h4>{esc(st["title"])}</h4><p>{m(st["what"])}</p>{annotated_code(R, st, s.get("comparison"))}'
-                   + (f'<details class="blk"><summary>Functions used in this Step ({len(st["apis"])})</summary><div class="inner">{ap}</div></details>' if ap else "")
-                   + f'<p class="mapto"><b>Math:</b> {m(st["math"])}</p></div>')
+    out.append('<details class="annotated"><summary><b>The same code with a note above every line (comparison counterpart and called-function specs on the line)</b></summary>')
+    out.append(annotated_body(R, s))
     out.append('</details>')
     if s.get("after"): out.append(f'<div class="flow after"><b>Meaning of the result, and where it leads</b><p>{m(s["after"])}</p></div>')
     cm = s.get("comparison")
@@ -425,8 +458,7 @@ def fig_flow_html(R):
 
 
 def code_flow_html(R):
-    """One card per code section, folded per chapter. Inside a card (same pattern as a figure card): what it follows from, the whole code with nothing added (folded),
-    goal and why this tool, the Steps, kind / state / comparison colours, functions and terms, math correspondence, where it occurs."""
+    """Sections in paper order, folded per chapter, each with the code of the section in two blocks: what it follows from, kind/state, goal and why, the whole code with nothing added (open), the annotated code (folded; comparison, function specs and math on the lines/Steps), terms, where it occurs."""
     cs = [s for s in R.S if s.get("steps")]
     if not cs: return '<p class="muted">(no code)</p>'
     ids = {s["id"] for s in cs}; items = []
@@ -437,19 +469,16 @@ def code_flow_html(R):
         kinds = " ".join(badge(c["kind"]) + f' {esc(c["name"])} <span class="muted small">[{esc(c.get("state", ""))}{", " + esc(c["lic"]) if c.get("lic") else ""}]</span>' for c in s.get("code", []) if c.get("kind") != "none")
         cm = s.get("comparison")
         legend = (f'<p class="small"><span class="stl same">same</span> <span class="stl chg">changed</span> <span class="stl onl">only on one side</span> {esc(cm["title"])}. {esc(summary(cm))}</p>') if cm else '<p class="small muted">(no comparison)</p>'
-        steps = "<ol>" + "".join(f'<li><b>{m(st["title"])}</b>: {m(st["what"])}</li>' for st in s["steps"]) + '</ol>'
-        apis = "".join(f'<li><code>{esc(x["name"])}</code> {esc(x.get("sig", ""))} → {m(x.get("ret", ""))}</li>' for st in s["steps"] for x in st.get("apis", []))
         gl = s.get("glossary") or []
         gt = ('<table><tr><th>term</th><th>what it is and what it is good for</th></tr>' + "".join(f'<tr><td><b>{m(w)}</b></td><td>{m(d)}</td></tr>' for w, d, _, _ in gl) + '</table>') if gl else ""
-        math = "<ul>" + "".join(f'<li><b>{m(st["title"])}</b>: {m(st["math"])}</li>' for st in s["steps"]) + '</ul>'
         card = (f'<div class="figcard" id="cf-{i}"><h4>§{i} {esc(s["title"])}</h4>{fromprev}<p>{kinds}</p>'
-                f'<details class="blk"><summary>The code as a whole, with nothing added</summary><div class="inner">{plain_code(R, s)}</div></details>'
                 f'<div class="flow goal"><b>Goal, and why this tool</b><p>{m(s.get("flow", ""))}</p><p>{m(s.get("why", ""))}</p></div>'
-                f'<p><b>Steps</b></p>{steps}{legend}'
-                + (f'<p><b>Functions used</b></p><ul>{apis}</ul>' if apis else "") + (f'<div class="figterms"><b>Terms of this section</b>{gt}</div>' if gt else "")
-                + f'<p><b>Math correspondence</b></p>{math}<p class="small">Occurs in: <a href="#cu-{i}">§{i}, code in the deep dive</a>.</p></div>')
+                f'<details class="plaincode" open><summary><b>1. The code as a whole, with nothing added (a heading per Step only)</b></summary>{plain_code(R, s)}</details>'
+                f'<details class="annotated"><summary><b>2. The same code with a note above every line (comparison counterpart, called-function specs and math correspondence included)</b></summary>{legend}{annotated_body(R, s)}</details>'
+                + (f'<div class="figterms"><b>Terms of this section</b>{gt}</div>' if gt else "")
+                + f'<p class="small">Occurs in: <a href="#cu-{i}">§{i}, code in the deep dive (the same two blocks plus the comparison table)</a>.</p></div>')
         items.append((i, card, f"§{i}"))
-    return '<p class="small muted">Code sections in paper order, folded per chapter (first fold open). Same card pattern as the figure flow.</p>' + _chapter_folds(R, items, "cfc")
+    return '<p class="small muted">Code sections in paper order, folded per chapter (first fold open). Each section carries its code twice: the whole code with nothing added, and the same code with a note above every line (function specs sit on the line that calls them).</p>' + _chapter_folds(R, items, "cfc")
 
 
 def build_html(R, pdf=None):
