@@ -225,13 +225,13 @@ def crops(R, s, pdf, words):
     return [(parts[0][0], uri, [p for p, _ in parts])], f"from the heading of §{s['id']} on p.{st[0]} to the next heading, as one continuous region"
 
 
-def orig_html(R, s, pdf, words):
+def orig_html(R, s, pdf, words, same=None):
     tr = ""
     if s.get("translation_html"): tr = (R.base / s["translation_html"]).read_text(encoding="utf-8")
     elif s.get("translation"): tr = "".join(f"<p>{m(p)}</p>" for p in s["translation"])
     imgs, desc = ([], "")
     if pdf and s.get("heading_word"): imgs, desc = crops(R, s, pdf, words)
-    left = "".join(f'<div class="origscroll"><figure><img src="{u}" alt="p.{pl[0]}"><figcaption>p.{pl[0]}' + (f'-{pl[-1]}' if len(pl) > 1 else '') + ' (original, this section only; page breaks marked by dotted lines)</figcaption></figure></div>' for p, u, pl in imgs) + ('<button class="small" onclick="this.previousElementSibling.classList.toggle(\'full\')">expand / collapse the original column</button>' if imgs else '') or '<p class="muted">no original region (give --original and heading_word)</p>'
+    left = "".join(f'<div class="origscroll"><figure><img {("data-same=" + chr(34) + same + chr(34)) if same else ("src=" + chr(34) + u + chr(34))} alt="p.{pl[0]}"><figcaption>p.{pl[0]}' + (f'-{pl[-1]}' if len(pl) > 1 else '') + ' (original, this section only; page breaks marked by dotted lines)</figcaption></figure></div>' for p, u, pl in imgs) + ('<button class="small" onclick="this.previousElementSibling.classList.toggle(\'full\')">expand / collapse the original column</button>' if imgs else '') or '<p class="muted">no original region (give --original and heading_word)</p>'
     return f'<div class="otgrid"><div><h4>Original</h4><p class="small muted">{esc(desc)}</p>{left}</div><div><h4>Faithful translation</h4>{tr or "<p class=muted>(none)</p>"}</div></div>'
 
 
@@ -356,21 +356,29 @@ def section_html(R, s, pdf, words):
             f'<div class="small" style="font-weight:400">{m(s.get("sell", ""))}</div></summary><div class="inner">{"".join(parts)}{kids}{bridge}</div></details>')
 
 
-def reading_html(R):
-    """Faithful translation of the whole paper in order, each section headed by what it says, with links into the deep dive."""
+def reading_html(R, pdf=None, words=None):
+    """First read, no preconceptions: per section the original (left) and the faithful translation (right), then what the section says; the whole picture comes last."""
     out = []
     for s in R.S:
-        i = s["id"]; lv = i.count(".")
-        tr = ""
-        if s.get("translation_html"): tr = (R.base / s["translation_html"]).read_text(encoding="utf-8")
-        elif s.get("translation"): tr = "".join(f"<p>{m(p)}</p>" for p in s["translation"])
+        i = s["id"]; lv = i.count("."); h = 3 + min(lv, 2)
+        has_text = bool(s.get("translation_html") or s.get("translation"))
+        head = f'<h{h}>§{i} {esc(s["title"])} <span class="muted small">{pages(s)}</span></h{h}>'
+        if not has_text:
+            out.append(f'<div class="rd lv{lv}" id="rd-{i}">{head}<p class="muted small">(This section is only a heading; its text starts in the subsections below.)</p></div>')
+            continue
         jump = [f'<a href="#sec-{i}">deep dive</a>']
         if s.get("figures"): jump.append("figures: " + ", ".join(f'<a href="#figs-{i}">{esc(f)}</a>' for f in s["figures"]))
         if s.get("steps"): jump.append(f'<a href="#cu-{i}">code</a>')
-        h = 3 + min(lv, 2)
-        out.append(f'<div class="rd lv{lv}" id="rd-{i}"><h{h}>§{i} {esc(s["title"])} <span class="muted small">{pages(s)}</span></h{h}>'
-                   f'<div class="say"><b>What this section says</b>: {m(s["question"])} → {m(s["answer"])}</div>{tr or "<p class=muted>(no translation of its own)</p>"}<p class="small">{" / ".join(jump)}</p></div>')
-    return "".join(out)
+        out.append(f'<div class="rd lv{lv}" id="rd-{i}">{head}{orig_html(R, s, pdf, words or {}, same=f"ot-{i}")}'
+                   f'<div class="say"><b>What this section says</b>: {m(s["question"])} → {m(s["answer"])}</div><p class="small">{" / ".join(jump)}</p></div>')
+    tops = [s for s in R.S if not s.get("parent")]
+    def chb(s):  # the bridge that leaves a chapter is the bridge of its last descendant
+        while R.kids(s["id"]): s = R.kids(s["id"])[-1]
+        return s.get("bridge")
+    pic = ('<div class="rd" id="whole"><h3>The whole picture (read after all sections)</h3>'
+           + (f'<p>{m(R.d["whole_picture"])}</p>' if R.d.get("whole_picture") else "")
+           + "<ol>" + "".join(f'<li>§{s["id"]} <b>{esc(s["title"])}</b>: {m(s["question"])} → {m(s["answer"])}' + (f'<br><span class="small">→ next chapter: {m(chb(s))}</span>' if chb(s) else "") + '</li>' for s in tops) + '</ol></div>')
+    return "".join(out) + pic
 
 
 def flow_html(R):
@@ -393,7 +401,7 @@ def build_html(R, pdf=None):
     frows = "".join(f'<tr id="fig-{esc(f)}"><td>{esc(f)}</td><td>p.{d["page"]}</td><td>{m(d["what"])}</td><td>{m(d["color"])}</td></tr>' for f, d in R.FIGS.items())
     crow = "".join(f'<tr><td><a href="#sec-{s["id"]}">§{s["id"]}</a></td><td>{esc(c["name"])}</td><td>{badge(c["kind"])}</td><td>{esc(c.get("src", ""))}</td><td>{esc(c.get("state", ""))}</td><td>{esc(c.get("lic", ""))}</td></tr>' for s in R.S for c in s.get("code", []) if c.get("kind") != "none")
     def top(i, t, b, op=False): return f'<details class="blk" id="{i}"{" open" if op else ""}><summary>{t}</summary><div class="inner">{b}</div></details>'
-    body = (top("reading", "1 Reading (overview, then the faithful translation from first to last)", ov + "<hr>" + reading_html(R), True)
+    body = (top("reading", "1 Reading (original and faithful translation, section by section; the whole picture at the end)", reading_html(R, pdf, words), True)
             + top("flow", "2 Flow (how the figures and the code connect; read beside Reading)", flow_html(R))
             + top("secs", "3 Deep dive (per section: what it says, original and translation, figures, code, terms, ledger)", secs)
             + top("appx", "4 Appendix (indexes and materials)",
@@ -404,7 +412,7 @@ def build_html(R, pdf=None):
     js = ("<script>function ledAll(b,o){b.parentElement.parentElement.querySelectorAll('details.ledcard').forEach(function(d){d.open=o})}"
           "function openTo(h){var e=document.getElementById(h);while(e){if(e.tagName==='DETAILS')e.open=true;e=e.parentElement}}"
           "addEventListener('hashchange',function(){var h=location.hash.slice(1);if(h){openTo(h);var t=document.getElementById(h);if(t)t.scrollIntoView()}});"
-          "if(location.hash)openTo(location.hash.slice(1));</script>")
+          "if(location.hash)openTo(location.hash.slice(1));document.querySelectorAll('img[data-same]').forEach(function(im){var e=document.getElementById(im.dataset.same);var s=e&&e.querySelector('img');if(s&&s.src)im.src=s.src});</script>")
     return f'<!doctype html><html><head><meta charset="utf-8"><title>{esc(R.d.get("title", ""))}</title><style>{CSS}</style></head><body><h1>{esc(R.d.get("title", ""))}</h1><p class="small muted">{esc(R.d.get("source", ""))}. Private page; do not publish.</p>{body}{js}</body></html>'
 
 
