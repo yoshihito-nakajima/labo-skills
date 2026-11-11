@@ -112,7 +112,11 @@ stylistic requirement.
 
 The entire workspace `local/` is private, including its originals, derived
 mathematics, metadata, private instructions, navigation, caches and output.
-Only `local/materials/` owns an independent Git; `local/` itself has no Git.
+`local/` itself has no Git. New books/topics default to no Git; only an explicitly
+selected project may have guarded local history. Preserve the legacy independent
+`local/materials/` Git. Original books in `local/original/` are gitignored and must
+never enter any Git, including local history. Review inputs containing originals
+remain outside Git as well.
 Follow [reading-book storage](../../reading-book/references/storage.md) for
 placement, child push protection and stopped-writer migration. Do not relocate
 activity outside the workspace merely to avoid parent Git tracking.

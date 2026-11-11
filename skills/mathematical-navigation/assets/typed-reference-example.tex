@@ -6,7 +6,8 @@
 \usepackage[colorlinks=true,linkcolor=blue]{hyperref}
 \usepackage{aliascnt}
 \usepackage[nameinlink]{cleveref}
-\newtheorem{theorem}{定理}[chapter]
+\newtheorem{theorem}{定理}[section]
+\numberwithin{equation}{section}
 \newaliascnt{lemma}{theorem}
 \newtheorem{lemma}[lemma]{補題}
 \aliascntresetthe{lemma}

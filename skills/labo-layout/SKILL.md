@@ -30,7 +30,7 @@ skill's real directory (`../../scripts/labo.py`), not from the shell's cwd.
 Inspect the relevant existing paths before writing; the directory need not
 be named `labo`. A placement question alone needs an answer, not scaffolding.
 For a layout-display request, show the [complete workspace skeleton](references/layout.md)
-including workspace-internal `local/` and its separate materials Git boundary. Inspect existing paths and distinguish the actual
+including workspace-internal `local/`, its no-Git original/books/topics and review roles, and the preserved legacy materials Git boundary. Inspect existing paths and distinguish the actual
 layout from illustrative or absent branches. Display-only work does not create
 directories, move files, or change Git settings.
 
@@ -99,7 +99,7 @@ rules even without a prior `layout init`. Reference creation likewise ensures
 under `lean/`, and optional website/profile material only when those tasks
 arise. The directory contract explains their relationships; output slugs need
 not match programs.
-For book-derived courses, use the workspace-internal local-only materials layout owned by [reading-book](../reading-book/SKILL.md); ordinary reading notes still use `reading/`. When creating or relocating such a course, follow its [local navigation rule](../reading-book/references/layout.md#workspace-からの案内) so the workspace has an entry to the local materials and output.
+For local courses and long notes, use [course-authoring](../course-authoring/SKILL.md) and its workspace-internal local layout; add [reading-book](../reading-book/SKILL.md) for book-led source tracking; ordinary reading notes still use `reading/`. When creating or relocating such a course, follow its [local navigation rule](../reading-book/references/layout.md#workspace-からの案内) so the workspace has an entry to the local materials and output.
 Layout creation supplies paths and templates, not mathematical validation or
 permission to publish. Read the owning skill when doing the substantive work.
 

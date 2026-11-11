@@ -17,7 +17,7 @@
 % amsthm, hyperref を読み込んだ後、以下の環境を定義する。
 \usepackage{aliascnt}
 \usepackage[nameinlink]{cleveref}
-\newtheorem{theorem}{定理}[chapter]
+\newtheorem{theorem}{定理}[section]
 \newaliascnt{lemma}{theorem}
 \newtheorem{lemma}[lemma]{補題}
 \aliascntresetthe{lemma}
@@ -29,7 +29,8 @@
 
 和文の種類名が途中で折り返されないよう、例では名前を `\mbox` でまとめている。
 命題・系・定義・公理・例・演習も、共有連番なら各型のalias counterと名前を定義する。
-定理スタイル・章ごとのリセットは既存方針を保持する。章・節・図・表・式・証明Stepなど
+定理スタイルは既存方針を保持する。長大教材の新規設定は節ごとのリセットとし、
+数式も `\numberwithin{equation}{section}` にする。稼働中の既存稿は本文所有者が移行する。章・節・図・表・式・証明Stepなど
 実際に参照する型の名称も設定する。articleのようにchapterがないクラスでは適切な親番号にする。
 独自クラスで既に環境を定義している場合は、この例を重複定義せずクラスの機構と調整する。
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create, check, and build a workspace-local, local-only book-materials repository."""
+"""Build local courses: legacy materials Git or book/topic projects without Git."""
 
 from __future__ import annotations
 
@@ -58,9 +58,17 @@ def validate(root: Path, workspace: Path) -> None:
     root = location(root, workspace)
     if not root.is_dir():
         raise ValueError("materials root does not exist")
+    validate_assets(root)
     gitroot = root / "materials"
     if (root / ".git").exists() or gitroot.is_symlink() or (gitroot / ".git").is_symlink() or not (gitroot / ".git").is_dir():
         raise ValueError("only materials/ must own a real .git directory")
+    validate_gitroot(gitroot)
+
+
+def validate_gitroot(gitroot: Path) -> None:
+    """Optional local history has the same no-remote, no-filter, no-push boundary."""
+    if not (gitroot / ".git").is_dir() or (gitroot / ".git").is_symlink():
+        raise ValueError("local history must own a real .git directory")
     top = run("git", "rev-parse", "--show-toplevel", cwd=gitroot).stdout.strip()
     if Path(top).resolve() != gitroot.resolve():
         raise ValueError("materials/ must own its independent Git")
@@ -75,15 +83,71 @@ def validate(root: Path, workspace: Path) -> None:
     attributes = gitroot / ".git" / "info" / "attributes"
     if not attributes.is_file() or attributes.is_symlink() or attributes.read_text() != NO_FILTERS:
         raise ValueError("external Git filters are not disabled")
-    for name in ("originals", "cache", "output"):
+    for entry in gitroot.rglob("*"):
+        if entry.is_symlink():
+            raise ValueError("materials Git must not contain symlinks")
+
+
+def validate_assets(root: Path) -> None:
+    for name in ("original", "originals", "cache", "output"):
         path = root / name
         if path.is_symlink() or (path.exists() and not path.is_dir()):
             raise ValueError(f"{name}/ must be a real directory outside materials Git")
         if any(entry.is_symlink() for entry in path.rglob("*")):
             raise ValueError(f"{name}/ must not contain symlinks")
-    for entry in gitroot.rglob("*"):
+        if any(entry.name == ".git" for entry in path.rglob("*")):
+            raise ValueError(f"{name}/ must not own Git, including nested repositories")
+
+
+def course_folder(root: Path, kind: str, course: str) -> Path:
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", course):
+        raise ValueError("course must be a simple slug")
+    return root / "materials" / "courses" / course if kind == "legacy" else root / kind / course
+
+
+def validate_project(root: Path, workspace: Path, kind: str, course: str) -> Path:
+    root = location(root, workspace)
+    validate_assets(root)
+    folder = course_folder(root, kind, course)
+    if not folder.is_dir():
+        raise ValueError("project does not exist")
+    for entry in (folder.parent, folder, *folder.rglob("*")):
         if entry.is_symlink():
-            raise ValueError("materials Git must not contain symlinks")
+            raise ValueError("project must not contain symlinks")
+    # A mode directory must not silently turn no-Git projects into tracked files.
+    if (folder.parent / ".git").exists():
+        raise ValueError("books/ and topics/ must not own Git")
+    if (folder / ".git").exists():
+        validate_gitroot(folder)
+    if any(p.name == ".git" and p.parent != folder for p in folder.rglob("*")):
+        raise ValueError("project must not contain nested Git repositories")
+    return folder
+
+
+def install_project(root: Path, workspace: Path, kind: str, course: str) -> None:
+    root = location(root, workspace)
+    validate_assets(root)
+    folder = course_folder(root, kind, course)
+    if folder.exists() or folder.parent.is_symlink() or (folder.parent / ".git").exists():
+        raise ValueError("new project needs an unused path outside Git")
+    ignore = root / ".gitignore"
+    if ignore.is_symlink() or (ignore.exists() and not ignore.is_file()):
+        raise ValueError("local .gitignore must be a real file")
+    patterns = ignore.read_text() if ignore.exists() else ""
+    folder.mkdir(parents=True)
+    for name in ("original", "cache", "output"):
+        (root / name).mkdir(exist_ok=True)
+    if "/original/" not in patterns.splitlines():
+        ignore.write_text(patterns + ("\n" if patterns and not patterns.endswith("\n") else "") + "/original/\n")
+    (folder / "chapters").mkdir()
+    (folder / "plan.md").write_text("# Plan\n\nRecord reader, adopted scope and prerequisite route.\n")
+    (folder / "progress.md").write_text("# Current state\n\nNo mathematical text written yet. Next: establish scope and write the first unit.\n")
+    (folder / "START_HERE.md").write_text(
+        f"# {course}: producer entrypoint\n\nUse course-authoring" + (" and reading-book" if kind == "books" else "") +
+        ". Read plan.md and progress.md; continue from current text and returns.\n"
+        "Own canonical text and official output; reviewers own their assigned case only.\n"
+        "Originals stay in local/original/, ignored by every Git. No Git was created here.\n")
+    validate_project(root, workspace, kind, course)
 
 
 def install(root: Path, workspace: Path) -> None:
@@ -106,23 +170,25 @@ def install(root: Path, workspace: Path) -> None:
     validate(root, workspace)
 
 
-def build(root: Path, workspace: Path, course: str, dry_run: bool) -> None:
-    validate(root, workspace)
+def build(root: Path, workspace: Path, course: str, dry_run: bool, kind: str = "legacy") -> None:
+    if kind == "legacy":
+        validate(root, workspace)
+    else:
+        validate_project(root, workspace, kind, course)
     root = root.resolve()
-    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", course):
-        raise ValueError("course must be a simple slug")
-    folder = root / "materials" / "courses" / course
+    folder = course_folder(root, kind, course)
     main = folder / "main.tex"
     if folder.is_symlink() or main.is_symlink() or not main.is_file():
         raise ValueError("course main.tex is missing or symlinked")
     if not re.search(r"\\documentclass\b", main.read_text(encoding="utf-8").split(r"\begin{document}", 1)[0]):
         raise ValueError("main.tex is not a document root")
-    cache = root / "cache" / course
+    artifact = course if kind == "legacy" else f"{kind}-{course}"
+    cache = root / "cache" / artifact
     output = root / "output"
     if cache.is_symlink() or output.is_symlink():
         raise ValueError("build directories must not be symlinks")
     for suffix in (".pdf", ".synctex.gz"):
-        target = output / f"{course}{suffix}"
+        target = output / f"{artifact}{suffix}"
         if target.is_symlink() or target.with_name(target.name + ".new").is_symlink():
             raise ValueError("build artifacts must not be symlinks")
     command = ["latexmk", "-xelatex", "-synctex=1", "-interaction=nonstopmode", "-halt-on-error", "-file-line-error", f"-outdir={cache}", "main.tex"]
@@ -136,14 +202,14 @@ def build(root: Path, workspace: Path, course: str, dry_run: bool) -> None:
     sync = cache / "main.synctex.gz"
     if not (pdf.is_file() and pdf.stat().st_size and sync.is_file() and sync.stat().st_size):
         raise ValueError("build needs a nonempty PDF and SyncTeX pair")
-    for source, target in ((pdf, output / f"{course}.pdf"), (sync, output / f"{course}.synctex.gz")):
+    for source, target in ((pdf, output / f"{artifact}.pdf"), (sync, output / f"{artifact}.synctex.gz")):
         temporary = target.with_name(target.name + ".new")
         if source.is_symlink() or target.is_symlink() or temporary.is_symlink():
             raise ValueError("build artifacts must not be symlinks")
         shutil.copy2(source, temporary)
         temporary.replace(target)
-    check_navigation(output / f"{course}.pdf", cache, "main", cache / "main.aux", source=main)
-    print(output / f"{course}.pdf")
+    check_navigation(output / f"{artifact}.pdf", cache, "main", cache / "main.aux", source=main)
+    print(output / f"{artifact}.pdf")
 
 
 def fingerprint(root: Path) -> dict[str, tuple[int, str]]:
@@ -193,22 +259,32 @@ def main() -> int:
     parser.add_argument("--writers-stopped", action="store_true", help="assert writers were explicitly confirmed stopped")
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("--course")
+    parser.add_argument("--kind", choices=["legacy", "books", "topics"], default="legacy",
+                        help="legacy materials Git (default), or books/topics with optional local history")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     args.root = args.root or args.workspace.resolve() / "local"
     try:
+        if args.kind != "legacy" and (not args.course or args.mode == "migrate"):
+            raise ValueError("books/topics require --course and do not support automatic migration")
         if args.mode == "migrate":
             if not args.from_root:
                 raise ValueError("migrate requires --from-root")
             migrate(args.from_root, args.root, args.workspace, args.writers_stopped)
         elif args.mode == "install":
-            install(args.root, args.workspace)
+            if args.kind == "legacy":
+                install(args.root, args.workspace)
+            else:
+                install_project(args.root, args.workspace, args.kind, args.course)
         elif args.mode == "check":
-            validate(args.root, args.workspace)
+            if args.kind == "legacy":
+                validate(args.root, args.workspace)
+            else:
+                validate_project(args.root, args.workspace, args.kind, args.course)
         else:
             if not args.course:
                 raise ValueError("build requires --course")
-            build(args.root, args.workspace, args.course, args.dry_run)
+            build(args.root, args.workspace, args.course, args.dry_run, args.kind)
     except (OSError, ValueError, PrivacyError, subprocess.CalledProcessError) as exc:
         print(f"Book materials: {exc}", file=sys.stderr)
         return 1

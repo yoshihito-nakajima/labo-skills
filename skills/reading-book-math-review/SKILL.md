@@ -1,9 +1,14 @@
 ---
 name: reading-book-math-review
-description: Review bounded mathematical claims and dependencies in a frozen long-course version, returning located findings and recheck scope to its reading-book producer. For textbook and course review assignments, not whole-paper refereeing or canonical-source editing.
+description: Review bounded mathematical claims and dependencies in a frozen long-course version, returning located findings and recheck scope to its reading-book producer. For book-led or topic-led textbook and course review assignments, not whole-paper refereeing or canonical-source editing.
 ---
 
 # 教材の数学確認
+
+本由来・テーマ型の教材／長いノートをともに対象とする。新規案件の担当入口は
+[course-authoring の役割フォルダ](../course-authoring/references/role-folders.md)に従い、
+`local/review/<case>/` に置く。既存の結果領域は移動しない。通常確認であり、
+本格的な多面的査読は明示依頼された `local/hard_review/<case>/` の別任務とする。
 
 [教材の制作・引継ぎ契約](../reading-book/references/production-handoff.md)を読み、
 現在の依頼の対象版、問い、許可資料、書込先、統合担当を確認する。

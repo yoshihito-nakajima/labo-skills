@@ -28,6 +28,12 @@ recorded as ordinary parent work.
 A push request alone does not request a PR; an authorized PR includes the
 necessary push of its reviewed policy branch, without a second approval.
 
+If the user maintains the shared repository itself (the `.agents` origin is the
+upstream, not a fork), there is no fork and no PR: the checkout is the authority
+and reviewed commits are pushed to its main branch. The fork-only category then
+disappears, so every committed change is published and the content review below
+applies to all of it.
+
 `.claude -> .agents` is a local alias, not another publishable tree. Recreate
 that link locally using the policy's deployment instructions; do not publish
 the parent to carry it. A standalone policy checkout, alternate host mount or

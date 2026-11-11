@@ -43,6 +43,7 @@ Every skill in `skills/`, grouped by what it is for. Each entry links to its `SK
 
 ### Papers and review
 
+- [story-interview](skills/story-interview/SKILL.md) — Stress-test a talk or paper storyline by dialogue with an adversarial listener.
 - `paper-introduction` — Discover and shape the story of an introduction.
 - [paper-structure](skills/paper-structure/SKILL.md) — Design or reassess the whole-paper architecture.
 - [paper-writing](skills/paper-writing/SKILL.md) — Draft or revise manuscripts from plans, sources and proof evidence.
@@ -59,6 +60,7 @@ Every skill in `skills/`, grouped by what it is for. Each entry links to its `SK
 ### Reading and references
 
 - [reading-reference](skills/reading-reference/SKILL.md) — Research positioning, prior work, notation lineage, source-grounded reading notes.
+- [course-authoring](skills/course-authoring/SKILL.md) — Local book-led or topic-led courses, optional local history, and role-based review handoffs.
 - [reading-book](skills/reading-book/SKILL.md) — Build long courses from books with one canonical body.
 - [reading-book-math-review](skills/reading-book-math-review/SKILL.md) — Review mathematical claims in a frozen long-course version.
 - [reading-book-output-review](skills/reading-book-output-review/SKILL.md) — Review indexes, rendering and navigation in a frozen course PDF.
@@ -71,6 +73,7 @@ Every skill in `skills/`, grouped by what it is for. Each entry links to its `SK
 - [exposition-review](skills/exposition-review/SKILL.md) — Adversarial review loop on a finished explanatory artifact.
 - [exposition-critique](skills/exposition-critique/SKILL.md) — Independent reader-side critique of a frozen explanatory artifact.
 - [exposition-flow-review](skills/exposition-flow-review/SKILL.md) — Rebuild the actual flow of an exposition and propose reconnections.
+- [exposition-granularity](skills/exposition-granularity/SKILL.md) — Estimate from a corpus how much a community defines and explains; check drafts and reviews against it.
 - [mathematical-navigation](skills/mathematical-navigation/SKILL.md) — Numbering, heading colors, cross-references and indexes; PDF link audits.
 
 ### Talks and slides
@@ -96,7 +99,7 @@ Every skill in `skills/`, grouped by what it is for. Each entry links to its `SK
 
 ## Separation and ownership
 
-For long book-based courses, [reading-book](skills/reading-book/SKILL.md) owns
+For local courses and long notes, [course-authoring](skills/course-authoring/SKILL.md) owns
 canonical text, correction integration, handoffs and official outputs.
 [reading-book-math-review](skills/reading-book-math-review/SKILL.md) and
 [reading-book-output-review](skills/reading-book-output-review/SKILL.md) review
@@ -443,6 +446,10 @@ Writing and in-scope reviews also use a
 compare actual object types, roles and conventions with inspected definitions
 and formulas, preserving legitimate alternatives and recording source gaps.
 Corpus style cues remain soft; semantic verification checks the mathematics.
+
+To work out a talk's or paper's storyline by dialogue, before any text exists,
+use [story-interview](skills/story-interview/SKILL.md); it hands the settled line
+to the skills below.
 
 For an introduction's central question, concrete significance and narrative
 order, use [paper-introduction](skills/paper-introduction/SKILL.md) alongside

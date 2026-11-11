@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local Course Authoring"
+  short_description: "Create local book-led or topic-led mathematical courses"
+  default_prompt: "Use $course-authoring to create or resume a local mathematical course or long note."

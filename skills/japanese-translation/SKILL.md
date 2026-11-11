@@ -83,6 +83,18 @@ After corrections, reread the Japanese in sequence.
 If only Japanese is available, perform the Japanese reading pass and state the
 limit of any fidelity assessment. Do not attribute a problem to an unseen source.
 
+## Check literal fidelity mechanically (LaTeX pairs)
+
+When the source and the translation are both LaTeX, run
+`python3 scripts/compare_translation.py SOURCE.tex TRANSLATION.tex` before delivery. A literal translation
+changes the language and nothing else, so the formulas (compared as multisets after whitespace and simple
+macro normalization), the sequence of theorem-like and list environments, the sections, the citation keys and
+the references should agree, and the translation should contain few Japanese-only parenthetical remarks
+(glosses the source does not have). Treat each difference as a hint to inspect, not a verdict: a macro, a
+reordered item or a legitimate rephrasing can cause one. `--strict` exits with status 1 when formulas,
+environments, citations or references differ. A translation that adds definitions, glosses or restatements is
+a rewrite; report it as such rather than delivering it as a translation.
+
 ## Make mathematical documents readable in Japanese alone
 
 Include all in-scope definitions, assumptions, theorem statements, proofs,

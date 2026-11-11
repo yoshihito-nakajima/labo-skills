@@ -20,6 +20,12 @@ reasoning.
 
 ## When it applies
 
+Ongoing local course/note production under
+[course-authoring](../course-authoring/SKILL.md) uses full author checks and
+selective independent checks; it does not automatically invoke this loop per
+increment. For those projects, run this loop on the explicitly requested frozen
+scope. Keep that exception distinct from the normal artifact-delivery rule below.
+
 Run the loop before delivery for every substantial explanatory artifact:
 web pages and HTML expositions, reading companions, lecture notes, reading
 notes and written explanations longer than a few screens. It is part of

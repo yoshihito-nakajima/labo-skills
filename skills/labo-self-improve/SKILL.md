@@ -16,7 +16,9 @@ context. Apply this skill's normal verification and publication rules.
 The user normally runs their own fork as the `.agents` submodule. Develop
 improvements there so mathematical practice can feed back into shared skills.
 Fork-specific choices can remain in the fork; upstream acceptance is not a
-prerequisite for using them.
+prerequisite for using them. A maintainer working directly in the shared
+repository has no fork-only category: see the
+[publication boundary](../labo-git/SKILL.md#publication-boundary).
 Use [labo-git](../labo-git/SKILL.md) when repository boundaries or push checks
 need setup. Follow its [publication boundary](../labo-git/SKILL.md#publication-boundary):
 both push and PR operate in the independent policy Git. The parent research

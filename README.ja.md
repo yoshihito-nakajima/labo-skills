@@ -32,6 +32,7 @@
 
 ### 論文と査読
 
+- [story-interview](skills/story-interview/SKILL.md) — 発表や論文の筋を、敵対的な聞き手との対話で詰める。
 - `paper-introduction` — 序文の物語を見つけて整える。
 - [paper-structure](skills/paper-structure/SKILL.md) — 論文全体の構成を設計・見直す。
 - [paper-writing](skills/paper-writing/SKILL.md) — 計画・出典・証明の証拠から原稿を書く・直す。
@@ -48,6 +49,7 @@
 ### 読むこと・文献
 
 - [reading-reference](skills/reading-reference/SKILL.md) — 研究の位置づけ、先行研究、記法の系譜、出典に基づく読書ノート。
+- [course-authoring](skills/course-authoring/SKILL.md) — 本由来・テーマ型のローカル教材制作、Git任意、担当別の通常確認／本格査読。
 - [reading-book](skills/reading-book/SKILL.md) — 本から長いコースを、一つの正本で作る。
 - [reading-book-math-review](skills/reading-book-math-review/SKILL.md) — 固定した長いコースの数学的主張を査読する。
 - [reading-book-output-review](skills/reading-book-output-review/SKILL.md) — 固定したコース PDF の索引・描画・ナビゲーションを査読する。
@@ -60,6 +62,7 @@
 - [exposition-review](skills/exposition-review/SKILL.md) — 完成した解説物に対する敵対的な査読の反復。
 - [exposition-critique](skills/exposition-critique/SKILL.md) — 固定した解説物への、読者側からの独立した批評。
 - [exposition-flow-review](skills/exposition-flow-review/SKILL.md) — 解説物の実際の流れを再構成し、つなぎ直しを提案する。
+- [exposition-granularity](skills/exposition-granularity/SKILL.md) — コーパスから、コミュニティがどこまで定義・説明するかを推定し、草稿と査読をそれに照らして確かめる。
 - [mathematical-navigation](skills/mathematical-navigation/SKILL.md) — 番号づけ、見出しの色、相互参照、索引。PDF のリンク検査。
 
 ### 講演とスライド
@@ -85,7 +88,7 @@
 
 ## 公開と非公開の分離、所有
 
-長大な本由来の教材は [reading-book](skills/reading-book/SKILL.md) が正本文、訂正の統合、
+ローカル教材・長いノートは [course-authoring](skills/course-authoring/SKILL.md) が正本文、訂正の統合、
 引継ぎ、公式出力を担当する。[reading-book-math-review](skills/reading-book-math-review/SKILL.md)
 と [reading-book-output-review](skills/reading-book-output-review/SKILL.md) は
 [共通の引継ぎ契約](skills/reading-book/references/production-handoff.md)に従い、
@@ -419,6 +422,9 @@ checkout にあり、記入済みの非公開記録は研究プログラムと�
 実際の対象の型、役割、慣習を、確認した定義や式と比べ、正当な別表現は残し、
 資料の欠落は記録する。コーパスの文体の手がかりはあくまで弱い手がかりで、
 意味の検証は数学そのものを確認する。
+
+文章が存在する前に、発表や論文の筋を対話で詰めるには
+[story-interview](skills/story-interview/SKILL.md) を使う。固まった筋は以下のスキルへ渡す。
 
 イントロダクションの中心的な問い、具体的な意義、語りの順序には、`paper-writing` と並べて
 [paper-introduction](skills/paper-introduction/SKILL.md) を使う。実際の結果と

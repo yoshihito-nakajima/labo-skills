@@ -113,7 +113,8 @@ the exact remaining question, what this work changes and how, and its limits.
 Put precise citations beside the claims and definitions they support; a memo
 or bibliography alone does not do this. Follow established notation and
 conventions where appropriate, recording translations or justified departures
-in the memo and explaining consequential changes in the text. Check meaning,
+in the memo and explaining consequential changes in the text. Make every symbol show the data it depends on and every bound index its range,
+as in [mathematical-exposition](../mathematical-exposition/SKILL.md#build-a-usable-route-through-the-argument). Check meaning,
 normalization and proof dependencies before any renaming; raise substantive
 changes to the author's contribution or established notation rather than
 silently rewriting them.

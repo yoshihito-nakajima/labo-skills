@@ -35,10 +35,14 @@ The tree is an example of the **whole workspace layout**. When showing an existi
     website/                  # optional source pages/config
     profile/                  # author identity plus optional CV/presentation/event records
     local/                   # workspace-internal, entire /local/ ignored by parent; no own Git
-      originals/              # optional new raw books, outside materials Git
+      original/               # raw books: ignored by every Git, no local Git
+      books/<slug>/           # book-led producer, default no Git
+      topics/<slug>/          # topic-led producer, default no Git
+      review/<case>/          # bounded normal reviewer
+      hard_review/<case>/     # adversarial review coordinator
       cache/                  # page images, OCR and TeX cache, outside materials Git
       output/                 # course PDF and SyncTeX, outside materials Git
-      materials/              # the only independent Git under this root; no remote, push denied
+      materials/              # preserved legacy local Git; no remote, push denied
         .git/
         sources/              # source identities, editions and locations
         catalog/              # mathematical claims, dependencies and review scope
@@ -56,8 +60,9 @@ The tree is an example of the **whole workspace layout**. When showing an existi
 Each user normally forks the shared `labo-skills` repository and mounts
 their fork at `.agents`. The fork submodule is the policy/runtime boundary. Its `skills/`,
 `scripts/`, and `src/` remain inside its own Git history; research-program data stays
-in `labo/`, while book-derived course materials use `labo/local/materials/`,
-whose independent local Git never goes to GitHub. Originals, cache and output
+in `labo/`. New local courses use `local/books/` or `local/topics/` without Git
+by default; legacy courses keep `local/materials/`, whose independent Git never
+goes to GitHub. Originals, cache and output
 remain under `local/` but outside materials Git. The parent excludes all `/local/`.
 The parent tracks the user's fork URL in `.gitmodules` and
 the selected policy commit, which may include changes not yet accepted upstream.
@@ -166,6 +171,6 @@ archive of historic papers. In the current CLI convention,
 exposition order. Each section marks the end of its opening with
 `% LABO:INTRO-END`. The local reader does not evaluate dynamic TeX includes.
 
-Book-derived courses use the [reading-book local materials layout](../../reading-book/references/layout.md), with `materials/` as its own local-only Git under workspace `local/`. This exception does not change placement for ordinary `reading/` notes or research-specific source inboxes.
+Local courses and long notes use the [course-authoring layout](../../course-authoring/references/layout.md), with book-led and topic-led producers and separate normal/hard-review roles. Existing `materials/` retains its local-only Git. This exception does not change placement for ordinary `reading/` notes or research-specific source inboxes.
 
 When a book-derived course is created or moved, the owning [reading-book navigation rule](../../reading-book/references/layout.md#workspace-からの案内) keeps a local `reading/` entry linked to its local canonical text, output and progress. Check ignore and tracking before writing actual course details; ordinary reading notes and display-only layout requests do not create these private indexes.

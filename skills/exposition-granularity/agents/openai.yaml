@@ -1,0 +1,4 @@
+interface:
+  display_name: "Exposition Granularity"
+  short_description: "Estimate how much a community defines and explains, and check a draft against it"
+  default_prompt: "Use $exposition-granularity to estimate a granularity profile from the corpus and check the draft for over-explanation and missing definitions."

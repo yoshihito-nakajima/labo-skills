@@ -21,6 +21,13 @@ reports; it does not rewrite, repair or certify, and the user decides what to ch
 
 Resolve `<scripts>` to this skill's real `scripts/` directory (follow symlinks first).
 
+For local course/note hard-review assignments, use the role entrypoint under
+`local/hard_review/<case>/` described in
+[course-authoring role folders](../course-authoring/references/role-folders.md).
+Keep original scans/extracts and fixed inputs outside every Git, including local Git.
+Return findings to the canonical producer; do not take over production or create a
+second editable manuscript. An existing folder alone does not launch this workflow.
+
 ## Procedure
 
 1. **Freeze the target.** Fix the exact statement, the source files and version, and the scope

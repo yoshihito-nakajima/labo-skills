@@ -1,0 +1,4 @@
+interface:
+  display_name: "Story Interview"
+  short_description: "Stress-test a talk or paper storyline by dialogue"
+  default_prompt: "Use $story-interview to restate my storyline as a ledger and press on its gaps, vague claims, ordering and material to cut."

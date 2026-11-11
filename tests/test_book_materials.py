@@ -146,6 +146,52 @@ class BookMaterialsTests(unittest.TestCase):
         (self.workspace / ".git/hooks/labo-reference-guard.py").write_text("# stale runtime")
         self.assertNotEqual(self.call("check").returncode, 0)
 
+    def test_git_free_projects_preserve_existing_courses_and_ignore_originals(self):
+        self.guarded_parent()
+        self.root = self.workspace / "local"
+        self.assertEqual(self.call("install").returncode, 0)
+        legacy_config = (self.root / "materials/.git/config").read_bytes()
+        for kind in ("books", "topics"):
+            installed = self.call("install", "--kind", kind, "--course", "sample")
+            self.assertEqual(installed.returncode, 0, installed.stderr)
+            project = self.root / kind / "sample"
+            self.assertTrue((project / "START_HERE.md").is_file())
+            self.assertFalse((project / ".git").exists())
+            (project / "main.tex").write_text("\\documentclass{book}\n\\begin{document}Fictional.\\end{document}\n")
+            self.assertEqual(self.call("check", "--kind", kind, "--course", "sample").returncode, 0)
+            dry = self.call("build", "--kind", kind, "--course", "sample", "--dry-run")
+            self.assertEqual(dry.returncode, 0, dry.stderr)
+            self.assertIn(f"cache/{kind}-sample", dry.stdout)
+        original = self.root / "original/fictional.pdf"
+        original.write_bytes(b"synthetic original")
+        self.assertEqual(self.parent_git("check-ignore", str(original)).returncode, 0)
+        self.parent_git("add", ".")
+        self.assertEqual(self.parent_git("diff", "--cached", "--name-only").stdout, "")
+        self.assertIn("/original/", (self.root / ".gitignore").read_text())
+        self.assertEqual((self.root / "materials/.git/config").read_bytes(), legacy_config)
+        # No source overwrite or accidental opt-in to history on repeated init.
+        self.assertNotEqual(self.call("install", "--kind", "books", "--course", "sample").returncode, 0)
+
+    def test_git_free_project_rejects_git_in_originals_and_mode_parent(self):
+        self.assertEqual(self.call("install", "--kind", "topics", "--course", "sample").returncode, 0)
+        original_git = self.root / "original/nested/.git"
+        original_git.mkdir(parents=True)
+        rejected = self.call("check", "--kind", "topics", "--course", "sample")
+        self.assertNotEqual(rejected.returncode, 0)
+        self.assertIn("must not own Git", rejected.stderr)
+        original_git.rmdir()
+        (self.root / "topics/.git").mkdir()
+        self.assertNotEqual(self.call("check", "--kind", "topics", "--course", "sample").returncode, 0)
+
+    def test_git_free_project_rejects_symlink_escape_and_slug_escape(self):
+        self.root.mkdir()
+        outside = self.base / "untouched"
+        outside.mkdir()
+        (self.root / "books").symlink_to(outside, target_is_directory=True)
+        self.assertNotEqual(self.call("install", "--kind", "books", "--course", "sample").returncode, 0)
+        self.assertEqual(list(outside.iterdir()), [])
+        self.assertNotEqual(self.call("install", "--kind", "topics", "--course", "../escape").returncode, 0)
+
     def test_internal_root_refuses_alias_escape_and_arbitrary_nested_git(self):
         self.guarded_parent()
         self.root = self.workspace / "other"
