@@ -217,7 +217,7 @@ def lang_folds(R, s, render, tag):
             if v is None: body += f'<div class="step"><h4>{m(st["title"])}</h4><p class="small muted">No {esc(name)} version of this Step.</p></div>'; continue
             v0 = v0 or v; kinds.add(v.get("kind")); body += render(st, v, key == main_key, seen)
         lab = ", ".join(KIND.get(k, k) for k in sorted(k for k in kinds if k))
-        out.append(f'<details class="langfold"{" open" if n == 0 else ""} id="lf-{esc(s["id"])}-{tag}-{esc(key)}"><summary><b>{esc(name)}</b>{(" · " + esc(lab)) if lab else ""}</summary><div class="inner">{lang_header(R, s, key, name, v0, main_key)}{body}</div></details>')
+        out.append(f'<details class="langfold"{" open" if n == 0 else ""}><summary><b>{esc(name)}</b>{(" · " + esc(lab)) if lab else ""}</summary><div class="inner">{lang_header(R, s, key, name, v0, main_key)}{body}</div></details>')
     return "".join(out)
 
 
