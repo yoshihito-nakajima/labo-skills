@@ -14,6 +14,9 @@ Needs only the standard library; pandoc (math to MathML), pdftotext and pdftoppm
 """
 import argparse, base64, html, json, os, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import code_langs as CL
+USED = set()  # language keys met while writing TeX listings
 
 KIND = {"author": "author", "official": "official", "lib": "library", "ai": "AI stand-in", "none": "none"}
 STATUS = {"same": ("same", "same"), "changed": ("changed", "chg"), "only_left": ("only left", "onl"), "only_right": ("only right", "onl")}
@@ -509,8 +512,8 @@ def lst(R, x, tag, litdir):
     if not x: return r"\par{\small\itshape (not on this side)}"
     if isinstance(x, dict):
         litdir.mkdir(parents=True, exist_ok=True); (litdir / f"{tag}.txt").write_text(x["lit"] + "\n"); return r"\lstinputlisting[numbers=none]{%s}" % (litdir / f"{tag}.txt")
-    f, a, b = x; lang = "Matlab" if f.endswith(".m") else "Python"
-    return r"\lstinputlisting[language=%s,firstline=%d,lastline=%d,firstnumber=%d]{%s}\par{\scriptsize %s %d--%d}" % (lang, a, b, a, R.base / f, tx(f), a, b)
+    f, a, b = x; sp = CL.spec(f); USED.add(sp.get("key"))
+    return r"\lstinputlisting[%sfirstline=%d,lastline=%d,firstnumber=%d]{%s}\par{\scriptsize %s %d--%d, %s}" % (CL.tex_lang_option(sp), a, b, a, R.base / f, tx(f), a, b, tx(sp["name"]))
 
 
 def card_tex(R, s, litdir):
@@ -558,6 +561,7 @@ def main(argv=None):
     a = ap.parse_args(argv)
     R = Rec(a.record, a.base); out = Path(a.out); (out / "panels").mkdir(parents=True, exist_ok=True); (out / "codecards").mkdir(exist_ok=True)
     (out / "index.html").write_text(build_html(R, a.original), encoding="utf-8")
+    # panels and cards below fill USED; lang_defs.tex is written at the end
     for s in R.S:
         (out / "panels" / f"p{s['id']}.tex").write_text(panel_tex(R, s) + "\n")
         if s.get("steps"): (out / "codecards" / f"c{s['id']}.tex").write_text(card_tex(R, s, out / "lit") + "\n")
@@ -570,6 +574,8 @@ def main(argv=None):
             (out / "ledger").mkdir(exist_ok=True); (out / "ledger" / f"l{s['id']}.tex").write_text(lt)
         if s.get("bridge"):
             (out / "bridge").mkdir(exist_ok=True); (out / "bridge" / f"br{s['id']}.tex").write_text(r"\par\medskip\noindent{\small\textbf{To the next section.} %s}\par" % tx(s["bridge"]) + "\n")
+    (out / "lang_defs.tex").write_text(CL.tex_definitions(sorted(k for k in USED if k)) + "\n")  # \input in the preamble
+    if CL.warn_unknown(): print("WARNING: unknown code language (listed without color): " + ", ".join(CL.warn_unknown()))
     print(f"built {len(R.S)} sections -> {out}")
 
 

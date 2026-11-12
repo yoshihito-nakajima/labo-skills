@@ -130,3 +130,15 @@ does. A one-line item that only names a thing is a defect, not a summary.
   version, not from memory; for software whose documentation cannot be reproduced, summarise and say so.
   After the Steps, what the result means and where it leads.
 - TeX needs `amsmath, booktabs, array, longtable, listings, tcolorbox` (with the `breakable` library).
+
+### Code languages
+
+Code is shown in the language of the source: a stand-in is written only when no original exists (and then in the language the reader can run), never to change the language of an original. What depends on the language lives in one table, `scripts/code_langs.py` (Python, MATLAB, Octave, Julia, R, C++ now; a new language is one row):
+
+- **Colouring** in TeX (`listings` name; Julia has none, so the table carries a definition and the builder writes `lang_defs.tex` to `\input` in the preamble). An unknown extension is never read as Python: it is listed without colour and `check_section_record.py` and the builder print a warning.
+- **Function cards**: keys carry a language prefix (`m:`, `oct:`, `jl:`, `r:`, `cpp:`; none for the main language) and a call is found with the language's own pattern after its comments are cut.
+- **Indexing and storage**: the table records the first index and whether matrices are row- or column-major. Whenever a note meets an index, slice, reshape or transpose in a language whose base or order differs from the formula the reader is following, it says so.
+- **Traps**: each row lists a few beginner traps (broadcasting dot, in-place `!`, references and ownership, data frames); put the ones the lines actually use into the line notes.
+- `.m` is read as MATLAB; for Octave pass `override="octave"` to `code_langs.spec` (no record field reads it yet).
+- Each code block should carry a label with the language and the source kind (author / library / AI stand-in). The generic builder puts the language in the TeX caption; a paper-specific builder adds it to the HTML block.
+- A comparison across two languages cannot align lines: mark the rows as correspondences of meaning, not same/changed.

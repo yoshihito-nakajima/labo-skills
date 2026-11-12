@@ -5,6 +5,9 @@ Usage: check_section_record.py RECORD.json
 Exit 0 when there are no errors; warnings do not fail the check.
 """
 import json, re, sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import code_langs as CL
 
 KINDS = {"author", "official", "lib", "ai", "none"}
 LOC = re.compile(r"\bpp?\.\s?\d+")
@@ -105,6 +108,8 @@ def check(rec):
                     warn.append(f"{i}: code section lacks '{k}' (the goal of the code as a whole / why this tool and not another / what the result means)")
             for st in s.get("steps", []):
                 chk_notes(i, st, err, warn)
+                if st.get("file") and CL.lang_of(st["file"]) is None:
+                    warn.append(f"{i}: step {st.get('title')!r}: unknown code language for {st['file']!r} (add a row to scripts/code_langs.py; it is listed without color until then)")
                 for k in ("title", "what", "file", "first", "last", "math"):
                     if k not in st:
                         err.append(f"{i}: step {st.get('title')!r} lacks {k!r}")
