@@ -35,6 +35,13 @@ description: Review indexes, rendering and navigation in a frozen long-course PD
   全件クリックを新しい完了条件にしない。表示の引継ぎには共通手順の描画証拠を使う。
   改ページの影響を変更行だけで限定しない。共通設定の変更なら影響する範囲を広げる。
 
+## 機械検査を先に
+
+頁の目視より先に機械検査を行う。[output_check.py](scripts/output_check.py) で qpdf、ログ（未定義参照・Overfull・重複定義）、
+mathematical-navigation の構造検査、前版から本文が変わった頁の一覧を一度に得て、所見は該当ソース行と照合する。
+描画は変更頁のうち見出し・表・長い式を含むものから少数（目安 5 頁）を低解像度で行い、多数の頁画像を読み込まない。
+出力確認は毎ビルドではなく数ビルドに一度、変更頁を中心にしてよい。[消費予算](../reading-book/references/token-budget.md)。
+
 ## 保存と返却
 
 固定入力を変更せず、画像・検査報告・一時ファイルは依頼専用の領域へ保存する。

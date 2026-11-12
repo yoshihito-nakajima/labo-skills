@@ -63,6 +63,8 @@ For explicit hard review of a fixed proof or chapter, use
 `local/hard_review/<case>/`; a folder name alone is not an instruction to launch it.
 Reviewers return findings; the producer owns repair and integration.
 
+For long courses run by a coordinator and workers, apply the reading-book
+[token budget](../reading-book/references/token-budget.md).
 Follow the [production handoff contract](references/production-handoff.md) for
 immutable inputs, ownership and returns. Continue independent production while
 waiting. Resolve serious findings before relying on the affected claim. Distinguish

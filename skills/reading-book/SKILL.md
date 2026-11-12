@@ -45,6 +45,9 @@ OCRの式・量化子・添字が疑わしければ原画像で確認する。�
   形式化を必須にしない。[ローカル案内](references/layout.md#workspace-からの案内)から
   正本・PDF・最新進捗へ辿れる状態を保つ。レイアウト表示だけなら変更しない。
 
+長い教材の制作・確認を統括と worker で回すときは[消費予算](references/token-budget.md)に従い、
+packet（[make_packet.py](scripts/make_packet.py)）と原著の文字キャッシュ（[source_text_cache.py](scripts/source_text_cache.py)）を使う。
+
 指示書に固定のモデル名・推論設定を埋め込まず、実際のホスト機能に従う。
 Luna/Haikuの担当境界は[役割](../research-router/references/editing-capability.md)を参照。
 汎用手順の改善だけを[labo-self-improve](../labo-self-improve/SKILL.md)へ返し、実教材をスキルGitへ入れない。

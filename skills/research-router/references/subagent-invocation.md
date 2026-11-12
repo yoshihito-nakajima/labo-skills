@@ -109,3 +109,13 @@ Claim 2 follows from its stated hypotheses. Do not read author notes, prior
 reviews, or the repair discussion. Return any finding with an exact location,
 the supporting source passage, and the reasoning; otherwise report no finding.
 ```
+
+## Bound each worker
+
+Every model call re-reads the whole context, so cost grows with calls times context size. Give each worker one
+bounded unit and stop it there: set a tool-call and context budget in the packet, and have it return partial
+results and the remaining obligations when the budget is reached. Start a fresh worker for the next unit rather
+than continuing one across many units. Pass a prepared packet (exact excerpts, cited statements, source text) and a
+short role card instead of whole files or the full chain of skill references; load page images only when text
+cannot be read. Long-course specifics live in the reading-book
+[token budget](../../reading-book/references/token-budget.md).
