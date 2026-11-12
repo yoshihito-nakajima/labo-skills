@@ -38,6 +38,9 @@ The corpus and its index/registration metadata are local-only; follow
 [source and corpus privacy](../labo-layout/references/reference-privacy.md).
 Keep source selection provenance in the local corpus, outside tracked papers.
 
+Apply the field-general [manuscript conventions](references/manuscript-conventions.md)
+(vocabulary, definitions, statements, proof economy) when drafting or revising.
+
 For substantive drafting/revision and requested terminology checks, apply the
 [terminology and notation audit](../reading-reference/references/terminology-audit.md)
 to affected names, symbols and conventions. Compare actual object types and
