@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import code_langs as CL
 USED = set()  # language keys met while writing TeX listings
 
-KIND = {"author": "author", "official": "official", "lib": "library", "ai": "AI stand-in", "none": "none"}
+KIND = {"author": "author", "official": "official", "lib": "library", "ai": "AI stand-in", "port": "AI port", "none": "none"}
 STATUS = {"same": ("same", "same"), "changed": ("changed", "chg"), "only_left": ("only left", "onl"), "only_right": ("only right", "onl")}
 MATSTATE = {"held": "held", "alt": "alternative only", "req": "requested", "requested": "requested", "paid": "paid", "na": "n/a"}
 HAVE_PANDOC = shutil.which("pandoc") is not None
@@ -165,24 +165,76 @@ def annotated_code(R, st, cm, seen=None):
         body = "\n".join(f'<span class="ln">{n}</span> {esc(L[n - st["first"]])}' for n in range(a, b + 1))
         rng = f"line {a}" if a == b else f"lines {a}-{b}"
         out.append(f'<div class="ablk"><div class="anote"><span class="alab">{rng}</span> {m(text)}</div>{compare_notes(R, cm, f, a, b)}{api_inline(R, st, a, b, seen)}<pre class="cb">{body}</pre></div>')
-    return f'<div class="acode">{"".join(out)}</div><div class="muted small">{esc(f)} {st["first"]}-{st["last"]} (notes are display only; the file is unchanged)</div>'
+    return f'<div class="acode">{"".join(out)}</div><div class="muted small">{esc(f)} {st["first"]}-{st["last"]} · {esc(CL.spec(f)["name"])} (notes are display only; the file is unchanged)</div>'
+
+
+def step_views(st):
+    """A Step's implementations: the Step itself (the original's language, first) and each entry of st['also'] (same Step, another language)."""
+    return [dict(st)] + [{**st, "apis": [], "lines": [], **a} for a in st.get("also", [])]
+
+
+def lang_groups(s):
+    """[(language key or name, display name)] in order of first appearance; the first is the main language."""
+    seen, out = set(), []
+    for st in s["steps"]:
+        for v in step_views(st):
+            sp = CL.spec(v["file"]); k = sp.get("key") or sp["name"]
+            if k not in seen: seen.add(k); out.append((k, sp["name"]))
+    return out
+
+
+def view_in(st, key):
+    for v in step_views(st):
+        sp = CL.spec(v["file"])
+        if (sp.get("key") or sp["name"]) == key: return v
+    return None
+
+
+def lang_header(R, s, key, name, v0, main_key):
+    """Per-language facts shown at the top of a language fold: indexing and storage, traps, kind and verification."""
+    sp = CL.LANGS.get(key); bits = []
+    if sp:
+        ms = CL.LANGS.get(main_key)
+        base = f"first index {sp['index_base']}" + (f" (the {ms['name']} version starts at {ms['index_base']})" if ms and ms["index_base"] != sp["index_base"] else "")
+        order = f"matrices {sp['order']}-major" + (f" (the {ms['name']} version is {ms['order']}-major)" if ms and ms["order"] != sp["order"] else "")
+        bits.append(f"{base}; {order}")
+        if sp["notes"]: bits.append("traps: " + " ".join(sp["notes"]))
+    if v0 and v0.get("kind") == "port":
+        bits.append("checked against the original: " + (esc(v0["verified"]) if v0.get("verified") else "<b>not checked</b>"))
+    return f'<p class="small muted langinfo">{" · ".join(bits)}</p>' if bits else ""
+
+
+def lang_folds(R, s, render, tag):
+    """One fold per language (main language open) around the Steps of this view; a single language gets no fold, as before."""
+    groups = lang_groups(s)
+    if len(groups) == 1:
+        seen = set(); return "".join(render(st, view_in(st, groups[0][0]), True, seen) for st in s["steps"])
+    out = []; main_key = groups[0][0]
+    for n, (key, name) in enumerate(groups):
+        seen = set(); body = ""; kinds = set(); v0 = None
+        for st in s["steps"]:
+            v = view_in(st, key)
+            if v is None: body += f'<div class="step"><h4>{m(st["title"])}</h4><p class="small muted">No {esc(name)} version of this Step.</p></div>'; continue
+            v0 = v0 or v; kinds.add(v.get("kind")); body += render(st, v, key == main_key, seen)
+        lab = ", ".join(KIND.get(k, k) for k in sorted(k for k in kinds if k))
+        out.append(f'<details class="langfold"{" open" if n == 0 else ""} id="lf-{esc(s["id"])}-{tag}-{esc(key)}"><summary><b>{esc(name)}</b>{(" · " + esc(lab)) if lab else ""}</summary><div class="inner">{lang_header(R, s, key, name, v0, main_key)}{body}</div></details>')
+    return "".join(out)
 
 
 def plain_code(R, s):
-    """The whole code with nothing added: one heading per Step, then the verbatim lines. Shown open, before the annotated version."""
-    out = []
-    for st in s["steps"]:
-        body = "\n".join(f'<span class="ln">{st["first"] + i}</span> {esc(l)}' for i, l in enumerate(R.lines(st["file"], st["first"], st["last"])))
-        out.append(f'<div class="step plain"><h4>{esc(st["title"])}</h4><pre class="cb">{body}</pre><div class="muted small">{esc(st["file"])} {st["first"]}-{st["last"]}</div></div>')
-    return "".join(out)
+    """The whole code with nothing added: one heading per Step, then the verbatim lines. Shown open, before the annotated version. One fold per language when there are several."""
+    def one(st, v, main, seen):
+        body = "\n".join(f'<span class="ln">{v["first"] + i}</span> {esc(l)}' for i, l in enumerate(R.lines(v["file"], v["first"], v["last"])))
+        return f'<div class="step plain"><h4>{esc(st["title"])}</h4><pre class="cb">{body}</pre><div class="muted small">{esc(v["file"])} {v["first"]}-{v["last"]} · {esc(CL.spec(v["file"])["name"])}</div></div>'
+    return lang_folds(R, s, one, "plain")
 
 
 def annotated_body(R, s):
-    seen = set(); out = []
-    for st in s["steps"]:
-        for nm in unplaced_apis(R, st): print(f'warning: {s["id"]}: step {st["title"]!r}: the spec of {nm!r} matches no call on the Step\'s lines, so it is not shown', file=sys.stderr)
-        out.append(f'<div class="step"><h4>{m(st["title"])}</h4><p>{m(st["what"])}</p>{annotated_code(R, st, s.get("comparison"), seen)}<p class="mapto"><b>Math:</b> {m(st["math"])}</p></div>')
-    return "".join(out)
+    def one(st, v, main, seen):
+        for nm in unplaced_apis(R, v): print(f'warning: {s["id"]}: step {st["title"]!r}: the spec of {nm!r} matches no call on the Step\'s lines, so it is not shown', file=sys.stderr)
+        note = "" if main else f'<p class="small muted">Comparison counterparts are shown in the main-language version.</p>'
+        return f'<div class="step"><h4>{m(st["title"])}</h4><p>{m(st["what"])}</p>{annotated_code(R, v, s.get("comparison") if main else None, seen)}{note}<p class="mapto"><b>Math:</b> {m(st["math"])}</p></div>'
+    return lang_folds(R, s, one, "ann")
 
 
 def card_html(R, s):
@@ -278,7 +330,7 @@ CSS = """body{font-family:system-ui,sans-serif;max-width:1200px;margin:0 auto;pa
 .panel2 table{width:100%;border-collapse:collapse}.panel2 th{width:8rem;text-align:left;vertical-align:top;font-size:.85rem;color:#055}.by{font-size:.72rem;padding:0 .35rem;border-radius:3px;margin-right:.2rem;background:#eee}.by-author,.by-official{background:#d8f0dc}.by-lib{background:#e3eaf8}.by-ai{background:#fbe3d0}
 .figcard{border:1px solid #cdd;border-radius:6px;margin:.8rem 0;padding:.4rem .8rem}.fromprev{background:#fff8e6;border-left:4px solid #e0a030;padding:.25rem .6rem;margin:.3rem 0}.say{background:#fff8e6;border-left:4px solid #e0a030;padding:.3rem .7rem;margin:.4rem 0}.rd{margin:1.2rem 0;border-top:1px solid #dde}.cb{background:#fbfbfd;border:1px solid #dde;padding:.3rem .5rem;font-size:.78rem;overflow:auto;white-space:pre}.cb .ln{color:#999;margin-right:.5rem}.cb.same{background:#eef8ee}.cb.chg{background:#fff8dc}.cb.onl{background:#eaf1fb}.cb.none{color:#999}.step{border-left:3px solid #9bc;padding:0 .6rem;margin:.6rem 0}.cmprow{margin:.5rem 0;padding:.3rem .5rem;border-radius:4px}
 .cmprow.same{background:#f2faf2}.cmprow.chg{background:#fffbe9}.cmprow.onl{background:#f1f6fc}.cmpgrid,.otgrid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}.otgrid img{max-width:100%;border:1px solid #ccd}.stl{font-size:.75rem;padding:0 .4rem;border-radius:3px;font-weight:700}.stl.same{background:#bfe3c1}.stl.chg{background:#f3dd7c}.stl.onl{background:#b9d0ee}.muted{color:#777}.small{font-size:.85rem}
-.ledcard{border:1px solid #cdd;border-radius:6px;margin:.35rem 0;background:#fff}.ledcard>summary{cursor:pointer;padding:.35rem .6rem;background:#f6f9fa}.ledcard>.inner{padding:.4rem .8rem}.sumgist{font-weight:400;font-size:.88rem;color:#345}.ledctl{margin:.4rem 0}.origscroll{max-height:85vh;overflow-y:auto;border:1px solid #ccd}.origscroll.full{max-height:none}.gist{background:#eef7f3;border-left:3px solid #4a9;padding:.25rem .5rem}.gistlist{background:#f6faf8;border:1px solid #cde;border-radius:6px;padding:.3rem .7rem;margin:.4rem 0}.lead,.bridge,.flow{background:#f7fbf9;border-left:4px solid #6b9;padding:.4rem .8rem;margin:.5rem 0}.bridge,.flow.after{border-left-color:#c96;background:#fcf9f5}.apic{border:1px solid #dde;padding:.3rem .5rem;margin:.3rem 0;font-size:.88rem}.acode{margin:.3rem 0}.ablk{margin:.1rem 0 .5rem}.anote{background:#f3f7fb;border-left:3px solid #6a9fd0;padding:.25rem .6rem;line-height:1.7}.alab{font-size:.75rem;color:#356;font-weight:700;margin-right:.3rem}.cnote{padding:.2rem .6rem;font-size:.88rem;border-left:3px solid #aaa}.cnote.same{background:#eef8ee}.cnote.chg{background:#fff8dc}.cnote.onl{background:#eaf1fb}.ablk .cb{margin:0}.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
+.ledcard{border:1px solid #cdd;border-radius:6px;margin:.35rem 0;background:#fff}.ledcard>summary{cursor:pointer;padding:.35rem .6rem;background:#f6f9fa}.ledcard>.inner{padding:.4rem .8rem}.sumgist{font-weight:400;font-size:.88rem;color:#345}.ledctl{margin:.4rem 0}.origscroll{max-height:85vh;overflow-y:auto;border:1px solid #ccd}.origscroll.full{max-height:none}.gist{background:#eef7f3;border-left:3px solid #4a9;padding:.25rem .5rem}.gistlist{background:#f6faf8;border:1px solid #cde;border-radius:6px;padding:.3rem .7rem;margin:.4rem 0}.lead,.bridge,.flow{background:#f7fbf9;border-left:4px solid #6b9;padding:.4rem .8rem;margin:.5rem 0}.bridge,.flow.after{border-left-color:#c96;background:#fcf9f5}.apic{border:1px solid #dde;padding:.3rem .5rem;margin:.3rem 0;font-size:.88rem}.acode{margin:.3rem 0}.ablk{margin:.1rem 0 .5rem}.anote{background:#f3f7fb;border-left:3px solid #6a9fd0;padding:.25rem .6rem;line-height:1.7}.alab{font-size:.75rem;color:#356;font-weight:700;margin-right:.3rem}.langfold{border:1px solid #cdd;border-radius:6px;margin:.5rem 0}.langfold>summary{cursor:pointer;padding:.35rem .6rem;background:#f1f6f4;border-radius:6px}.langinfo{margin:.2rem 0 .5rem}.cnote{padding:.2rem .6rem;font-size:.88rem;border-left:3px solid #aaa}.cnote.same{background:#eef8ee}.cnote.chg{background:#fff8dc}.cnote.onl{background:#eaf1fb}.ablk .cb{margin:0}.figin{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.figin img{max-width:100%}@media(max-width:900px){.cmpgrid,.otgrid,.figin{grid-template-columns:1fr}}"""
 
 
 def ledger_parts(R, s):
@@ -519,16 +571,26 @@ def lst(R, x, tag, litdir):
 def card_tex(R, s, litdir):
     L = [r"\par\medskip\noindent{\large\bfseries \S%s Code: Steps%s}\par" % (s["id"], " and comparison" if s.get("comparison") else " (no comparison)")]
     if s.get("flow"): L.append(r"\par{\small\textbf{Goal of this code as a whole, and why this tool.} %s%s}\par" % (tx(s["flow"]), (r"\par " + tx(s["why"])) if s.get("why") else ""))
+    groups = lang_groups(s); multi = len(groups) > 1
+    def head(name): return [r"\par\smallskip\noindent\textsc{Language: %s}\par" % tx(name)] if multi else []
     L.append(r"\par\smallskip\noindent\textbf{The code as a whole, with nothing added}\par")
-    for st in s["steps"]:
-        L += [r"\par\smallskip\noindent\textbf{%s}" % tx(st["title"]), lst(R, (st["file"], st["first"], st["last"]), "", litdir)]
+    for key, name in groups:
+        L += head(name)
+        for st in s["steps"]:
+            v = view_in(st, key)
+            if v is None: L.append(r"\par\smallskip\noindent\textbf{%s}\ (no %s version)" % (tx(st["title"]), tx(name))); continue
+            L += [r"\par\smallskip\noindent\textbf{%s}" % tx(st["title"]), lst(R, (v["file"], v["first"], v["last"]), "", litdir)]
     L.append(r"\par\smallskip\noindent\textbf{The same code with a note above every line}\par")
-    for st in s["steps"]:
-        L.append(r"\par\smallskip\noindent\textbf{%s}\quad %s\par" % (tx(st["title"]), tx(st["what"])))
-        for a, b, text in st["lines"]:
-            L += [r"\par\smallskip{\footnotesize\textbf{%s:} %s}" % (("line %d" % a) if a == b else ("lines %d--%d" % (a, b)), tx(text)), lst(R, (st["file"], a, b), "", litdir)]
-        if st.get("apis"): L.append(r"\par{\small\textbf{Functions used}}\begin{itemize}\footnotesize" + "".join(r"\item \texttt{%s}\ \texttt{%s}: returns %s; note: %s%s" % (tx(x["name"]), tx(x.get("sig", "")), tx(x.get("ret", "")), tx(x.get("note", "")), (r" {\scriptsize %s}" % tx(x["quote"])) if x.get("quote") else "") for x in st["apis"]) + r"\end{itemize}")
-        L.append(r"\par{\small\textbf{Math:} %s}\par" % tx(st["math"]))
+    for key, name in groups:
+        L += head(name)
+        for st in s["steps"]:
+            v = view_in(st, key)
+            if v is None: continue
+            L.append(r"\par\smallskip\noindent\textbf{%s}\quad %s\par" % (tx(st["title"]), tx(st["what"])))
+            for a, b, text in v["lines"]:
+                L += [r"\par\smallskip{\footnotesize\textbf{%s:} %s}" % (("line %d" % a) if a == b else ("lines %d--%d" % (a, b)), tx(text)), lst(R, (v["file"], a, b), "", litdir)]
+            if v.get("apis"): L.append(r"\par{\small\textbf{Functions used}}\begin{itemize}\footnotesize" + "".join(r"\item \texttt{%s}\ \texttt{%s}: returns %s; note: %s%s" % (tx(x["name"]), tx(x.get("sig", "")), tx(x.get("ret", "")), tx(x.get("note", "")), (r" {\scriptsize %s}" % tx(x["quote"])) if x.get("quote") else "") for x in v["apis"]) + r"\end{itemize}")
+            L.append(r"\par{\small\textbf{Math:} %s}\par" % tx(st["math"]))
     if s.get("after"): L.append(r"\par{\small\textbf{Meaning of the result.} %s}\par" % tx(s["after"]))
     cm = s.get("comparison")
     if cm:

@@ -142,3 +142,15 @@ Code is shown in the language of the source: a stand-in is written only when no 
 - `.m` is read as MATLAB; for Octave pass `override="octave"` to `code_langs.spec` (no record field reads it yet).
 - Each code block should carry a label with the language and the source kind (author / library / AI stand-in). The generic builder puts the language in the TeX caption; a paper-specific builder adds it to the HTML block.
 - A comparison across two languages cannot align lines: mark the rows as correspondences of meaning, not same/changed.
+
+#### The same Step in several languages
+
+The original's language is the main language. Another language may carry the same Step as an original, a library version or an **AI port** (allowed whether or not an original exists in the main language, but always split into the same Steps, labelled `port`, and with a statement of how it was checked against the original). Record: a Step keeps `file / first / last / lines / apis` for the main version and may add
+
+```json
+"also": [{"file": "code/avg.jl", "first": 1, "last": 3, "kind": "port",
+          "verified": "same neighbour lists as the main version on the toy matrix (run, not proved)",
+          "lines": [[1, 1, "note ..."], [2, 3, "note ..."]], "apis": []}]
+```
+
+Step title, `what` and `math` are shared: the Step is the unit of correspondence across languages. In the page, **inside each of the two views (whole code, annotated code) there is one fold per language**, the main language open and the others closed, several can be open at once. A section with one language gets no fold. Each fold opens with the language's first index and storage order (and where they differ from the main version), its traps, its kind and the verification. Line notes, function cards and their "same as above" pointers are per language. Comparison counterparts are attached to the main version only; other folds say so. A Step lacking a version in a language shows "no version of this Step" there, and the checker warns. In TeX the folds become sequential "Language: X" headings. `check_section_record.py` validates `also` (required keys, kind, line-note coverage per version, a port without `verified`, languages missing for some Steps).

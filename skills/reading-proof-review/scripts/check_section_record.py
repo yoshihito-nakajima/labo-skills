@@ -9,7 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import code_langs as CL
 
-KINDS = {"author", "official", "lib", "ai", "none"}
+KINDS = {"author", "official", "lib", "ai", "port", "none"}
 LOC = re.compile(r"\bpp?\.\s?\d+")
 
 
@@ -27,6 +27,26 @@ def chk_notes(i, st, err, warn):
         seen += list(range(a, b + 1))
     if sorted(seen) != list(range(a0, b0 + 1)): err.append(f"{i}: step {st.get('title')!r}: notes must cover lines {a0}-{b0} exactly once")
     if len(rows) * 2 < (b0 - a0 + 1) // 3: warn.append(f"{i}: step {st.get('title')!r}: very few notes for {b0 - a0 + 1} lines")
+
+
+def chk_also(i, s, err, warn):
+    """`also`: the same Step in another language. Every Step must offer each language used in the section; a port says whether it was checked against the original."""
+    steps = s.get("steps", []); langs = {}
+    for st in steps:
+        for n, a in enumerate(st.get("also", [])):
+            tag = f"{i}: step {st.get('title')!r} also[{n}]"
+            for k in ("file", "first", "last", "kind", "lines"):
+                if k not in a: err.append(f"{tag} lacks {k!r}")
+            if a.get("kind") not in KINDS: err.append(f"{tag}: kind {a.get('kind')!r}")
+            if "file" not in a: continue
+            key = CL.lang_of(a["file"]) or a["file"]; langs.setdefault(key, set()).add(st.get("title"))
+            if CL.lang_of(a["file"]) is None: warn.append(f"{tag}: unknown code language for {a['file']!r}")
+            if CL.lang_of(a["file"]) == CL.lang_of(st.get("file", "")): warn.append(f"{tag}: same language as the main version; a language gets one fold")
+            if a.get("kind") == "port" and not a.get("verified"): warn.append(f"{tag}: AI port without 'verified' (state how it was checked against the original, or say it was not)")
+            if all(k in a for k in ("first", "last", "lines")): chk_notes(i, dict(title=st.get("title"), first=a["first"], last=a["last"], lines=a["lines"]), err, warn)
+    for key, titles in langs.items():
+        miss = [st.get("title") for st in steps if st.get("title") not in titles]
+        if miss: warn.append(f"{i}: language {key!r} is missing for Steps {miss}; each fold shows 'no version of this Step' there")
 
 
 def check(rec):
@@ -113,6 +133,7 @@ def check(rec):
                 for k in ("title", "what", "file", "first", "last", "math"):
                     if k not in st:
                         err.append(f"{i}: step {st.get('title')!r} lacks {k!r}")
+            chk_also(i, s, err, warn)
             for r in (s.get("comparison") or {}).get("rows", []):
                 if r.get("status") not in ("same", "changed", "only_left", "only_right"):
                     err.append(f"{i}: comparison row status {r.get('status')!r}")
