@@ -40,7 +40,9 @@ description: Review indexes, rendering and navigation in a frozen long-course PD
 頁の目視より先に機械検査を行う。[output_check.py](scripts/output_check.py) で qpdf、ログ（未定義参照・Overfull・重複定義）、
 mathematical-navigation の構造検査、前版から本文が変わった頁の一覧を一度に得て、所見は該当ソース行と照合する。
 描画は変更頁のうち見出し・表・長い式を含むものから少数（目安 5 頁）を低解像度で行い、多数の頁画像を読み込まない。
-出力確認は毎ビルドではなく数ビルドに一度、変更頁を中心にしてよい。[消費予算](../reading-book/references/token-budget.md)。
+長い教材では、出力確認は毎ビルドではなく数ビルドに一度、変更頁を中心にしてよい。
+短い文書（一回の文脈で全体を読める）では、機械検査のあと毎版全頁を確認する。
+[規模と確認の水準](../reading-book/references/token-budget.md)。
 
 ## 保存と返却
 

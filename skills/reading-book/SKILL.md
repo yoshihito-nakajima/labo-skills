@@ -45,9 +45,11 @@ OCRの式・量化子・添字が疑わしければ原画像で確認する。�
   形式化を必須にしない。[ローカル案内](references/layout.md#workspace-からの案内)から
   正本・PDF・最新進捗へ辿れる状態を保つ。レイアウト表示だけなら変更しない。
 
-長い教材の制作・確認を統括と worker で回すときは[消費予算](references/token-budget.md)に従い、
-packet（[make_packet.py](scripts/make_packet.py)）と原著の文字キャッシュ（[source_text_cache.py](scripts/source_text_cache.py)）を使う。
+確認の深さと消費の配分は[規模と確認の水準](references/token-budget.md)で決める。一回の文脈で全体を
+読める短い文書は全面的に、読めない長い教材は重点の段階と消費予算で回す。長い教材では
+driver（[course_driver.py](scripts/course_driver.py)）、packet（[make_packet.py](scripts/make_packet.py)）、
+原著の文字キャッシュ（[source_text_cache.py](scripts/source_text_cache.py)）を使う。
 
-指示書に固定のモデル名・推論設定を埋め込まず、実際のホスト機能に従う。
-Luna/Haikuの担当境界は[役割](../research-router/references/editing-capability.md)を参照。
+指示書に固定のモデル名・推論設定を埋め込まず、能力の段階と思考量で書き、実際の対応は教材の設定ファイルに置く。
+制限された担当の境界は[役割](../research-router/references/editing-capability.md)を参照。
 汎用手順の改善だけを[labo-self-improve](../labo-self-improve/SKILL.md)へ返し、実教材をスキルGitへ入れない。
