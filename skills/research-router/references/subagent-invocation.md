@@ -26,7 +26,12 @@ assignment needs:
   that boundary.
 
 Use the host's actual callable interface. A native default or inherited model is
-valid; explicit selection is optional when supported and appropriate. Concrete
+valid when the parent is not restricted; explicit selection is optional then. When a
+restricted model coordinates, every worker that does substantive work (drafting,
+proving, checking a proof, judging findings) must be launched with an explicit
+non-restricted selection from the host configuration; an inherited selection would
+be restricted too. Work a restricted model did itself, or a worker that ended up
+restricted, is evidence collection only: it does not count as a review or a check. Concrete
 runtime choices belong to host configuration or the invocation, not the reusable
 packet. Missing model/effort metadata or a named preset does not block delegation.
 If dispatch is unavailable, use the [consultation fallback](consultation.md) and

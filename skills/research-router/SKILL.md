@@ -33,7 +33,8 @@ context. Apply the selected skill's normal verification rules.
 
 Before delegation, inspect the actual callable interface and relevant local roles.
 Use an available matching adapter or a bounded general-purpose assignment; another
-host's preset is not a requirement. Default/inherited selection is valid. Keep
+host's preset is not a requirement. Default/inherited selection is valid unless the
+coordinator is restricted ([invocation contract](references/subagent-invocation.md)). Keep
 concrete model choices out of portable instructions and task handoffs. Missing
 presets or runtime metadata alone are not reasons to stop. Follow
 [task assignment](references/editing-capability.md) and the
