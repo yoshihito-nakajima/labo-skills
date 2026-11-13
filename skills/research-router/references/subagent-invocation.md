@@ -117,5 +117,7 @@ bounded unit and stop it there: set a tool-call and context budget in the packet
 results and the remaining obligations when the budget is reached. Start a fresh worker for the next unit rather
 than continuing one across many units. Pass a prepared packet (exact excerpts, cited statements, source text) and a
 short role card instead of whole files or the full chain of skill references; load page images only when text
-cannot be read. Long-course specifics live in the reading-book
+cannot be read. While waiting for workers, the coordinator waits once with the longest timeout the host allows
+(or for a completion notice) instead of polling with short sleeps or status checks: each wake re-reads the
+coordinator's whole context. Long-course specifics live in the reading-book
 [token budget](../../reading-book/references/token-budget.md).
