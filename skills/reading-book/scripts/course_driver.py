@@ -244,7 +244,7 @@ class Driver:
                 self.sleep(limit_wait)
                 continue
             cost, mix, exact = self.cycle_usage(started, session_id)
-            mean = None if cost is None else self.record_cost(cost, mix, exact)
+            mean = None if cost is None or self.dry else self.record_cost(cost, mix, exact)  # dry runs do not pace
             ns = re.findall(r"NEXT_SLEEP=(\d+)", out)
             st = re.findall(r"STATUS=(.*)", out)
             want = int(ns[-1]) if ns else int(self.cfg.get("default_sleep_sec", 60))
