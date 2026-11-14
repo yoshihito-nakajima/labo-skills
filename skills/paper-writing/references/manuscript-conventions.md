@@ -20,6 +20,13 @@ paper's notation decisions belong with that paper.
 - Inside TeX, use TeX markup only: `\emph{...}` for emphasis or run-in
   headings, never Markdown such as `**...**` or backticks, even when the text
   is stored in Markdown-based files.
+- In Japanese TeX, type no space between Japanese and Latin letters, digits or
+  inline math; (u)pLaTeX inserts better spacing itself.
+- Avoid parenthetical asides in statements and proofs. A convention a formula
+  needs follows as its own sentence ("where ...", 「ただし…とする」); other
+  remarks become a clause or are dropped.
+- Proof paragraphs may carry working labels (1), (2), ... in drafts. Drop them
+  in the output; if a step is cited, show "Step $k$" and cite it as such.
 
 ## Definitions and statements
 
@@ -34,12 +41,31 @@ paper's notation decisions belong with that paper.
   `\coloneqq` (mathtools) when a symbol is being defined and `=` only for
   equalities that are claimed or computed.
 - Typeset multi-part statements (a), (b), ... as a list.
+- When a definition extends a quantity to new arguments, write its formula
+  again unless it is literally the same (an infimum over a family is not the
+  formula for a single object).
+- A fact needed to justify a new name (that a "principal pyramid" is a pyramid)
+  is a proposition stated right after the definition, not a claim inside it.
+  Never introduce a notion with a promise that it will be justified later.
+- State each property once, in the strongest form needed: "$d_{\mathrm P}$
+  metrizes weak convergence on $\operatorname{Prob}(Z)$", not "is symmetric,
+  is a metric, and metrizes weak convergence".
+- Name a result only when it has an established or genuinely descriptive name
+  (Prokhorov's theorem, rigidity); a title that restates the statement adds
+  nothing.
+- Cite a definition or theorem to its first appearance, with a section or
+  number checked in that source; cite a later text in addition only for the
+  formulation actually used.
 - Put the citation of a quoted result in the theorem name, for example
   `\begin{proposition}[Prokhorov's theorem {\cite[Thm.~5.1]{B}}]`, not in the
   statement text.
 
 ## Proof economy
 
+- Expand a lemma used only once into the proof that uses it, even at some cost
+  in length; keep a separate lemma when it is reused or isolates a genuinely
+  separate idea. A short fact listed as a corollary item but used in one place
+  is proved there.
 - Prove the target statement directly. Do not isolate an intermediate lemma
   whose only use is the next step (for example "some witness gives zero")
   unless it is reused or clarifies a genuinely separate idea.

@@ -161,7 +161,7 @@ class BookMaterialsTests(unittest.TestCase):
             self.assertEqual(self.call("check", "--kind", kind, "--course", "sample").returncode, 0)
             dry = self.call("build", "--kind", kind, "--course", "sample", "--dry-run")
             self.assertEqual(dry.returncode, 0, dry.stderr)
-            self.assertIn(f"cache/{kind}-sample", dry.stdout)
+            self.assertIn(f"cache/{kind}-sample", dry.stdout.replace("\\", "/"))
         original = self.root / "original/fictional.pdf"
         original.write_bytes(b"synthetic original")
         self.assertEqual(self.parent_git("check-ignore", str(original)).returncode, 0)

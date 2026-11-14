@@ -36,6 +36,7 @@
 - `paper-introduction` — 序文の物語を見つけて整える。
 - [paper-structure](skills/paper-structure/SKILL.md) — 論文全体の構成を設計・見直す。
 - [paper-writing](skills/paper-writing/SKILL.md) — 計画・出典・証明の証拠から原稿を書く・直す。
+- [writing-harness](skills/writing-harness/SKILL.md) — 著者が自分で書く論文のハーネス。事実カード、物語と文体の台帳、古くなった文章と読む順序の検査。
 - [paper-referee](skills/paper-referee/SKILL.md) — 番号つき基準で論文・決定的な証明・説明を監査する。
 - [proof-adversarial-review](skills/proof-adversarial-review/SKILL.md) — 固定した証明を、独立した複数の視点で敵対的に査読する。
 - [undergraduate-lecture](skills/undergraduate-lecture/SKILL.md) — 学部生向けの講義ノート（paper-writing の補助）。

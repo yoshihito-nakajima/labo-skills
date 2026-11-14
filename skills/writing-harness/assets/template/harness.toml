@@ -1,0 +1,23 @@
+# Paper harness settings. Paths are relative to this directory.
+language = "en"          # author-facing language: the author's own, or one they name ("ja" renders with upLaTeX)
+title = ""               # used when structure.yaml has no title
+author = ""
+# macros = "macros.tex"  # \newcommand lines inserted into the generated preamble
+# preamble = "preamble.tex"  # a complete preamble (everything before \begin{document}) instead of the generated one
+# bibliography = "references.bib"
+# paper_dir = "paper"    # render output directory; the default file name is cards.tex
+# html_out = "html"      # card viewer output directory
+# mathjax = "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js"
+# assumed_profile = "profile.json"  # exposition-granularity profile; its assumed terms count as known
+# workspace = ".."       # base for workspace-relative paths in the dependency graph (default: the enclosing git root)
+
+# [[html_links]]        # links shown above the viewer title
+# text = "All papers"
+# href = "../"
+
+# [html_index]          # also write ../index.html listing every viewer next to this one
+# title = "Card harness"
+# links = [{ text = "Back", href = "../" }]
+
+# [mathjax_macros]
+# dist = "d_{\\mathrm{dist}}"

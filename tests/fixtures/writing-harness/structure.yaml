@@ -1,0 +1,11 @@
+title: Settled sequences
+external: []
+sections:
+  - title: Definitions
+    items:
+      - def-settled
+  - title: Results
+    items:
+      - x-why-settled
+      - lem-tail
+      - thm-sum-settled

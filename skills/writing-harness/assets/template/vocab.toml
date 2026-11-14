@@ -1,0 +1,13 @@
+# Vocabulary: one [[term]] per notion the story or the paper names.
+# name     : current name (the first spelling the story uses)
+# aliases  : other spellings, including the author's language
+# standard : true for a term the readership already knows (not defined in the paper)
+# decided  : the agreed name or a date; absent while the name is still open
+# card     : the card that defines it
+# question : what is still to be decided
+
+# [[term]]
+# name = "example term"
+# aliases = []
+# card = "def-example"
+# question = "Is the established name in the literature different?"

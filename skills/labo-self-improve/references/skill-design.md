@@ -26,7 +26,9 @@ can remain local; preparing a clear change does not authorize publication.
   grouped together and existing skills changed only where integration requires it.
 - Do not combine the feature with incidental renaming, reformatting, cleanup,
   deletion of existing skills, or changes to host settings. Preserve existing
-  capabilities and discovery behavior. If rules move, update current callers and
+  capabilities and discovery behavior. When generalizing a host tool into a
+  skill, list everything it currently produces and carry each output over,
+  opt-in if necessary; never drop one silently. If rules move, update current callers and
   keep a short forwarding reference when old paths still need to resolve; keep
   one authoritative rule body rather than two editable copies.
 - Keep project-specific content and user-identifying evidence in the project.

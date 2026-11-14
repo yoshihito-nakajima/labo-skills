@@ -12,7 +12,7 @@ claude : reads Claude Code session logs (default ~/.claude/projects); groups tok
          Claude logs have no limit state; use course_driver.py usage for window estimates.
 
 --threads maps names to keywords found in a root thread's first user message, e.g.
-{"writing": ["RESTART_C32"], "review": ["BOOKMARK"]}; unmatched threads are listed by their opening words.
+{"writing": ["WRITING_SESSION"], "review": ["REVIEW_SESSION"]}; unmatched threads are listed by their opening words.
 The report never changes anything and imposes no limit.
 """
 from __future__ import annotations

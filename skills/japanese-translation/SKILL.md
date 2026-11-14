@@ -111,6 +111,11 @@ Likewise, links back to the source do not replace translated statements or
 other in-scope material. Include what the source contains without expanding
 it into a new textbook or completing its missing arguments.
 
+In Japanese text typeset by (u)pLaTeX, write Japanese directly against Latin
+letters, digits and inline math, with no space between them: TeX inserts the
+Japanese–Latin spacing itself, and better than a typed space. Keep this in
+every Japanese TeX source, not only translations.
+
 ## Deliver the reading copy
 
 Present the Japanese text as a continuous document by default, without paired

@@ -59,6 +59,9 @@ user's reaction after each unless the user has asked to run through to the page.
    a Reader page; standalone, `build_review_page.py <spec-dir> --out <page.html> --lang <user's language>`
    and `check_review_page.py`, then look at the rendered page ([page contract](references/page.md)). Math
    needs KaTeX: `fetch_katex.py` downloads a pinned, integrity-checked copy into a cache once the user agrees.
+   When the user will read the page and send remarks back, add the comment layer:
+   `python3 ../writing-harness/scripts/comment_layer.py <page.html> --lang <user's language>` (select text,
+   comment, copy all comments with their headings and TeX quotes to the clipboard).
 
 ## Proof-centred mode: follow the proof itself
 

@@ -116,6 +116,10 @@ review found, how the result differs from prior work and whether it looks like a
 private page, use [reading-proof-review](../reading-proof-review/SKILL.md). Both apply to the user's
 own manuscript or to a published paper, and both are report-only.
 
+When the author writes a paper themselves and wants the agent to keep facts,
+names, reading order and style beside them, use
+[writing-harness](../writing-harness/SKILL.md).
+
 For whole-paper architecture or structural reassessment, use
 [paper-structure](../paper-structure/SKILL.md). It maps section roles and
 proposed moves from the actual question and proof route. For explicit

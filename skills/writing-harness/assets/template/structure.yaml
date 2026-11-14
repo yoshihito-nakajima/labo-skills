@@ -1,0 +1,8 @@
+# Reading order of the paper. Items are card ids; a fact card may carry
+# {card: ID, proof: fact | author | omit | appendix}.
+title: ""
+external: []      # prerequisites the paper cites rather than shows
+sections:
+  - title: Introduction
+    items: []
+appendix: []

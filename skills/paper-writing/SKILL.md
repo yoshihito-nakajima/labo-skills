@@ -20,6 +20,9 @@ proof route to section purposes, inputs and outputs before applying moves.
 For an adopted explicit dependency graph or a requested dependency audit, use
 [knowledge-dependencies](../knowledge-dependencies/SKILL.md) to check affected
 hard prerequisites and downstream impact; ordinary writing requires no graph.
+When the author writes the paper themselves in a card harness, use
+[writing-harness](../writing-harness/SKILL.md); it owns cards, the story and
+style ledgers and the author's editing loop, and this skill's conventions apply.
 For a `*_lec.tex` target, also use
 [undergraduate-lecture](../undergraduate-lecture/SKILL.md) for its reader floor.
 

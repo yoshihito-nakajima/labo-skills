@@ -47,6 +47,7 @@ Every skill in `skills/`, grouped by what it is for. Each entry links to its `SK
 - `paper-introduction` — Discover and shape the story of an introduction.
 - [paper-structure](skills/paper-structure/SKILL.md) — Design or reassess the whole-paper architecture.
 - [paper-writing](skills/paper-writing/SKILL.md) — Draft or revise manuscripts from plans, sources and proof evidence.
+- [writing-harness](skills/writing-harness/SKILL.md) — Author-led paper harness: fact cards, story and style ledgers, staleness and reading-order checks.
 - [paper-referee](skills/paper-referee/SKILL.md) — Audit papers, decisive proofs and exposition against numbered criteria.
 - [proof-adversarial-review](skills/proof-adversarial-review/SKILL.md) — Independent multi-viewpoint adversarial review of a frozen proof.
 - [undergraduate-lecture](skills/undergraduate-lecture/SKILL.md) — Lecture notes for undergraduate readers (an overlay on paper-writing).

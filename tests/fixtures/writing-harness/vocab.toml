@@ -1,0 +1,13 @@
+[[term]]
+name = "settled sequence"
+aliases = ["settled"]
+card = "def-settled"
+decided = "2026-01-01"
+
+[[term]]
+name = "sequence"
+standard = true
+
+[[term]]
+name = "settling index"
+question = "Is there an established name?"

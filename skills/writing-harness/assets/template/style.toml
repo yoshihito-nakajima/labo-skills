@@ -1,0 +1,12 @@
+# Style ledger for this paper only.
+# Route each new rule to its owner:
+#   rules for the whole field      -> paper-writing/references/manuscript-conventions.md (shared skill)
+#   the author's own preferences   -> writing/.rules/ in the workspace
+#   decisions for this paper only  -> here
+# source = "asked" (the author answered) or "inferred" (read from an edit; confirm once).
+
+# [[rule]]
+# name = "symbol-for-the-main-metric"
+# rule = "The main metric is written \\delta, never d."
+# source = "asked"
+# date = 2026-01-01

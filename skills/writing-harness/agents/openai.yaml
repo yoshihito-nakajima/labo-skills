@@ -1,0 +1,4 @@
+interface:
+  display_name: "Writing Harness"
+  short_description: "Keep facts, names, order and style in cards while the author writes the paper"
+  default_prompt: "Use $writing-harness to check the paper harness, report stale prose and forward references, and continue the author's editing loop."
