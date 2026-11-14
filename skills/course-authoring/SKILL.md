@@ -5,7 +5,10 @@ description: Create and maintain local mathematical courses and long notes, eith
 
 # Local courses and mathematical notes
 
-Own the plan, canonical text, correction integration, progress and official output.
+Own canonical text, correction integration, production progress and official output.
+Use [course-planning](../course-planning/SKILL.md) to design or replan the overall
+route, bounded books and their prerequisite connections. The adopted project plan
+is shared; do not maintain a separate competing production plan.
 For book-led work, also use [reading-book](../reading-book/SKILL.md) for editions,
 source coverage and adoption decisions. Topic-led work starts from a question,
 reader and prerequisite route; it does not require a whole-book coverage ledger.
@@ -26,6 +29,21 @@ next meaningful section. Use `local/books/<slug>/` for book-led courses and
 Original books belong in `local/original/`, which must be ignored and never added
 to any Git, including local-only Git. Existing originals may stay in their protected
 input location. Do not move or copy them merely to match a layout.
+
+## Open a planned volume
+
+For multi-book courses, write the entrance from the adopted
+[preliminaries contract](../course-planning/references/preliminaries.md): give the
+question and endpoint, necessary conventions and exact borrowed results, and
+connect to the first unit. Resolve the actual source labels, versions and proof
+state at first use. Keep one proof owner; a restatement cannot close an unfinished
+prerequisite. Count the entrance in the volume size and keep operational metadata
+in production records rather than mathematical prose. Make the book readable
+from those preliminaries and prove its adopted main content internally. State
+self-containedness relative to the project's explicit accepted inputs, for any
+introductory or specialized text. Do not turn a missing promised proof into an
+assumption without a recorded scope change. A collection also needs a common
+input boundary and internal owners for imported results outside that boundary.
 
 ## Produce useful mathematical units
 
@@ -76,3 +94,13 @@ coverage and mathematical review are separate evidence. At a chapter boundary,
 compare adopted scope with actual proofs and necessary solutions, outstanding
 findings, references/indexes and matching output. Report concrete remaining work;
 neither page count nor an empty review queue establishes completion.
+
+## Integrate completed books
+
+Use the adopted [integration plan](../course-planning/references/plan-contract.md#integration-plan)
+to assemble fixed book versions from shared mathematical sources. Compare exact
+statements before merging definitions or theorems, preserve label mappings, and
+repair transitions, notation, indexes and references. Check changed mathematics
+and affected uses, then the cross-book reading route and integrated output.
+Keep valid evidence for unchanged scopes; a final PDF concatenation alone does
+not establish a coherent or self-contained course.

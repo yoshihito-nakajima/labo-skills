@@ -10,6 +10,9 @@ description: Build and resume book-led mathematical courses by mapping source ed
 [course-authoring](../course-authoring/SKILL.md) に従う。全訳を指定された場合はその指定を守る。
 本を起点としない教材・長いノートはcourse-authoringから始める。
 
+範囲・分冊・読書順の設計や立て直しは [course-planning](../course-planning/SKILL.md) を使う。
+原著の版・採否・証明義務は引き続き本スキルで保持し、分冊を理由に削除しない。
+
 ## 原著から一つの教材へ
 
 1. 既存の計画、進捗冒頭、対象本文、公開依頼・返却を読み、最新の合意と実物から再開する。

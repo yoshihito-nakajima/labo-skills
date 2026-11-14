@@ -18,6 +18,11 @@ Preserve existing `AGENTS.md`; an optional scoped instruction can point to the
 entrypoint but cannot grant writes outside the assigned area. Reading an entrypoint
 alone does not start work unless the user's request asks the agent to execute it.
 
+For an adopted multi-book plan, [course-planning](../../course-planning/SKILL.md)
+owns architecture and planning entrypoints within the existing course root.
+It does not take ownership of mathematical text, review results or official builds.
+A planning folder is not a request to start a planner agent or production loop.
+
 For review cases, use this shape as needed:
 
 ```text

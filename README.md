@@ -60,6 +60,7 @@ Every skill in `skills/`, grouped by what it is for. Each entry links to its `SK
 ### Reading and references
 
 - [reading-reference](skills/reading-reference/SKILL.md) — Research positioning, prior work, notation lineage, source-grounded reading notes.
+- [course-planning](skills/course-planning/SKILL.md) — Design bounded books, prerequisite connections, reader routes and final integration.
 - [course-authoring](skills/course-authoring/SKILL.md) — Local book-led or topic-led courses, optional local history, and role-based review handoffs.
 - [reading-book](skills/reading-book/SKILL.md) — Build long courses from books with one canonical body; review depth scales with whether one context can read the whole, and a host-neutral driver runs long courses cycle by cycle.
 - [reading-book-math-review](skills/reading-book-math-review/SKILL.md) — Review mathematical claims in a frozen long-course version.

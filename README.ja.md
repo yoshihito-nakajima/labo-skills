@@ -49,6 +49,7 @@
 ### 読むこと・文献
 
 - [reading-reference](skills/reading-reference/SKILL.md) — 研究の位置づけ、先行研究、記法の系譜、出典に基づく読書ノート。
+- [course-planning](skills/course-planning/SKILL.md) — 本の区切り・前提・読書の流れ・最終統合を設計する。
 - [course-authoring](skills/course-authoring/SKILL.md) — 本由来・テーマ型のローカル教材制作、Git任意、担当別の通常確認／本格査読。
 - [reading-book](skills/reading-book/SKILL.md) — 本から長いコースを、一つの正本で作る。
 - [reading-book-math-review](skills/reading-book-math-review/SKILL.md) — 固定した長いコースの数学的主張を査読する。
