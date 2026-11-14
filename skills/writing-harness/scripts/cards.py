@@ -34,7 +34,7 @@ FACT_KINDS = {'definition', 'theorem', 'proposition', 'lemma', 'corollary'}
 PROP_KINDS = FACT_KINDS - {'definition'}
 STATUS = ['stated', 'drafted', 'gap-free', 'verified', 'lean']
 ROLES = {'motivation', 'proof', 'remark', 'transition', 'intro'}
-PROOF_MODES = {'fact', 'author', 'omit', 'appendix'}
+PROOF_MODES = {'fact', 'author', 'omit', 'appendix', 'later'}
 ID_RE = re.compile(r'^[a-z][a-z0-9-]*$')
 DEFAULT_MATHJAX = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js'
 
@@ -139,6 +139,10 @@ def structure_items(st):
         for it in sec.get('items') or []:
             if isinstance(it, str):
                 yield i, sec['title'], it, {}
+            elif 'subsection' in it:
+                yield i, sec['title'], '', {'_subsection': it['subsection']}
+            elif 'proof_of' in it:
+                yield i, sec['title'], it['proof_of'], {'_proof_only': True}
             else:
                 it = dict(it)
                 cid = it.pop('card')
@@ -207,18 +211,36 @@ def check(h, cards, errors):
     errors += ['cycle: ' + ' -> '.join(cy) for cy in cycles]
     st = load_structure(h)
     if st:
-        pos = {}
+        pos, proof_pos, later = {}, {}, set()
         for n, (si, _, cid, opt) in enumerate(structure_items(st)):
+            if opt.get('_subsection'):
+                continue
             if cid not in cards:
                 errors.append(f'structure: unknown card {cid}')
                 continue
+            if opt.get('_proof_only'):
+                if cid in proof_pos:
+                    errors.append(f'structure: proof of {cid} appears twice')
+                proof_pos[cid] = (n, si)
+                continue
+            if opt.get('proof') == 'later':
+                later.add(cid)
             if cid in pos:
                 errors.append(f'structure: {cid} appears twice')
             pos[cid] = (n, si)
             if opt.get('proof') and opt['proof'] not in PROOF_MODES:
                 errors.append(f'structure: {cid}: proof must be one of {sorted(PROOF_MODES)}')
+        for cid in sorted(later - set(proof_pos)):
+            errors.append(f'structure: {cid} has proof: later but no {{proof_of: {cid}}} item')
+        for cid in sorted(set(proof_pos) - later):
+            errors.append(f'structure: {{proof_of: {cid}}} needs {{card: {cid}, proof: later}}')
+        for cid in sorted(set(proof_pos) & later):
+            if cid in pos and proof_pos[cid][0] < pos[cid][0]:
+                errors.append(f'structure: the proof of {cid} comes before its statement')
         external = set(st.get('external') or [])
         for cid, (n, _) in pos.items():
+            if cid in proof_pos:
+                n = proof_pos[cid][0]
             for r in cards[cid].requires:
                 if r in external:
                     continue
@@ -407,8 +429,17 @@ def render_card(cards, cid, opt, author_proofs):
     title = f'[{{{c.meta["title"]}}}]' if c.meta.get('title') else ''
     out = [f'% card {cid} ({c.meta.get("status")})', f'\\begin{{{c.kind}}}{title}\\label{{{card_label(c)}}}',
            link_refs(_reader().external_steps_display(c.sec('Statement'), opt['_stepped']), cards), f'\\end{{{c.kind}}}']
+    if opt.get('_proof_only'):
+        body = (author_proofs[cid].body.strip() if cid in author_proofs else link_refs(_reader().external_steps_display(
+            _reader().proof_display(cid, c.sec('Proof'), opt['_stepped']), opt['_stepped']), cards))
+        ja = {'theorem': '定理', 'proposition': '命題', 'lemma': '補題', 'corollary': '系'}
+        head = (f'{{{ja.get(c.kind, "")}\\ref{{{card_label(c)}}}の証明}}' if opt.get('_lang') == 'ja'
+                else f'{{Proof of {c.kind.capitalize()}~\\ref{{{card_label(c)}}}}}')
+        return '\n'.join([f'% proof of {cid}', f'\\begin{{proof}}[{head}]', body, '\\end{proof}']) + '\n'
     if c.kind in PROP_KINDS:
         mode = opt.get('proof') or ('author' if cid in author_proofs else 'fact')
+        if mode == 'later':
+            return '\n'.join(out) + '\n'
         if mode == 'author' and cid in author_proofs:
             out += ['\\begin{proof}', author_proofs[cid].body.strip(), '\\end{proof}']
         elif mode in ('fact', 'author') and c.sec('Proof'):
@@ -433,6 +464,12 @@ def cmd_render(h, a):
     stepped = _reader().stepped_ids(cards, _reader().step_references(cards))
     body, cur, appendix = [], object(), False
     for si, stitle, cid, opt in structure_items(st):
+        if opt.get('_subsection') and (a.sections is None or (si is not None and si < a.sections)):
+            if si != cur:
+                body.append(f'\\section{{{stitle}}}\n')
+                cur = si
+            body.append(f'\\subsection{{{opt["_subsection"]}}}\n')
+            continue
         if cid not in cards or (a.sections is not None and (si is None or si >= a.sections)):
             continue
         if si is None and not appendix:
@@ -441,7 +478,7 @@ def cmd_render(h, a):
         elif si is not None and si != cur:
             body.append(f'\\section{{{stitle}}}\n')
             cur = si
-        body.append(render_card(cards, cid, {**opt, '_stepped': stepped}, author_proofs))
+        body.append(render_card(cards, cid, {**opt, '_stepped': stepped, '_lang': h.language}, author_proofs))
     bib = ''
     if h.cfg.get('bibliography'):
         bibfile = h.path('bibliography', '').resolve()
@@ -494,8 +531,8 @@ def cmd_html(h, a):
     errors, warn = check(h, cards, errors0)
     stale = {w.split()[1].rstrip(':') for w in warn if w.startswith('STALE')}
     order, seen, toc = [], set(), []
-    for _, stitle, cid, _ in (structure_items(st) if st else []):
-        if cid in cards and cid not in seen:
+    for _, stitle, cid, opt in (structure_items(st) if st else []):
+        if cid in cards and cid not in seen and not opt.get('_proof_only'):
             if not toc or toc[-1][0] != stitle:
                 toc.append((stitle, []))
             toc[-1][1].append(cid)

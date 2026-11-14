@@ -192,6 +192,34 @@ class WritingHarnessTests(unittest.TestCase):
         shown = reader.proof_display("x", cited, {"x"})
         self.assertIn("\\emph{Step 2.} By Step 1, done.", shown)
         self.assertEqual(reader.external_steps_display("x proof (2)", {"x"}), "x proof Step 2")
+        math = "(1) First.\n(2) By (1), $o(1)+\\lambda^{(2)}$ and \\[f(1)\\]."
+        shown = reader.proof_display("x", math, {"x"})
+        self.assertIn("By Step 1, $o(1)+\\lambda^{(2)}$ and \\[f(1)\\].", shown)
+
+    def test_statement_first_proof_later(self):
+        self.edit("structure.yaml", "      - lem-tail\n      - thm-sum-settled\n",
+                  "      - {card: thm-sum-settled, proof: later}\n      - lem-tail\n      - {proof_of: thm-sum-settled}\n")
+        code, data = self.check_json()
+        self.assertEqual(code, 0, data)
+        self.assertFalse([w for w in data["warnings"] if w.startswith("FORWARD thm-sum-settled")])
+        self.assertEqual(self.run_cards("render").returncode, 0)
+        tex = (self.h / "paper/cards.tex").read_text()
+        self.assertLess(tex.index(r"\begin{theorem}"), tex.index(r"\begin{lemma}"))
+        self.assertLess(tex.index(r"\begin{lemma}"), tex.index("% proof of thm-sum-settled"))
+        self.assertIn(r"\begin{proof}[{Proof of Theorem~\ref{", tex)
+        self.assertEqual(self.run_cards("read").returncode, 0)
+        self.edit("structure.yaml", "      - {proof_of: thm-sum-settled}\n", "")
+        self.assertNotEqual(self.check_json()[0], 0)
+
+    def test_subsection_items(self):
+        self.edit("structure.yaml", "      - lem-tail\n", "      - {subsection: Proofs}\n      - lem-tail\n")
+        code, data = self.check_json()
+        self.assertEqual(code, 0, data)
+        self.assertEqual(self.run_cards("render").returncode, 0)
+        tex = (self.h / "paper/cards.tex").read_text()
+        self.assertLess(tex.index(r"\section{Results}"), tex.index(r"\subsection{Proofs}"))
+        self.assertLess(tex.index(r"\subsection{Proofs}"), tex.index(r"\begin{lemma}"))
+        self.assertEqual(self.run_cards("read").returncode, 0)
 
     def test_comment_layer_injects_once(self):
         sys.path.insert(0, str(CARDS.parent))

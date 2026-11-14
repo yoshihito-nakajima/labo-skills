@@ -105,7 +105,11 @@ sections:
     items:
       - x-why-grade                          # explanation card, printed as is
       - def-graded-set
-      - {card: thm-grading, proof: author}   # fact | author | omit | appendix
+      - {card: thm-grading, proof: author}   # fact | author | omit | appendix | later
+      - {card: thm-main, proof: later}       # statement first ...
+      - lem-step
+      - {proof_of: thm-main}                 # ... its proof after the lemmas it uses
+      - {subsection: Proofs}                 # a numbered subsection heading
 appendix:
   - lem-technical
 ```
@@ -115,6 +119,11 @@ otherwise the reference proof (marked by a TeX comment). `check` reports
 unknown or duplicated ids, prerequisites shown later (`FORWARD`, or appendix),
 prerequisites not shown at all (`MISSING`) and fact cards no section uses
 (`UNUSED`).
+
+`proof: later` prints only the statement; the proof appears at the
+`{proof_of: ID}` item, headed with a reference back to the statement. Use it to
+state the section's main results first. Prerequisites are checked against the
+position of the proof, so the lemmas may sit between the two.
 
 ## Commands
 

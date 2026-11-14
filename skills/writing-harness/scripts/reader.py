@@ -20,8 +20,8 @@ KIND_NAMES = {'definition': 'Definition', 'theorem': 'Theorem', 'proposition': '
 def numbering(cards, items, fact_kinds):
     """Paper numbers: section.counter with one shared counter per section, A.n in the appendix."""
     num, sec_no, count, last = {}, 0, 0, object()
-    for si, _, cid, _ in items:
-        if cid not in cards:
+    for si, _, cid, opt in items:
+        if cid not in cards or opt.get('_proof_only'):
             continue
         if si != last:
             last = si
@@ -68,6 +68,28 @@ STEP_RE = re.compile(r'(?m)^\((\d+)\)[ \t]*')
 EXT_STEP_RE = re.compile(r'([a-z][a-z0-9-]*)([ \t]*(?:の証明|proof)[ \t]*)\((\d+)\)')
 
 
+MATH_RE = re.compile(r'\$\$.*?\$\$|\$[^$]*\$|\\\[.*?\\\]|\\begin\{(equation|align|gather|multline)\*?\}.*?\\end\{\1\*?\}', re.S)
+
+
+def _outside_math(text):
+    """Spans of text outside inline and display math."""
+    pos = 0
+    for m in MATH_RE.finditer(text):
+        yield pos, m.start()
+        pos = m.end()
+    yield pos, len(text)
+
+
+def _sub_outside_math(pattern, repl, text):
+    out, pos = [], 0
+    for m in MATH_RE.finditer(text):
+        out.append(re.sub(pattern, repl, text[pos:m.start()]))
+        out.append(m.group(0))
+        pos = m.end()
+    out.append(re.sub(pattern, repl, text[pos:]))
+    return ''.join(out)
+
+
 def step_references(cards):
     """Step numbers of each card's proof that other cards cite as "<id>の証明 (k)" / "<id> proof (k)"."""
     ext = {}
@@ -85,7 +107,8 @@ def stepped_ids(cards, ext):
             continue
         proof = c.sec('Proof')
         steps = set(STEP_RE.findall(proof))
-        internal = {m.group(1) for m in re.finditer(r'\((\d+)\)', proof) if m.start() and proof[m.start() - 1] != '\n'}
+        internal = {m.group(1) for a, b in _outside_math(proof)
+                    for m in re.finditer(r'\((\d+)\)', proof[a:b]) if a + m.start() and proof[a + m.start() - 1] != '\n'}
         if steps & (internal | ext.get(c.id, set())):
             out.add(c.id)
     return out
@@ -100,7 +123,7 @@ def proof_display(cid, proof, stepped):
         return proof
     if cid not in stepped:
         return STEP_RE.sub('', proof)
-    proof = re.sub(r'(?<=[^\n])\((\d+)\)', lambda m: f'Step {m.group(1)}' if m.group(1) in steps else m.group(0), proof)
+    proof = _sub_outside_math(r'(?<=[^\n])\((\d+)\)', lambda m: f'Step {m.group(1)}' if m.group(1) in steps else m.group(0), proof)
     return STEP_RE.sub(lambda m: f'\\emph{{Step {m.group(1)}.}} ', proof)
 
 
@@ -122,7 +145,18 @@ def build(h, cards, st, items, card_label, prop_kinds, fact_kinds):
     stepped = stepped_ids(cards, step_references(cards))
     conv = lambda s: tex_to_html(external_steps_display(s, stepped), cards, num, label_to_id, card_label)  # noqa: E731
     out, toc, cur, appendix = [], [], object(), False
+    sub = 0
     for si, stitle, cid, opt in items:
+        if opt.get('_subsection'):
+            if si != cur:
+                cur = si
+                out.append(f'<h2 id="sec-{si + 1}">{si + 1}　{_html.escape(stitle)}</h2>')
+                toc.append((f'sec-{si + 1}', f'{si + 1}　{_html.escape(stitle)}'))
+                sub = 0
+            sub += 1
+            out.append(f'<h3 id="sec-{si + 1}-{sub}">{si + 1}.{sub}　{_html.escape(opt["_subsection"])}</h3>')
+            toc.append((f'sec-{si + 1}-{sub}', f'{si + 1}.{sub}　{_html.escape(opt["_subsection"])}'))
+            continue
         if cid not in cards:
             continue
         c = cards[cid]
@@ -132,8 +166,18 @@ def build(h, cards, st, items, card_label, prop_kinds, fact_kinds):
             toc.append(('sec-A', 'A　{{appendix}}'))
         elif si is not None and si != cur:
             cur = si
+            sub = 0
             out.append(f'<h2 id="sec-{si + 1}">{si + 1}　{_html.escape(stitle)}</h2>')
             toc.append((f'sec-{si + 1}', f'{si + 1}　{_html.escape(stitle)}'))
+        if opt.get('_proof_only'):
+            proof = (author_proofs[cid].body if cid in author_proofs
+                     else proof_display(cid, c.sec('Proof'), stepped))
+            name = '{proof}'
+            out.append(f'<article id="{cid}-proof" class="card k-proof" data-card="{cid}"><header>'
+                       f'<span class="kname"><a href="#{cid}">{KIND_NAMES[c.kind]} {num.get(cid, "")}</a></span>'
+                       f'<span class="cid">{cid}</span></header>'
+                       f'<details class="proof" open><summary>{name}</summary>{conv(proof)}</details></article>')
+            continue
         if c.kind == 'explanation':
             if c.meta.get('role') == 'proof':
                 continue
