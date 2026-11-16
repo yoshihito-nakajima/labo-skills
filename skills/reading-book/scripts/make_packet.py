@@ -13,6 +13,9 @@ Writes PACKET_DIR/{unit.tex,deps.tex,source/,manifest.json,request.md,SHA256SUMS
 from __future__ import annotations
 import argparse, datetime, hashlib, json, pathlib, re, sys
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import tex_blocks  # noqa: E402  (shared block rule with review_coverage.py)
+
 STATEMENT_ENVS = 'theorem|lemma|proposition|corollary|definition|remark|example|exercise|assumption|notation|conjecture'
 REF = re.compile(r'\\(?:c?ref|Cref|eqref|pageref|autoref)\*?\{([^}]+)\}')
 LABEL = re.compile(r'\\label\{([^}]+)\}')
@@ -88,8 +91,11 @@ def main(argv=None) -> int:
                 dst = out / 'source' / f'{slug}-p{p:04d}.txt'
                 dst.write_text(page.read_text(encoding='utf-8', errors='ignore'), encoding='utf-8')
                 copied.append(dst.name)
+    unit_blocks = [b for b in tex_blocks.blocks(unit) if b['label']]
     man = {'kind': a.kind, 'created': datetime.datetime.now().isoformat(timespec='seconds'),
            'file': a.file, 'lines': [s, e], 'file_sha256': sha(src_file), 'unit_sha256': sha(out / 'unit.tex'),
+           'target_labels': {b['label']: b['hash'] for b in unit_blocks if b['complete']},
+           'target_partial': sorted(b['label'] for b in unit_blocks if not b['complete']),
            'deps_found': len(deps), 'deps_missing': missing, 'source_pages': copied, 'note': a.note}
     (out / 'manifest.json').write_text(json.dumps(man, ensure_ascii=False, indent=1), encoding='utf-8')
     (out / 'request.md').write_text(
