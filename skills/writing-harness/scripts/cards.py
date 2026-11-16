@@ -140,7 +140,7 @@ def structure_items(st):
             if isinstance(it, str):
                 yield i, sec['title'], it, {}
             elif 'subsection' in it:
-                yield i, sec['title'], '', {'_subsection': it['subsection']}
+                yield i, sec['title'], '', {'_subsection': it['subsection'], '_label': it.get('label')}
             elif 'proof_of' in it:
                 yield i, sec['title'], it['proof_of'], {'_proof_only': True}
             else:
@@ -185,8 +185,14 @@ def check(h, cards, errors):
             if status == 'lean' and not lean:
                 errors.append(f'{c.id}: status lean but no lean declarations')
             for r in c.requires:
-                if r not in cards:
+                if r in cards:
+                    continue
+                ns, _, rid = r.partition(':')
+                ext = (h.cfg.get('external_harnesses') or {}).get(ns) if rid else None
+                if ext is None:
                     errors.append(f'{c.id}: requires unknown card {r}')
+                elif not any((h.root / ext / 'cards').glob(f'*/{rid}.md')):
+                    errors.append(f'{c.id}: requires {r}, but {ext}/cards has no card {rid}')
         else:
             errors.append(f'{c.id}: unknown kind {k}')
     # hard cycles among fact cards
@@ -403,15 +409,18 @@ def card_label(c):
     return c.meta.get('label') or f'card:{c.id}'
 
 
+REF_COMMAND = 'ref'   # set from harness.toml `ref_command` (e.g. "Cref" with cleveref) at render time
+
+
 def link_refs(text, cards):
-    """Turn bare card labels and bare card ids in running text into \\ref."""
+    """Turn bare card labels and bare card ids in running text into \\ref (or the configured command)."""
     labels = {card_label(c) for c in cards.values() if c.is_fact}
     ids = {c.id: c for c in cards.values() if c.is_fact}
     out = re.sub(r'(?<![{A-Za-z0-9_:-])([a-z]+:[a-z0-9-]+)(?![A-Za-z0-9_}-])',
-                 lambda m: f'\\ref{{{m.group(1)}}}' if m.group(1) in labels else m.group(0), text)
+                 lambda m: f'\\{REF_COMMAND}{{{m.group(1)}}}' if m.group(1) in labels else m.group(0), text)
     for cid in sorted(ids, key=len, reverse=True):
         out = re.sub(r'(?<![{A-Za-z0-9_:-])' + re.escape(cid) + r'(?![A-Za-z0-9_}-])',
-                     lambda m, c=ids[cid]: '\\ref{' + card_label(c) + '}', out)
+                     lambda m, c=ids[cid]: '\\' + REF_COMMAND + '{' + card_label(c) + '}', out)
     return out
 
 
@@ -433,7 +442,8 @@ def render_card(cards, cid, opt, author_proofs):
         body = (author_proofs[cid].body.strip() if cid in author_proofs else link_refs(_reader().external_steps_display(
             _reader().proof_display(cid, c.sec('Proof'), opt['_stepped']), opt['_stepped']), cards))
         ja = {'theorem': '定理', 'proposition': '命題', 'lemma': '補題', 'corollary': '系'}
-        head = (f'{{{ja.get(c.kind, "")}\\ref{{{card_label(c)}}}の証明}}' if opt.get('_lang') == 'ja'
+        head = (f'{{\\{REF_COMMAND}{{{card_label(c)}}}の証明}}' if opt.get('_lang') == 'ja' and REF_COMMAND != 'ref'
+                else f'{{{ja.get(c.kind, "")}\\ref{{{card_label(c)}}}の証明}}' if opt.get('_lang') == 'ja'
                 else f'{{Proof of {c.kind.capitalize()}~\\ref{{{card_label(c)}}}}}')
         return '\n'.join([f'% proof of {cid}', f'\\begin{{proof}}[{head}]', body, '\\end{proof}']) + '\n'
     if c.kind in PROP_KINDS:
@@ -451,7 +461,15 @@ def render_card(cards, cid, opt, author_proofs):
     return '\n'.join(out) + '\n'
 
 
+def section_head(st, si, stitle):
+    """\\section with the optional `label:` of that section in structure.yaml."""
+    label = (st.get('sections') or [])[si].get('label')
+    return f'\\section{{{stitle}}}' + (f'\\label{{{label}}}' if label else '') + '\n'
+
+
 def cmd_render(h, a):
+    global REF_COMMAND
+    REF_COMMAND = h.cfg.get('ref_command', 'ref')
     cards, _ = load_cards(h)
     st = load_structure(h)
     if not st:
@@ -466,9 +484,10 @@ def cmd_render(h, a):
     for si, stitle, cid, opt in structure_items(st):
         if opt.get('_subsection') and (a.sections is None or (si is not None and si < a.sections)):
             if si != cur:
-                body.append(f'\\section{{{stitle}}}\n')
+                body.append(section_head(st, si, stitle))
                 cur = si
-            body.append(f'\\subsection{{{opt["_subsection"]}}}\n')
+            sub_label = f'\\label{{{opt["_label"]}}}' if opt.get('_label') else ''
+            body.append(f'\\subsection{{{opt["_subsection"]}}}{sub_label}\n')
             continue
         if cid not in cards or (a.sections is not None and (si is None or si >= a.sections)):
             continue
@@ -476,7 +495,7 @@ def cmd_render(h, a):
             body.append(f'\\appendix\n\\section{{{h.cfg.get("appendix_title", "Deferred proofs")}}}\n')
             appendix = True
         elif si is not None and si != cur:
-            body.append(f'\\section{{{stitle}}}\n')
+            body.append(section_head(st, si, stitle))
             cur = si
         body.append(render_card(cards, cid, {**opt, '_stepped': stepped, '_lang': h.language}, author_proofs))
     bib = ''

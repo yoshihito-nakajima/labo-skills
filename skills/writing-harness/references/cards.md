@@ -74,6 +74,20 @@ omits:  {thm-grading: [3]}         # steps deliberately skipped
 
 `role: proof` with `explains: [X]` makes the card the paper's proof of `X`.
 
+## Facts from another harness
+
+A paper that builds on a companion paper's cards names them as `ns:id` in
+`requires`, with the namespace declared in `harness.toml`:
+
+```
+[external_harnesses]
+ctg = "../../compact-target-gds/harness"   # relative to this harness
+```
+
+`check` accepts `ns:id` when that harness has `cards/*/id.md`, and reports it
+otherwise. Such cards are cited, never rendered here; list them under
+`external:` in `structure.yaml` once the structure exists.
+
 ## Status ladder
 
 `stated` -> `drafted` (a proof exists) -> `gap-free` (every step justified) ->
@@ -102,6 +116,7 @@ title: ...
 external: [cited-result]     # prerequisites the paper cites instead of showing
 sections:
   - title: Graded sets
+    label: sec:graded                        # optional; emitted as \label after \section
     items:
       - x-why-grade                          # explanation card, printed as is
       - def-graded-set
@@ -109,10 +124,14 @@ sections:
       - {card: thm-main, proof: later}       # statement first ...
       - lem-step
       - {proof_of: thm-main}                 # ... its proof after the lemmas it uses
-      - {subsection: Proofs}                 # a numbered subsection heading
+      - {subsection: Proofs, label: sec:proofs}  # a numbered subsection heading (label optional)
 appendix:
   - lem-technical
 ```
+
+Section and subsection labels let explanation cards refer to sections with
+`\ref` or, with `ref_command = "Cref"` in `harness.toml` and cleveref in the
+preamble, with `\Cref`; the same setting renders bare card ids as `\Cref`.
 
 Without an option a proposition shows the author's proof when one exists,
 otherwise the reference proof (marked by a TeX comment). `check` reports

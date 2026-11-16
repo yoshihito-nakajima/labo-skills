@@ -131,6 +131,19 @@ class WritingHarnessTests(unittest.TestCase):
         self.run_cards("render")
         self.assertIn(r"\documentclass[uplatex,dvipdfmx,11pt]{jsarticle}", (self.h / "paper/cards.tex").read_text())
 
+    def test_section_labels_and_cref(self):
+        self.edit("structure.yaml", "  - title: Definitions\n", "  - title: Definitions\n    label: sec:defs\n")
+        self.edit("structure.yaml", "      - x-why-settled\n", "      - {subsection: Why, label: sec:why}\n      - x-why-settled\n")
+        self.run_cards("render")
+        tex = (self.h / "paper/cards.tex").read_text()
+        self.assertIn(r"\section{Definitions}\label{sec:defs}", tex)
+        self.assertIn(r"\subsection{Why}\label{sec:why}", tex)
+        self.assertIn(r"By \ref{def:settled}", tex)
+        p = self.h / "harness.toml"
+        p.write_text(p.read_text() + '\nref_command = "Cref"\n')
+        self.run_cards("render")
+        self.assertIn(r"By \Cref{def:settled}", (self.h / "paper/cards.tex").read_text())
+
     @unittest.skipUnless(shutil.which("pdflatex"), "pdflatex not installed")
     def test_rendered_tex_compiles(self):
         self.run_cards("render")
