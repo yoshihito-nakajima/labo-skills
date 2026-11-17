@@ -152,6 +152,13 @@ class ReviewCoverageTest(unittest.TestCase):
         self.assertTrue(chunks[0]["priority"])
         self.assertFalse(chunks[0]["stable"])
 
+    def test_next_proposes_changed_results_after_unreviewed_ones(self):
+        self.packet("reviewed", "5-17")  # lem:finite, thm:compact
+        (self.root / "chapters/toy.tex").write_text(CHAPTER.replace("By \\cref{lem:finite}.", "By \\cref{lem:finite}; done."))
+        chunks = self.coverage("next", "--stable-minutes", "0")
+        self.assertEqual([(c["state"], c["labels"]) for c in chunks],
+                         [("unreviewed", ["prop:connected"]), ("changed", ["thm:compact"])])
+
 
 if __name__ == "__main__":
     unittest.main()

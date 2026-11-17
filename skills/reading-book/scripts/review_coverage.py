@@ -27,8 +27,9 @@ Results without a proof in the canonical text are reported separately and are no
 "end": 400, "priority": false}], "stable_with": ["volumes/x/preliminaries.tex"]}]}. With groups,
 blocks outside every span are ignored. ``priority`` spans (e.g. new proofs) are proposed first.
 A chunk is stable when its file and every ``stable_with`` file were last written at least
-``--stable-minutes`` ago. ``next`` proposes contiguous unreviewed results within one section,
-ordered by priority, stability and size; its line range can be passed to make_packet.py.
+``--stable-minutes`` ago. ``next`` proposes contiguous results of one state (``unreviewed``, then
+``changed``: a recheck of the changed results only) within one section, ordered by priority,
+stability, state and size; its line range can be passed to make_packet.py.
 """
 from __future__ import annotations
 
@@ -189,6 +190,7 @@ def chunks(rows: list[dict], max_lines: int) -> list[dict]:
     def flush():
         if cur:
             out.append({"group": cur[0]["group"], "file": cur[0]["file"], "section": cur[0]["section"],
+                        "state": cur[0]["state"],
                         "start": cur[0]["start"], "end": cur[-1]["end"], "count": len(cur),
                         "labels": [r["label"] or f"(無ラベル L{r['start']})" for r in cur],
                         "priority": any(r["priority"] for r in cur), "stable": all(r["stable"] for r in cur),
@@ -198,15 +200,16 @@ def chunks(rows: list[dict], max_lines: int) -> list[dict]:
     for r in rows:
         if r["kind"] != "result":
             continue
-        target = r["state"] == "unreviewed" and r["has_proof"]
+        target = r["state"] in ("unreviewed", "changed") and r["has_proof"]
         if cur and (not target or r["group"] != cur[0]["group"] or r["file"] != cur[0]["file"]
-                    or r["priority"] != cur[0]["priority"]
+                    or r["priority"] != cur[0]["priority"] or r["state"] != cur[0]["state"]
                     or r["section"] != cur[0]["section"] or r["end"] - cur[0]["start"] + 1 > max_lines):
             flush()
         if target:
             cur.append(r)
     flush()
-    out.sort(key=lambda c: (not c["priority"], not c["stable"], -c["count"], c["group"], c["file"], c["start"]))
+    out.sort(key=lambda c: (not c["priority"], not c["stable"], c["state"] != "unreviewed", -c["count"],
+                            c["group"], c["file"], c["start"]))
     return out
 
 
@@ -259,10 +262,11 @@ def main(argv=None) -> int:
         if a.json:
             print(json.dumps(cs, ensure_ascii=False))
         else:
-            print("-- 次の候補（未確認の証明つき結果の連続。優先span→安定→件数の順）")
+            print("-- 次の候補（未確認または確認後に変更された証明つき結果の連続。優先span→安定→未確認→件数の順）")
             for i, c in enumerate(cs, 1):
                 shown = ", ".join(c["labels"][:4]) + (f" ほか{c['count'] - 4}件" if c["count"] > 4 else "")
-                print(f"{i}. {c['group']} {c['file']} L{c['start']}-{c['end']}  節 {c['section']}  {c['count']}件 [{shown}]"
+                kind = "未確認" if c["state"] == "unreviewed" else "確認後に変更（変わった結果だけ再確認）"
+                print(f"{i}. {c['group']} {c['file']} L{c['start']}-{c['end']}  節 {c['section']}  {kind} {c['count']}件 [{shown}]"
                       f"  {'安定' if c['stable'] else '未安定'}（最終書込 {c['age_min']:.0f}分前）{'  優先span' if c['priority'] else ''}")
             if not cs:
                 print("（候補なし）")
