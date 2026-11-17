@@ -80,3 +80,4 @@
 
 消費の原因を調べるときは、ホストのセッション記録から（[usage_report.py](../scripts/usage_report.py)：時間枠の使用率・減る速さ・スレッド別とモデル別の内訳）役割別・段階別に呼出回数・文脈の大きさ・出力量を集計し、
 画像の読込回数、同じ対象への重複した確認、待機の呼出（sleep・wait の回数と待ち時間）、worker ごとの呼出回数と最大の文脈を数える。推測で規則を足さない。
+無人で長く回すときの5時間窓の見積もり・段階・上限後の片付けは [capacity-window.md](capacity-window.md)（[usage_window.py](../scripts/usage_window.py)）。
