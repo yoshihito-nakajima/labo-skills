@@ -29,7 +29,7 @@ blocks outside every span are ignored. ``priority`` spans (e.g. new proofs) are 
 A chunk is stable when its file and every ``stable_with`` file were last written at least
 ``--stable-minutes`` ago. ``next`` proposes contiguous results of one state (``unreviewed``, then
 ``changed``: a recheck of the changed results only) within one section, ordered by priority,
-stability, state and size; its line range can be passed to make_packet.py.
+stability, state and size (``--group-order``: earlier groups first); its line range can be passed to make_packet.py.
 """
 from __future__ import annotations
 
@@ -50,7 +50,7 @@ def case_kind(name: str, man: dict) -> str:
     probe = k or name.lower()
     if "math" in probe or "verify" in probe:
         return "math"
-    if any(w in probe for w in ("output", "source", "correspondence", "navigation", "index")):
+    if any(w in probe for w in ("output", "source", "correspondence", "navigation", "index", "scope")):
         return "other"
     return "math"
 
@@ -183,7 +183,7 @@ def collect(a) -> tuple[list[dict], dict, list[dict]]:
     return rows, stats, groups
 
 
-def chunks(rows: list[dict], max_lines: int) -> list[dict]:
+def chunks(rows: list[dict], max_lines: int, order: list[str] | None = None) -> list[dict]:
     out: list[dict] = []
     cur: list[dict] = []
 
@@ -208,8 +208,9 @@ def chunks(rows: list[dict], max_lines: int) -> list[dict]:
         if target:
             cur.append(r)
     flush()
-    out.sort(key=lambda c: (not c["priority"], not c["stable"], c["state"] != "unreviewed", -c["count"],
-                            c["group"], c["file"], c["start"]))
+    rank = {g: i for i, g in enumerate(order or [])}
+    out.sort(key=lambda c: (rank.get(c["group"], 0), not c["priority"], not c["stable"], c["state"] != "unreviewed",
+                            -c["count"], c["group"], c["file"], c["start"]))
     return out
 
 
@@ -245,6 +246,8 @@ def main(argv=None) -> int:
     ap.add_argument("-n", type=int, default=3)
     ap.add_argument("--group")
     ap.add_argument("--state", choices=list(RANK))
+    ap.add_argument("--group-order", action="store_true",
+                    help="propose earlier groups first (the order of --groups), e.g. to finish volumes front to back")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
     a.exclude_names = []
@@ -258,7 +261,7 @@ def main(argv=None) -> int:
         else:
             print(summary(rows, stats, groups))
     elif a.command == "next":
-        cs = chunks(rows, a.max_lines)[: a.n]
+        cs = chunks(rows, a.max_lines, [g["name"] for g in groups] if a.group_order else None)[: a.n]
         if a.json:
             print(json.dumps(cs, ensure_ascii=False))
         else:

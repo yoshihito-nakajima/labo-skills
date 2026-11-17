@@ -151,6 +151,11 @@ class ReviewCoverageTest(unittest.TestCase):
         self.assertEqual([c["labels"] for c in chunks], [["thm:compact"], ["prop:connected"]])
         self.assertTrue(chunks[0]["priority"])
         self.assertFalse(chunks[0]["stable"])
+        groups.write_text(json.dumps({"groups": [
+            {"name": "v1", "spans": [{"file": "chapters/toy.tex", "start": 18, "end": 99, "priority": False}]},
+            {"name": "v2", "spans": [{"file": "chapters/toy.tex", "start": 1, "end": 17, "priority": True}]}]}))
+        chunks = self.coverage("next", "--groups", str(groups), "--stable-minutes", "0", "--group-order")
+        self.assertEqual([c["group"] for c in chunks], ["v1", "v2"])  # earlier volume first, even before priority
 
     def test_next_proposes_changed_results_after_unreviewed_ones(self):
         self.packet("reviewed", "5-17")  # lem:finite, thm:compact
