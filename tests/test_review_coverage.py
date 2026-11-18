@@ -164,6 +164,27 @@ class ReviewCoverageTest(unittest.TestCase):
         self.assertEqual([(c["state"], c["labels"]) for c in chunks],
                          [("unreviewed", ["prop:connected"]), ("changed", ["thm:compact"])])
 
+    def test_recorded_minor_repair_counts_until_the_next_change(self):
+        self.packet("reviewed", "5-17")  # lem:finite, thm:compact
+        repaired = CHAPTER.replace("By \\cref{lem:finite}.", "By \\cref{lem:finite}; done.")
+        (self.root / "chapters/toy.tex").write_text(repaired)
+        self.assertEqual(self.states()["thm:compact"], "changed")
+        args = ["--root", str(self.root), "--reviews", str(self.reviews)]
+        r = run(str(COVERAGE), "record-repair", "--case", "reviewed", *args)  # severity is required
+        self.assertNotEqual(r.returncode, 0)
+        r = run(str(COVERAGE), "record-repair", "--case", "reviewed", "--severity", "minor", *args)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("thm:compact", r.stdout)
+        rows = {x["label"]: x for x in self.coverage("list")}
+        self.assertEqual(rows["thm:compact"]["state"], "current")
+        self.assertTrue(rows["thm:compact"]["accepted_repair"])
+        self.assertFalse(rows["lem:finite"]["accepted_repair"])  # unchanged: the review itself is current
+        (self.root / "chapters/toy.tex").write_text(repaired.replace("; done.", "; done again."))
+        self.assertEqual(self.states()["thm:compact"], "changed")
+        self.packet("unreturned", "18-24", ready=False)
+        r = run(str(COVERAGE), "record-repair", "--case", "unreturned", "--severity", "minor", *args)
+        self.assertNotEqual(r.returncode, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
