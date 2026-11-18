@@ -53,6 +53,8 @@ OCRの式・量化子・添字が疑わしければ原画像で確認する。�
 driver（[course_driver.py](scripts/course_driver.py)）、packet（[make_packet.py](scripts/make_packet.py)）、
 原著の文字キャッシュ（[source_text_cache.py](scripts/source_text_cache.py)）、
 独立確認の被覆（[review_coverage.py](scripts/review_coverage.py)）を使う。
+本文側とレビュー側の親スレッドを定期再開で無人で回すときの指示書・貼付文・状況表示・訂正は
+[long-run-rounds](../long-run-rounds/SKILL.md) に従う。
 
 指示書に固定のモデル名・推論設定を埋め込まず、能力の段階と思考量で書き、実際の対応は教材の設定ファイルに置く。
 制限された担当の境界は[役割](../research-router/references/editing-capability.md)を参照。

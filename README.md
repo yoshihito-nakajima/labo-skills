@@ -66,6 +66,7 @@ Every skill in `skills/`, grouped by what it is for. Each entry links to its `SK
 - [reading-book](skills/reading-book/SKILL.md) — Build long courses from books with one canonical body; review depth scales with whether one context can read the whole, and a host-neutral driver runs long courses cycle by cycle.
 - [reading-book-math-review](skills/reading-book-math-review/SKILL.md) — Review mathematical claims in a frozen long-course version.
 - [reading-book-output-review](skills/reading-book-output-review/SKILL.md) — Review indexes, rendering and navigation in a frozen course PDF.
+- [long-run-rounds](skills/long-run-rounds/SKILL.md) — Run producer and reviewer threads unattended on a schedule: instruction documents, restart prompts, status fingerprints, capacity stages and corrections.
 - [reading-proof-review](skills/reading-proof-review/SKILL.md) — Read a paper or proof and make a private explanation page: proof review, proof book, method-and-code companion or prose page, on the site or as one HTML.
 - [japanese-translation](skills/japanese-translation/SKILL.md) — Continuous Japanese reading translation of a manuscript.
 
