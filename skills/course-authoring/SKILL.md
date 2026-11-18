@@ -44,8 +44,31 @@ self-containedness relative to the project's explicit accepted inputs, for any
 introductory or specialized text. Do not turn a missing promised proof into an
 assumption without a recorded scope change. A collection also needs a common
 input boundary and internal owners for imported results outside that boundary.
+Check definition vocabulary as well as proof dependencies under the
+[definition closure rule](../course-planning/references/preliminaries.md#close-definitions-as-well-as-proofs).
+Apply it to the entrance itself and each writing unit before calling them
+self-checked; place necessary definitions and conventions before their first use.
+Use the [structure-definition contract](../course-planning/references/preliminaries.md#make-mathematical-structures-explicit)
+for every mathematical structure, including recalled prerequisites: specify carriers,
+data and their types, quantified axioms, conventions, and extra assumptions.
+Keep defining the structure separate from proving a construction supplies it;
+check induced data and preservation conditions where used. Preserve local
+index/reference routes for each defined concept when sharing or extracting text.
 
 ## Produce useful mathematical units
+
+When material already exists, first map it into the adopted route, keeping one
+canonical source, stable labels and valid review evidence. Mark gaps and missing
+bridges without turning placement into a full audit or counting it as completion.
+Then work forward through the agreed production pass, choosing its earliest unit
+not yet completed through author self-check. Reuse established work instead of
+restarting it. Keep explicitly deferred additions in their named later pass.
+
+Keep the pass scope, author-checked position and next concrete edit in the existing
+progress summary; track review closure separately. A pending review does not move
+the writing position backward. Revisit earlier text when a defect blocks the current
+argument, a changed assumption affects it, or its planned repair stage is reached.
+Batch other corrections at a coherent boundary and continue independent writing.
 
 Apply [mathematical-exposition](../mathematical-exposition/SKILL.md) for explanation
 and proof detail, and [undergraduate-lecture](../undergraduate-lecture/SKILL.md)
@@ -60,6 +83,13 @@ proof locations, source correspondence when relevant, unresolved obligations and
 next work in the existing `progress.md`; keep historical detail out of the current
 summary. Preserve valid earlier evidence and recheck changed claims and affected uses.
 Independent checks unavailable in the host remain explicitly unperformed.
+
+Prepare the section's source correspondence and necessary exercise answers as
+part of this pass; do not substitute repeated global inventories for writing the
+next incomplete section. Group related sections into review submissions under
+[the submission rule](references/production-handoff.md#まとまった範囲で提出する).
+Individual writing tasks can be smaller than a submission. Do not create a review
+request or a complete output cycle for each exercise or theorem by default.
 
 Use [mathematical-navigation](../mathematical-navigation/SKILL.md) from the first
 draft. Long courses use section-scoped shared theorem numbering `1.18.5` and
@@ -94,6 +124,8 @@ coverage and mathematical review are separate evidence. At a chapter boundary,
 compare adopted scope with actual proofs and necessary solutions, outstanding
 findings, references/indexes and matching output. Report concrete remaining work;
 neither page count nor an empty review queue establishes completion.
+Report newly written, substantively completed and only checked existing material
+separately, so a large reviewed range is not mistaken for new textbook content.
 
 ## Integrate completed books
 

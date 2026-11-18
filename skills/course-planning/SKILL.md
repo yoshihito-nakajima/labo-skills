@@ -56,6 +56,14 @@ primary sources and integrate overlap rather than continually inventing a new
 whole-course architecture. Assign essential early inputs to a named owner before
 using them; do not conceal a cycle behind a preliminary restatement.
 
+For existing material, plan initial placement followed by a forward authoring pass.
+Name that pass's adopted scope, starting unit, exit and explicitly deferred work;
+keep the author-checked position distinct from pending independent review.
+Plan review submissions at coherent section-group or chapter boundaries using
+[the submission rule](../course-authoring/references/production-handoff.md#まとまった範囲で提出する),
+rather than requiring an exercise-by-exercise review schedule. Integration is a
+later stage unless the user requests an intermediate collected output.
+
 ## Connect books without duplicating mathematics
 
 Use [volume entrances and borrowed results](references/preliminaries.md) to plan
