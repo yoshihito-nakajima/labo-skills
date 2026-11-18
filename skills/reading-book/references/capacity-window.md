@@ -35,5 +35,6 @@ Related tools: [course_driver.py](../scripts/course_driver.py) `usage` estimates
 ## Spend less per result
 
 - **Rechecks converge.** Fix minor findings without publishing a new recheck. Publish a new recheck only after a major or medium finding, or once before closing a unit. Close the unit when the latest recheck has no major or medium finding and every minor one is fixed. Successive rechecks that each return only minor findings are the main waste.
+- **Minor repairs keep their review.** The same holds for math reviews of single results. Coverage by block hash turns every repaired result back into "changed after review", so each minor fix would otherwise send the result to review again, often with new minor findings. After repairing a returned case whose findings were all minor, the author runs `review_coverage.py record-repair --case NAME --severity minor`. That writes `AUTHOR_REPAIR.json` into the case, and coverage then counts the repaired hashes as current, reported as accepted minor repairs. Repairs of major or medium findings are not recorded; they get a recheck. A later change of the block makes it "changed" again.
 - **Work ahead only in 余裕.** Work ahead of the current target (the next volume's audit) is for spare capacity only.
 - **Large reviews.** Split large reviews by the reviewer's own budget rather than repeating whole-unit reviews.
