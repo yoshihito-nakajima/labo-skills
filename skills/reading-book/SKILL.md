@@ -20,6 +20,9 @@ description: Build and resume book-led mathematical courses by mapping source ed
 2. [本の処理手順](references/book-workflow.md)で、資料の巻・版・印刷頁とPDF頁、採用範囲、
    必要な演習、本文位置と直接前提を対応付ける。主資料と補助資料の役割を分ける。
    全章配置・資料取得は証明完成や全演習採用を意味しない。
+   既存本文の配置後は合意した制作順の最初の未完単位から進み、その単位の原著読解・
+   本文補完・必要解答と一緒に対応を確定する。原著全体の対応表を先に完成させることを
+   執筆の条件にせず、出典整理だけを繰り返して次の本文制作を先送りしない。
 3. 原著の流れを生かして問い・定義・例・定理・証明・応用を組み立てる。同じ内容の
    既存本文は再利用し、原著ごとの独立した第二本文や証明部品庫を増やさない。
    複数資料の定義域・仮定・量化子・正規化・依存を照合する。
@@ -29,6 +32,10 @@ description: Build and resume book-led mathematical courses by mapping source ed
 5. 自己点検と選択的独立確認を分け、章の区切りでは
    [採用範囲との完了照合](references/book-workflow.md#章講義の完了判定)を行う。
    返却待ちでも依存しない制作を続ける。本格的な敵対的査読は別の固定範囲への依頼とする。
+
+作者は各証明・必要解答を点検するが、通常の独立レビュー依頼は
+[数十頁程度のまとまり](../course-authoring/references/production-handoff.md#まとまった範囲で提出する)で渡す。
+一題ずつの依頼作成を既定にせず、後回し範囲と原著の未照合項目はその所有先に残す。
 
 原著の位置と引用は [reading-referenceの出典規則](../reading-reference/references/source-rules.md)。
 OCRの式・量化子・添字が疑わしければ原画像で確認する。原著、原画像、抜粋入り固定入力は
