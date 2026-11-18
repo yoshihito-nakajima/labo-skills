@@ -24,7 +24,9 @@ description: Set up, restart, monitor and correct unattended long runs in which 
 1. **方針を決める。** ユーザーに次を確かめ、指示書の §1 に書く：自走か（スレッドはユーザーに聞かず規則で決める）、
    採るか迷ったときの既定（採る／採らない）、冊の順序（前から閉じる等）、自己完結の要否、容量の扱い。
    指示役が推奨を出してよいが、決めるのはユーザー。
-2. **状況表示を用意する。** 親が見るのはこの出力だけ。必要な欄と FINGERPRINT の作り方は
+2. **状況表示を用意する。** 親が見るのはこの出力だけ。[round_status.py](scripts/round_status.py) に
+   プロジェクトの設定 JSON（冊・queue・記録・case の置き場所など。鍵は script の先頭）を渡して使い、
+   プロジェクト側には `--config` を固定した短い包みだけを置く。必要な欄と FINGERPRINT の作り方は
    [状況表示の契約](references/status-contract.md)。容量は reading-book の
    [usage_window.py](../reading-book/scripts/usage_window.py)、レビュー被覆は
    [review_coverage.py](../reading-book/scripts/review_coverage.py) を呼ぶ。
