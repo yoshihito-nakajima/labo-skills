@@ -55,6 +55,7 @@
 - [reading-book](skills/reading-book/SKILL.md) — 本から長いコースを、一つの正本で作る。
 - [reading-book-math-review](skills/reading-book-math-review/SKILL.md) — 固定した長いコースの数学的主張を査読する。
 - [reading-book-output-review](skills/reading-book-output-review/SKILL.md) — 固定したコース PDF の索引・描画・ナビゲーションを査読する。
+- [long-run-rounds](skills/long-run-rounds/SKILL.md) — 本文側とレビュー側のスレッドを定期再開で無人で回す：指示書、貼付文、状況表示の FINGERPRINT、容量の段階、訂正のしかた。
 - [reading-proof-review](skills/reading-proof-review/SKILL.md) — 論文や証明を読んで作る私的な解説ページ：証明レビュー、証明の読み物、手法とコードの companion、散文の解説。サイトの Reader か 1 枚の HTML。
 - [japanese-translation](skills/japanese-translation/SKILL.md) — 原稿を通して読める日本語訳にする。
 
