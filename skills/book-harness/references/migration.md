@@ -33,6 +33,12 @@ existing scope-audit table become C2 rows with a `sources` list and the audit st
 a remark or a line range need cards for that text before they can be `OK`. After the import run
 `book deps --write` to get dependency candidates, and treat the cards as `legacy` until restructured.
 
+Limits of the importer: a proof that is separated from its statement by a paragraph of prose is not attached to the
+statement's card (the proof is then among the uncovered lines `verify_import.py` reports); attach it by hand with
+`book new A3 ... --proves`. Import **every** volume of a course into the pool before searching it: a result that lives in
+another volume (a construction owned there) is invisible to the pool search until its volume is in the pool, and a new
+card for it would duplicate it.
+
 Existing identifiers are kept as `aliases`; a numbering table is not rewritten. Source texts,
 OCR and page images are never copied into cards or into this skill. Private books and their
 incidents stay in the workspace; examples in skills are fictional.

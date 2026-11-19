@@ -15,7 +15,8 @@ time, in the order the route or plan gives. Intake is not finished at the last c
    order, boundary cases (empty sets, empty index, degenerate objects), what the source leaves to the reader, and
    anything wrong.
 3. **Decide the cards** ([granularity](#granularity)).
-4. **Search the pool before writing** (`book search`, at least three queries: the notion's name, its symbols, key
+4. **Search the pool before writing** (the whole pool: every volume of the course must already be imported, or a result
+   owned by another volume is missed) (`book search`, at least three queries: the notion's name, its symbols, key
    words, in each language the pool uses and under older names; `book show` the nearest candidates). Compare
    hypotheses, quantifiers, normalization and the proof route, then choose:
    - **same** statement → reuse: add the new locator to the card's `sources`, write the C2 row with relation `same`;
