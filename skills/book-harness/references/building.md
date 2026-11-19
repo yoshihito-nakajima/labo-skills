@@ -18,6 +18,10 @@ and is not tracked, and nobody edits it.
   courses, [labo-build](../../labo-build/SKILL.md) for papers); the tool does not compile. Structural and visual PDF
   checks, index coverage and the output review are separate evidence from `book check`.
 - **Reading.** `book html` (see [views](views.md)) is the reading and slicing aid; it is not the book.
+- **Index macros.** In a card, `index` (terms) and `formula_index` (formulas) entries are plain strings, or mappings
+  `{term: ..., reading: ...}`. With `--term-macro termat --formula-macro formulaat` (the project's own macros) a
+  mapping is written as `\termat{<card label>}{reading}{term}`; without the options it is a plain `\index{term}`.
+  Imported (legacy) cards already carry the project's macros in their text.
 - **Numbering and index.** Numbers come from the route's section order and LaTeX counters, so reordering a route
   renumbers; use labels, ids and `[[...]]`, never typed numbers. Register index entries in a card's `index` where the
   notion is introduced.

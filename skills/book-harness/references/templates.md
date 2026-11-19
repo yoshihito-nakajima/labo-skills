@@ -17,7 +17,7 @@ area: sets                 # pool directory (fact cards)
 requires: []               # hard prerequisites (card ids)
 references: []             # mentions that impose no order; never also in requires
 symbols: []                # notation introduced here
-index: []                  # index entries registered where the notion is introduced
+index: []                  # index entries where the notion is introduced: "term" or {term, reading}; also formula_index
 sources: [{src: <C1 id>, loc: "Prop 2.7(iii), print pp.12-13"}]   # locators only
 relations: [{to: <card>, type: variant, diff: "empty index set allowed"}]
 status: drafted            # stated | drafted | self-checked | independent | lean

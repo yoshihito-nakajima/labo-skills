@@ -84,6 +84,8 @@ def register(areas, add_workspace) -> None:
             sub.add_argument("--language", default="ja", choices=sorted(bk.HEADS))
             sub.add_argument("--preamble", help="file with the whole preamble (replaces the built-in one)")
             sub.add_argument("--title")
+            sub.add_argument("--term-macro", help="project macro for index terms, e.g. termat -> \\termat{label}{reading}{term}")
+            sub.add_argument("--formula-macro", help="project macro for formula index entries, e.g. formulaat")
         if name == "html":
             sub.add_argument("--slice", dest="slice_", help="closure:<id> | impact:<id> | section:<n> | area:<name> "
                                                               "| kinds:A1,A2")
@@ -235,7 +237,8 @@ def run(args) -> int:
     if act == "render":
         pre = _path(args, args.preamble).read_text(encoding="utf-8") if args.preamble else None
         text = bk.render_tex(book, args.route, args.level, standalone=args.standalone, language=args.language,
-                             preamble=pre, title=args.title)
+                             preamble=pre, title=args.title,
+                             index_macros={k: v for k, v in (("term", args.term_macro), ("formula", args.formula_macro)) if v})
         if args.out:
             target = _path(args, args.out)
             target.parent.mkdir(parents=True, exist_ok=True)

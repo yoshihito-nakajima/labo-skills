@@ -901,5 +901,27 @@ class PlaceTests(unittest.TestCase):
             self.assertEqual(run_cli(ws, "place", "intro-a", "nope").returncode, 2)
 
 
+class IndexMacroTests(unittest.TestCase):
+    def test_structured_index_entries_use_the_projects_macros(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ws = Path(tmp).resolve()
+            make(ws / "book")
+            put(ws / "book", "pool/arith/def-even.md",
+                fact("def-even", "A1", variant="predicate", requires=["conv-integers"], label="def:even",
+                     index=[{"term": "偶数 (even)", "reading": "ぐうすう"}, "plain term"],
+                     formula_index=[{"term": "$2k$", "reading": "2k"}]),
+                definition="$n$ is even if $n=2k$.")
+            book = bk.Book(ws / "book")
+            plain = bk.render_tex(book, "intro-a", "L0")
+            self.assertIn("\\index{偶数 (even)}", plain)
+            tex = bk.render_tex(book, "intro-a", "L0", index_macros={"term": "termat", "formula": "formulaat"})
+            self.assertIn("\\termat{def:even}{ぐうすう}{偶数 (even)}", tex)
+            self.assertIn("\\formulaat{def:even}{2k}{$2k$}", tex)
+            self.assertIn("\\index{plain term}", tex)
+            res = run_cli(ws, "render", "--route", "intro-a", "--level", "L0", "--term-macro", "termat")
+            self.assertEqual(res.returncode, 0, res.stderr)
+            self.assertIn("\\termat{def:even}", res.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

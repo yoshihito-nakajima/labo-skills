@@ -245,7 +245,8 @@ def dump_card(meta: dict, body: str) -> str:
 
 
 LIST_OF_TEXT = ("requires", "requires_candidates", "references", "between", "forward", "answered_by", "conventions",
-                "well_defined", "aliases", "symbols", "index", "not_requires")
+                "well_defined", "aliases", "symbols", "not_requires")
+LIST_OF_MIXED = ("index", "formula_index")  # entries are text or {term, reading}
 LIST_OF_MAPS = ("maps_to", "borrows", "relations", "sources", "reviews")
 MAPS = ("anchors", "searched")
 TEXT = ("proves", "illustrates", "target", "variant", "status", "title", "area", "label")
@@ -259,6 +260,10 @@ def sanitize(meta: dict) -> list:
         if key in meta and not (isinstance(meta[key], list) and all(isinstance(x, str) for x in meta[key])):
             wrong.append(f"{key} must be a list of ids")
             meta[key] = [x for x in meta[key] if isinstance(x, str)] if isinstance(meta[key], list) else []
+    for key in LIST_OF_MIXED:
+        if key in meta and not (isinstance(meta[key], list) and all(isinstance(x, (str, dict)) for x in meta[key])):
+            wrong.append(f"{key} must be a list of terms or {{term, reading}} mappings")
+            meta[key] = []
     for key in LIST_OF_MAPS:
         if key in meta and not (isinstance(meta[key], list) and all(isinstance(x, dict) for x in meta[key])):
             wrong.append(f"{key} must be a list of mappings")
@@ -986,7 +991,7 @@ def card_label(card: Card) -> str:
 
 
 def render_tex(book: Book, route: str, level: str = "L3", *, standalone: bool = False, language: str = "ja",
-               preamble: str | None = None, title: str | None = None) -> str:
+               preamble: str | None = None, title: str | None = None, index_macros: dict | None = None) -> str:
     """TeX of a route at a show level.  `[[card-id]]` in card text becomes `\\cref` of that card's label
     (the card's own `label`, else `card:<id>`), so references survive moving cards between books."""
     if level not in LEVELS:
@@ -1005,7 +1010,7 @@ def render_tex(book: Book, route: str, level: str = "L3", *, standalone: bool = 
                 out.append(f"\\section{{{data['sections'][last_section]['title']}}}\n")
             else:
                 out.append("\\appendix\n\\section{Appendix}\n")
-        out.append(_tex_card(book, c, language))
+        out.append(_tex_card(book, c, language, index_macros or {}))
     body = "\n".join(out)
     if not standalone:
         return body
@@ -1024,12 +1029,30 @@ def _resolve(book: Book, text: str) -> str:
                           if m.group(1) in book.cards else m.group(0), text)
 
 
-def _tex_card(book: Book, c: Card, language: str = "ja") -> str:
+def _index_lines(c: Card, macros: dict) -> str:
+    """Index registrations of a card.  `index` and `formula_index` entries are plain strings (`\\index{term}`) or
+    mappings {term, reading}; with a project macro (`macros['term']`, `macros['formula']`, e.g. termat, formulaat) a
+    mapping becomes `\\macro{<card label>}{reading}{term}`, the three-argument form some courses register with."""
+    out = []
+    for key, macro_key in (("index", "term"), ("formula_index", "formula")):
+        for x in c.meta.get(key) or []:
+            macro = macros.get(macro_key)
+            if isinstance(x, dict) and x.get("term"):
+                if macro:
+                    out.append(f"\\{macro}{{{card_label(c)}}}{{{x.get('reading') or x['term']}}}{{{x['term']}}}\n")
+                else:
+                    out.append(f"\\index{{{x['term']}}}\n")
+            elif isinstance(x, str):
+                out.append(f"\\index{{{x}}}\n")
+    return "".join(out)
+
+
+def _tex_card(book: Book, c: Card, language: str = "ja", macros: dict | None = None) -> str:
     m = c.meta
     s = {k: _resolve(book, v) for k, v in c.sections.items()}
     own_label = c.legacy and m.get("label")  # an imported body already carries its label
     label = "" if own_label else f"\\label{{{card_label(c)}}}\n"
-    index = "".join(f"\\index{{{x}}}\n" for x in m.get("index") or [])
+    index = _index_lines(c, macros or {})
     if c.legacy and s.get("body") and c.kind in ("A1", "A2", "A3", "A4", "A5", "A6"):
         env = {"A1": "definition", "A2": m.get("env", "theorem"), "A3": "proof", "A4": "example",
                "A5": "exercise", "A6": m.get("env", "axiom")}[c.kind]
