@@ -21,6 +21,11 @@ description: Review bounded mathematical claims and dependencies in a frozen lon
 
 ## 対象と確認
 
+カードの本（[book-harness](../book-harness/SKILL.md)）では、入力は `book review-input` の固定 packet
+（`manifest.json` の id と指紋、`cards.md`）。REVIEW の札のカードだけを判定し、CONTEXT は主張の参照用。所見は
+カード id・位置・重大度・最小の修復で返し、確認し終えたカード id を明記する（本文担当が `record-review --ids` に使う）。
+カード・manifest は変更せず、原著の文字を報告へ写さない。
+
 - 基礎結果、利用先の多い結果、修正・一般化された証明、複数資料の接合を優先する。
   依頼された節・主張と必要な前提・使用先から読む。追加の影響先を見つけたら理由を示す。
 - 独立した証明確認には [math-verifier](../math-verifier/SKILL.md) を適用する。起動は同じ固定版・範囲で一度だけ

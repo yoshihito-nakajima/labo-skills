@@ -64,6 +64,10 @@ Plan review submissions at coherent section-group or chapter boundaries using
 rather than requiring an exercise-by-exercise review schedule. Integration is a
 later stage unless the user requests an intermediate collected output.
 
+When the books are built from cards ([book-harness](../book-harness/SKILL.md)), the plan's reading order becomes
+each book's route, the preliminaries below become its entrance card with exact `borrows`, a joined book is a route
+that `includes` the others, and completion evidence is `book status` over the source mappings.
+
 ## Connect books without duplicating mathematics
 
 Use [volume entrances and borrowed results](references/preliminaries.md) to plan

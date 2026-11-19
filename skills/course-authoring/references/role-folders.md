@@ -35,6 +35,10 @@ For review cases, use this shape as needed:
   evidence/           only evidence actually needed
 ```
 
+For a card book the immutable input is the `book review-input` packet folder (`manifest.json` with each card's
+fingerprint, `cards.md`); reviewers report against those ids and a recorded review applies only to cards whose
+fingerprint still matches ([intake review](../../book-harness/references/intake-review.md)).
+
 The brief identifies the canonical producer and return destination, fixes exact
 claims/proofs, permitted sources, dependencies, review scope and version/hash.
 Review input can include local original extracts, which remain ignored and must

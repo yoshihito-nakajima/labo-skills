@@ -14,6 +14,7 @@ workspace/
     ├── hard_review/<case>/  # 本格査読担当
     ├── cache/               # OCR・画像・組版キャッシュ、Gitなし
     ├── output/              # PDF・SyncTeX、Gitなし
+    ├── book/                # カードのプールと route（book-harness）。独立ローカルGitのみ、remoteなし
     └── materials/           # 既存の独立ローカルGitと教材を維持
 ```
 

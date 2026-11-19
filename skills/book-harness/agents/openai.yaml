@@ -1,0 +1,4 @@
+interface:
+  display_name: "Book Harness"
+  short_description: "Build, join and audit mathematical books from shared cards, routes and source mappings"
+  default_prompt: "Use $book-harness to check the book cards, report stale cards, forward references and open findings, and continue with the next unit of the route."

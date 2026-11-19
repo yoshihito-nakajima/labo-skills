@@ -25,6 +25,10 @@
 | FINGERPRINT | 下の材料の hash 先頭 | 「WAIT の行に書き、同じなら worker を出さない」 |
 | 記録の末尾 | 自分の役の記録の末尾数行、相手役の引継ぎの末尾 | |
 
+カードの本（[book-harness](../../book-harness/SKILL.md)）では、「採用範囲の照合」は `book status --route R`
+（C2 の状態の数・`complete`）、「今の冊の被覆」は同じ出力の数学確認の被覆（current・stale・never）、固定入力は
+`book review-input` の manifest（id と指紋）に置き換える。FINGERPRINT には `status` の数と STALE の id を入れる。
+
 **分け方の注意**：作者が直して再確認を待っている case（queue の `repaired`）を「返却済み・作者未閉鎖」に数えると、
 本文側の親が WAIT を却下し続けて空回りする。待つだけのものは別の欄にする。
 

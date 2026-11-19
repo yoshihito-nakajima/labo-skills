@@ -23,6 +23,7 @@ from .build import (
     run_postprocess,
     verify_current,
 )
+from .book import BookError
 from .evidence import EvidenceError, KINDS, check_evidence, init_catalog, snapshot
 from . import exploration
 from .layout import LayoutError, init_layout, new_item
@@ -332,6 +333,9 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
             sub.add_argument("--node", action="append", required=True,
                              help="repeat for selected targets or changed nodes")
 
+    from .book_cli import register as register_book
+    register_book(areas, _workspace)
+
     paper = areas.add_parser("paper", help="local section-by-section TeX reading")
     paper_actions = paper.add_subparsers(dest="action", required=True)
     for name in ("map", "section"):
@@ -487,6 +491,9 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
                 for limit in result["limits"]:
                     print("limit: " + limit)
             return int(result["status"] == "error")
+        elif args.area == "book":
+            from .book_cli import run as run_book
+            return run_book(args)
         elif args.area == "research":
             if args.action == "exploration":
                 action = args.exploration_action
@@ -604,7 +611,7 @@ def main(argv: list[str] | None = None, *, checkout: Path | None = None) -> int:
             print(f"Output files: {result.file_count} (limit {result.max_files})")
             if result.over_limit:
                 print("warning: protected or unrecognized files keep output above the limit", file=sys.stderr)
-    except (PlanError, PaperError, WorkspaceError, LayoutError, EvidenceError, ReadingError, exploration.ExplorationError, OSError, UnicodeError) as exc:
+    except (PlanError, PaperError, WorkspaceError, LayoutError, EvidenceError, ReadingError, exploration.ExplorationError, BookError, OSError, UnicodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
     return 0

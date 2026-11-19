@@ -116,6 +116,9 @@ review found, how the result differs from prior work and whether it looks like a
 private page, use [reading-proof-review](../reading-proof-review/SKILL.md). Both apply to the user's
 own manuscript or to a published paper, and both are report-only.
 
+To read a source into a shared pool of cards, build or join books from cards, or audit and view a card pool
+(including the intake review of a taken-in book), use [book-harness](../book-harness/SKILL.md).
+
 When the author writes a paper themselves and wants the agent to keep facts,
 names, reading order and style beside them, use
 [writing-harness](../writing-harness/SKILL.md).

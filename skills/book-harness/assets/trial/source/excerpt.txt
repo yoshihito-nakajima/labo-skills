@@ -1,0 +1,13 @@
+Elementary Number Theory for Beginners (a fictional textbook), Chapter 2, Parity. Printed pages 14-15.
+
+Throughout this chapter all numbers are integers.
+
+Definition 2.1. A number n is called even if there is a number k with n = 2k. A number that is not even is called odd.
+
+Proposition 2.2. The sum of two even numbers is even.
+Proof. Write m = 2a and n = 2b. Then m + n = 2(a + b), which is even by Definition 2.1.
+
+Proposition 2.3. The product of two odd numbers is even.
+Proof. This is clear from Proposition 2.2 and a short computation.
+
+Exercise 2.4. Show that n squared is even if and only if n is even.

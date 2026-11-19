@@ -14,6 +14,9 @@ private graphs with the research or manuscript, usually as
 research and writing need no graph migration. The shared schema, executable
 checks and synthetic fixture live in this checkout.
 
+For a book built from cards, `labo book graph --route R` writes a graph of this schema from the cards
+([book-harness](../book-harness/SKILL.md)); check it here.
+
 Read [the schema and CLI contract](references/graph.md) before creating or
 editing a graph. Use the [synthetic graph](assets/example.yaml) with its
 [source note](assets/example-source.md) to see edge direction and coverage;

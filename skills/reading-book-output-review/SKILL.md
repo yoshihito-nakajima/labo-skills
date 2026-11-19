@@ -18,6 +18,9 @@ description: Review indexes, rendering and navigation in a frozen long-course PD
 
 ## 確認の選択
 
+カードの本では、出力は `book render` の生成物（標準は `--standalone` か本体の `\input`）とその route の版を固定して
+受け取る。所見は PDF 側の位置に加えて対応するカード id を示す。生成物の TeX は直さず、直すのはカードである。
+
 - 索引・番号・参照は [mathematical-navigation](../mathematical-navigation/SKILL.md)、
   検査と証拠の引継ぎはその [PDF手順](../mathematical-navigation/references/pdf-checks.md)を使う。
   その通常ビルド手順はこの担当に公式ビルドの権限を与えない。
