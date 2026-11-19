@@ -220,6 +220,20 @@ class Card:
         """Cards named in the text as [[card-id]] (rendered as cross references)."""
         return list(dict.fromkeys(MENTION_RE.findall(self.body)))
 
+    def reviewed_ok(self, book: "Book", kind: str = "math") -> bool:
+        """A current review that passed, or one with findings that every finding card of this card has closed
+        with a recorded reason (a repaired card has a new fingerprint and needs a new review anyway)."""
+        fp = self.fingerprint()
+        mine = [r for r in self.meta.get("reviews") or [] if isinstance(r, dict) and r.get("fp") == fp
+                and r.get("kind") == kind]
+        if any(r.get("result") == "pass" for r in mine):
+            return True
+        if not mine:
+            return False
+        cards = [c for c in book.cards.values() if c.kind == "D1" and c.meta.get("target") == self.id
+                 and c.meta.get("target_fp") == fp]
+        return bool(cards) and all(c.meta.get("status") == "resolved-with-reason" for c in cards)
+
     def reviewed_current(self, kind: str | None = None) -> bool:
         fp = self.fingerprint()
         return any(r.get("fp") == fp and (kind is None or r.get("kind") == kind)
@@ -1101,8 +1115,8 @@ def status(book: Book, route: str | None = None) -> dict:
         and not open_major and not result["errors"]
     math = [c for c in book.cards.values() if c.kind in ("A1", "A2", "A3", "A4", "A5", "A6")
             and (route is None or c.id in _route_ids(book, route))]
-    review = {"math_cards": len(math), "reviewed_current": sum(1 for c in math if c.reviewed_current("math")),
-              "reviewed_stale": sum(1 for c in math if not c.reviewed_current("math")
+    review = {"math_cards": len(math), "reviewed_current": sum(1 for c in math if c.reviewed_ok(book)),
+              "reviewed_stale": sum(1 for c in math if not c.reviewed_ok(book)
                                     and any(r.get("kind") == "math" for r in c.meta.get("reviews") or [])),
               "never_reviewed": sum(1 for c in math if not any(r.get("kind") == "math"
                                                                for r in c.meta.get("reviews") or []))}

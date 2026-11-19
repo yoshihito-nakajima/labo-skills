@@ -109,7 +109,7 @@ def review_input(book: Book, route: str, out: Path, kind: str = "math", max_char
 
 
 def record_review(root: Path, manifest: Path, report: Path, result: str, kind: str | None = None,
-                  ids: list | None = None, promote: bool = True) -> dict:
+                  ids: list | None = None, promote: bool = True, flagged: list | None = None) -> dict:
     """Record a returned review on the cards of a packet whose fingerprints still match.
 
     `result` is pass (no defect found in the checked cards) or findings.  Only a `pass` of a math review lifts a
@@ -133,8 +133,10 @@ def record_review(root: Path, manifest: Path, report: Path, result: str, kind: s
                 stale.append(cid)  # changed (or gone) since the packet was frozen: not reviewed
                 continue
             meta = dict(card.meta)
-            meta["reviews"] = list(meta.get("reviews") or []) + [{**stamp, "fp": entry["fp"]}]
-            if promote and result == "pass" and kind == "math" and meta.get("status") in ("drafted", "self-checked"):
+            # a report that lists the cards with findings passes the other checked cards
+            own = "findings" if result == "findings" and (flagged is None or cid in flagged) else "pass"
+            meta["reviews"] = list(meta.get("reviews") or []) + [{**stamp, "result": own, "fp": entry["fp"]}]
+            if promote and own == "pass" and kind == "math" and meta.get("status") in ("drafted", "self-checked"):
                 meta["status"] = "independent"
             card.path.write_text(dump_card(meta, card.body), encoding="utf-8")
             done.append(cid)

@@ -41,7 +41,7 @@ Never stop on a single worker's return; stop on `DONE` or an explicit stop by th
 ## What `next` decides (in this order)
 
 1. **A returned review** → `RUN record-review --packet P` (reviewer role). The reviewer's report ends with one line
-   `RESULT: pass|findings [CHECKED: id,id|all]`; the tool records it only for cards whose fingerprint still matches.
+   `RESULT: pass|findings [CHECKED: id,id|all] [FINDINGS: id,id|none]`; the tool records it only for cards whose fingerprint still matches.
    A report without that line is refused: send it back, do not guess.
 2. **Check errors**, **findings of a returned review** (`triage:`), **open findings (D1)**, **verbatim runs** → a
    producer unit. (Producer role.)

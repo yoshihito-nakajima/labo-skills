@@ -48,7 +48,7 @@ Then review only what changed: `review-input --cards <changed ids>`, and record 
 book record-review --manifest <packet>/manifest.json --report <report file> --result pass|findings [--ids ...]
 ```
 
-Only cards whose fingerprint still equals the packet's are recorded; a card edited since is listed as changed and
+A reviewer's last line may list the cards that have findings (`RESULT: findings CHECKED: a,b,c FINDINGS: b`); the other checked cards then pass. Only cards whose fingerprint still equals the packet's are recorded; a card edited since is listed as changed and
 stays unreviewed. A `pass` of a math review lifts a card from `drafted` or `self-checked` to `independent`; the
 report is stored by hash, not copied. `check` warns when a card marked `independent` no longer matches a review.
 List `--ids` as the cards the reviewer checked completely; do not pass the whole packet if the reviewer covered less.

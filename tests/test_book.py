@@ -923,5 +923,38 @@ class IndexMacroTests(unittest.TestCase):
             self.assertIn("\\termat{def:even}", res.stdout)
 
 
+class PerCardResultTests(ScriptedTakeIn):
+    def test_result_line_parsing(self):
+        from labo_tools.book_rounds import parse_result
+        self.assertEqual(parse_result("x\nRESULT: findings CHECKED: a,b,c FINDINGS: b\n"),
+                         {"result": "findings", "ids": ["a", "b", "c"], "findings": ["b"]})
+        self.assertEqual(parse_result("RESULT: pass CHECKED: all"), {"result": "pass", "ids": None, "findings": None})
+        self.assertEqual(parse_result("RESULT: findings CHECKED: a FINDINGS: none")["findings"], [])
+        self.assertIsNone(parse_result("no result line here"))
+
+    def test_only_flagged_cards_fail_and_a_resolved_finding_closes_them(self):
+        self.take_in()
+        run = lambda *a: run_cli(self.ws, *a)  # noqa: E731
+        res = run("review-input", "--route", "toy-parity", "--out", str(self.ws / "rev/c1/input"), "--unreviewed", "math")
+        self.assertEqual(res.returncode, 0, res.stderr)
+        (self.ws / "rev/c1/result").mkdir()
+        (self.ws / "rev/c1/result/packet-01.md").write_text(
+            "One problem.\nRESULT: findings CHECKED: all FINDINGS: claim-odd-product\n", encoding="utf-8")
+        rec = run("record-review", "--packet", str(self.ws / "rev/c1/input/packet-01"))
+        self.assertEqual(rec.returncode, 0, rec.stderr)
+        book = bk.Book(self.root)
+        self.assertTrue(book.cards["def-even"].reviewed_ok(book))
+        self.assertEqual(book.cards["def-even"].meta["status"], "independent")
+        self.assertFalse(book.cards["claim-odd-product"].reviewed_ok(book))
+        self.assertNotEqual(book.cards["claim-odd-product"].meta["status"], "independent")
+        self.assertFalse(bk.status(book, "toy-parity")["taken_in"])
+        self.cli("new", "D1", "f-declined", "--route", "toy-parity", "--target", "claim-odd-product", "--severity", "minor",
+                 "--summary", "A remark, not a defect.")
+        self.fill("route/toy-parity/finding/f-declined.md", status="resolved-with-reason",
+                  reason="the reviewer's point is about wording outside the statement")
+        book = bk.Book(self.root)
+        self.assertTrue(book.cards["claim-odd-product"].reviewed_ok(book))
+
+
 if __name__ == "__main__":
     unittest.main()

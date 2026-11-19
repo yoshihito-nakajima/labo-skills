@@ -31,7 +31,8 @@ from .book import Book, BookError, book_lock
 
 SKILL_DIR = Path(__file__).resolve().parents[2] / "skills" / "book-harness"
 RESULT_RE = re.compile(r"^RESULT:\s*(pass|findings)\b(.*)$", re.I)
-CHECKED_RE = re.compile(r"CHECKED:\s*([A-Za-z0-9,\- ]+|all)", re.I)
+CHECKED_RE = re.compile(r"CHECKED:\s*([A-Za-z0-9,\- ]+?)(?=\s+FINDINGS:|$)", re.I)
+FINDINGS_RE = re.compile(r"FINDINGS:\s*([A-Za-z0-9,\- ]+|none)", re.I)
 ROLES = ("producer", "reviewer", "all")
 
 
@@ -92,7 +93,12 @@ def parse_result(text: str) -> dict | None:
             ids = None
             if checked and checked.group(1).strip().lower() != "all":
                 ids = [x.strip() for x in checked.group(1).split(",") if x.strip()]
-            return {"result": m.group(1).lower(), "ids": ids}
+            found = FINDINGS_RE.search(m.group(2) or "")
+            flagged = None
+            if found:
+                flagged = [] if found.group(1).strip().lower() == "none" else \
+                    [x.strip() for x in found.group(1).split(",") if x.strip()]
+            return {"result": m.group(1).lower(), "ids": ids, "findings": flagged}
         break
     return None
 
@@ -140,7 +146,7 @@ def record_from_packet(root: Path, packet: Path) -> dict:
     if parsed is None:
         raise BookError(f"{report} does not end with a line `RESULT: pass|findings [CHECKED: ids|all]`; "
                         f"send it back to the reviewer instead of guessing")
-    out = rev.record_review(Path(root), manifest, report, parsed["result"], None, parsed["ids"])
+    out = rev.record_review(Path(root), manifest, report, parsed["result"], None, parsed["ids"], flagged=parsed["findings"])
     out["result"] = parsed["result"]
     (case / "result" / f"{packet.name}.recorded.json").write_text(json.dumps(out), encoding="utf-8")
     return out
@@ -323,7 +329,10 @@ def decide(book: Book, route: str, *, workspace: Path, root: Path, role: str = "
         # 4. reviews (reviewer): make packets for ready cards, hand open packets to a reviewer
         if reviewer and out is None and review_dir is not None:
             covered = {i for p in pks if p["state"] in ("open", "returned") for i in p["live"]}
-            fresh = [i for i in ready_ids(book, route, result) if not book.cards[i].reviewed_current("math") and i not in covered]
+            open_findings = {c.meta.get("target") for c in book.cards.values() if c.kind == "D1" and c.meta.get("status") == "open"}
+            # a card needs a review unless a passing one is current; one with an open finding waits for its repair
+            fresh = [i for i in ready_ids(book, route, result)
+                     if not book.cards[i].reviewed_ok(book) and i not in covered and i not in open_findings]
             if fresh:
                 Path(work_dir or review_dir).mkdir(parents=True, exist_ok=True)
                 listing = Path(work_dir or review_dir) / f"cards-for-review-{fp}.txt"
@@ -339,7 +348,8 @@ def decide(book: Book, route: str, *, workspace: Path, root: Path, role: str = "
                                        "Review the cards marked REVIEW in the packet as the skill's math review describes. Judge "
                                        "only those cards. Write the report to the path given. End it with exactly one line "
                                        "`RESULT: pass CHECKED: <ids you checked completely>` if you found no defect in them, or "
-                                       "`RESULT: findings CHECKED: <ids>` otherwise. Do not edit cards.",
+                                       "`RESULT: findings CHECKED: <ids> FINDINGS: <the ids that have a finding>` otherwise "
+                                       "(checked cards not listed under FINDINGS count as passed). Do not edit cards.",
                                        ["intake-review.md", "templates.md"],
                                        "DONE <unit> | report: <path> | RESULT: <pass|findings>")
                         if out:
