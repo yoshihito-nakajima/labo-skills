@@ -10,12 +10,13 @@ import yaml
 from . import book as bk
 from . import book_ops as ops
 from . import book_review as rev
+from . import book_rounds as rounds
 from .book import Book, BookError
 
 DEFAULT_ROOT = "local/materials/book"
 ACTIONS = ("check", "status", "search", "new", "anchor", "closure", "impact", "graph", "render", "html",
            "show", "list", "merge", "rename", "retire", "restructure", "deps", "promote", "reject",
-           "review-input", "record-review", "leak-check")
+           "review-input", "record-review", "leak-check", "next", "release", "place")
 
 
 def register(areas, add_workspace) -> None:
@@ -26,8 +27,8 @@ def register(areas, add_workspace) -> None:
         add_workspace(sub)
         sub.add_argument("--root", default=DEFAULT_ROOT, help=f"book root, workspace-relative (default {DEFAULT_ROOT})")
         sub.add_argument("--format", choices=("text", "json"), default="text")
-        if name in ("check", "status", "graph", "render", "html", "deps", "review-input", "leak-check", "list"):
-            sub.add_argument("--route", required=name in ("graph", "render", "html", "review-input"), help="route slug")
+        if name in ("check", "status", "graph", "render", "html", "deps", "review-input", "leak-check", "list", "next"):
+            sub.add_argument("--route", required=name in ("graph", "render", "html", "review-input", "next"), help="route slug")
         if name in ("closure", "impact", "graph", "html"):
             sub.add_argument("--candidates", action="store_true",
                              help="also follow requires_candidates (unconfirmed dependency candidates)")
@@ -93,15 +94,34 @@ def register(areas, add_workspace) -> None:
             sub.add_argument("--kind", default="math", choices=("math", "output"))
             sub.add_argument("--max-chars", type=int, default=60000, help="split packets above this size")
             sub.add_argument("--cards", help="comma-separated card ids (their proofs follow)")
+            sub.add_argument("--cards-file", help="file with one card id per line")
             sub.add_argument("--section", type=int, help="route section index")
             sub.add_argument("--closure", help="a card and everything it needs")
             sub.add_argument("--unreviewed", choices=("math", "output"), help="cards without a current review of this kind")
         if name == "record-review":
-            sub.add_argument("--manifest", required=True)
-            sub.add_argument("--report", required=True, help="the returned report (stored by hash only)")
-            sub.add_argument("--result", required=True, choices=("pass", "findings"))
+            sub.add_argument("--packet", help="a packet folder whose reviewer wrote result/<packet>.md ending in a RESULT line "
+                                              "(then no other option is needed)")
+            sub.add_argument("--manifest")
+            sub.add_argument("--report", help="the returned report (stored by hash only)")
+            sub.add_argument("--result", choices=("pass", "findings"))
             sub.add_argument("--kind", choices=("math", "output"))
             sub.add_argument("--ids", help="comma-separated ids actually checked (default: the whole packet)")
+        if name == "next":
+            sub.add_argument("--role", default="all", choices=rounds.ROLES, help="the coordinator's role")
+            sub.add_argument("--review-dir", help="folder for review packets and their results")
+            sub.add_argument("--work-dir", help="folder where worker prompt files are written")
+            sub.add_argument("--source-text", action="append", help="local source text for the verbatim check (repeatable)")
+            sub.add_argument("--claim", help="claim a dispatched unit for this holder (always pass it when running for real)")
+            sub.add_argument("--ttl-hours", type=float, default=12.0, help="claims and unanswered packets expire after this")
+            sub.add_argument("--batch-chars", type=int, default=30000)
+        if name == "place":
+            sub.add_argument("route_name", metavar="ROUTE")
+            sub.add_argument("ids", nargs="+")
+            sub.add_argument("--section", help="section title (created if missing) or index; default the last section")
+            sub.add_argument("--after", help="put the cards right after this listed card")
+        if name == "release":
+            sub.add_argument("unit")
+            sub.add_argument("--done", action="store_true", help="mark the unit finished (for units not derived from state)")
         if name == "leak-check":
             sub.add_argument("--source-text", action="append", required=True,
                              help="directory (or file) of local source text, repeatable; never reported or copied")
@@ -269,12 +289,52 @@ def run(args) -> int:
               + ("" if moved else " (candidates exist only after `book deps --write`)"))
         return 0
     if act == "review-input":
-        sel = {"cards": _csv(args.cards), "section": args.section, "closure": args.closure, "unreviewed": args.unreviewed}
+        cards = _csv(args.cards)
+        if args.cards_file:
+            cards = [x.strip() for x in _path(args, args.cards_file).read_text(encoding="utf-8").splitlines() if x.strip()]
+        sel = {"cards": cards, "section": args.section, "closure": args.closure, "unreviewed": args.unreviewed}
         dirs = rev.review_input(book, args.route, _path(args, args.out), args.kind, args.max_chars, **sel)
         for d in dirs:
             print(f"wrote {_rel(args, d)}")
         return 0
+    if act == "next":
+        out = rounds.decide(book, args.route, workspace=args.workspace, root=root, role=args.role,
+                            review_dir=_path(args, args.review_dir) if args.review_dir else None,
+                            work_dir=_path(args, args.work_dir) if args.work_dir else None,
+                            source_text=[str(_path(args, p)) for p in args.source_text or []] or None,
+                            ttl_hours=args.ttl_hours, batch_chars=args.batch_chars, claim=args.claim)
+        if args.format == "json":
+            print(json.dumps(out, ensure_ascii=False, indent=2))
+        else:
+            head = f"{out['action']} tier={out['tier']}"
+            if out["action"] == "DISPATCH":
+                head += f" worker_role={out['worker_role']} unit={out['unit']} prompt={out.get('prompt_file') or '(inline)'}"
+            if out["action"] == "RUN":
+                head += f" command: {out['command']}"
+            print(head)
+            print(f"reason: {out['reason']}")
+            print(f"FINGERPRINT={out['fingerprint']}")
+            s = out["summary"]
+            print(f"state: cards {s['cards']} errors {s['errors']} legacy {s['legacy']} stale {s['stale']} "
+                  f"audit {s['scope_audit']} review never {s['review']['never_reviewed']} stale {s['review']['reviewed_stale']} "
+                  f"open packets {s['open_packets']} returned {s['returned_packets']} complete {s['complete']} "
+                  f"taken_in {s['taken_in']} leak_checked {s['leak_checked']}")
+        return 0
+    if act == "place":
+        placed = ops.place(root, args.route_name, args.ids, args.section, args.after)
+        print("placed: " + (", ".join(placed) or "nothing (already in the route)"))
+        return 0
+    if act == "release":
+        print(rounds.release(root, args.unit, args.done))
+        return 0
     if act == "record-review":
+        if args.packet:
+            res = rounds.record_from_packet(root, _path(args, args.packet))
+            _emit(args, res, [f"recorded {len(res['recorded'])} cards as {res['result']}", "changed since the packet (not reviewed): "
+                              + (", ".join(res["changed_since_packet"]) or "none")])
+            return 0
+        if not (args.manifest and args.report and args.result):
+            raise BookError("record-review needs --packet, or all of --manifest, --report and --result")
         res = rev.record_review(root, _path(args, args.manifest), _path(args, args.report), args.result, args.kind,
                                 _csv(args.ids))
         _emit(args, res, [f"recorded {len(res['recorded'])} cards", "changed since the packet (not reviewed): "

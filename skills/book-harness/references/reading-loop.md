@@ -27,7 +27,9 @@ time, in the order the route or plan gives. Intake is not finished at the last c
 5. **Write the cards in the book's own words** ([no copying](#no-copying)), in the template's sections: each step of
    a proof justified with `[by: card-id]`, boundary cases stated, hypotheses used. Name other cards in running text
    as `[[card-id]]` so references survive moving cards between books.
-6. **Write the C2 row** for the unit: every source that covers it with locators, `maps_to` with relations,
+6. **Place the cards in the route** in reading order: `book place <route> <ids> [--section "Title"] [--after <card>]`
+   (a claim shows its owning proof by itself; never edit `route.yaml` by hand while others write). Then **write the
+   C2 row** for the unit: every source that covers it with locators, `maps_to` with relations,
    `adoption` and `scope_audit`. `OK` only when the cards exist and their proofs are closed; otherwise `PARTIAL`,
    `TODO` or `MISSING` with the remaining obligation. `OUT` names the book that owns it.
 7. **Self-check** every definition, construction, proof, calculation and solution; set `status: self-checked`

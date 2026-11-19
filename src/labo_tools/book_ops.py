@@ -398,3 +398,62 @@ class _null:
 
     def __exit__(self, *exc):
         return False
+
+
+# ---------------------------------------------------------------- placing cards in a route
+
+
+def place(root: Path, route: str, ids: list, section: str | None = None, after: str | None = None) -> list:
+    """Add cards to a route's reading order (under the root lock, so concurrent writers do not clobber each other).
+
+    `section` is a title (created when missing) or an index; the default is the last section.  `after` puts the
+    cards right behind a card already listed.  A card that is already in the route, or is the proof of one that is
+    (a claim shows its owning proof by itself), is skipped.
+    """
+    with book_lock(root):
+        book = Book(root, use_cache=False)
+        path = book.root / "route" / route / "route.yaml"
+        if not path.is_file():
+            raise BookError(f"route not found: {route}")
+        for cid in ids:
+            if cid not in book.cards:
+                raise BookError(f"unknown card {cid}")
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        sections = data.setdefault("sections", [])
+
+        def card_of(item):
+            return item if isinstance(item, str) else item.get("card") or item.get("proof_of") if isinstance(item, dict) else None
+
+        listed = {card_of(i) for s in sections for i in s.get("items") or []}
+        shown = {book.chosen_proof(x) for x in listed if x in book.cards and book.cards[x].kind in ("A1", "A2", "A5")}
+        todo = [c for c in ids if c not in listed and c not in shown]
+        if not todo:
+            return []
+        target = None
+        if after:
+            for s in sections:
+                items = s.setdefault("items", [])
+                for k, it in enumerate(items):
+                    if card_of(it) == after:
+                        items[k + 1:k + 1] = todo
+                        target = True
+                        break
+                if target:
+                    break
+            if not target:
+                raise BookError(f"{after} is not listed in route {route}")
+        else:
+            if section is None:
+                if not sections:
+                    sections.append({"title": route, "items": []})
+                sec = sections[-1]
+            elif str(section).isdigit() and int(section) < len(sections):
+                sec = sections[int(section)]
+            else:
+                sec = next((s for s in sections if s.get("title") == section), None)
+                if sec is None:
+                    sec = {"title": section, "items": []}
+                    sections.append(sec)
+            sec.setdefault("items", []).extend(todo)
+        path.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        return todo

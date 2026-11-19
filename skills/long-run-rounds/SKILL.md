@@ -19,6 +19,10 @@ description: Set up, restart, monitor and correct unattended long runs in which 
 
 親を軽くし、重い読み書きは worker に閉じ込める。親が本文を読むと、待機のたびに文脈が膨らんで容量が尽きる。
 
+カードの本（[book-harness](../book-harness/SKILL.md)）では、親の表を `labo book next` が計算する。
+親は軽い調整役、worker は能力のある役という段階だけで指示し、モデル名・ホストの道具名は指示書に入れない
+（[カードの本のラウンド](../book-harness/references/rounds.md)）。
+
 ## 手順
 
 1. **方針を決める。** ユーザーに次を確かめ、指示書の §1 に書く：自走か（スレッドはユーザーに聞かず規則で決める）、

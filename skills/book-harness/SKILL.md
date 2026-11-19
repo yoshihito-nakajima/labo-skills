@@ -55,6 +55,7 @@ building a book means choosing a route. Joining, reusing, slicing or comparing b
   [pool operations](references/pool-operations.md).
 - Graph and HTML views, slices, queries across books: [views](references/views.md).
 - Rendering TeX, references, a whole document, building: [building](references/building.md).
+- Running the intake unattended with a light coordinator and capable workers, on any LLM host: [rounds](references/rounds.md).
 - Moving existing TeX and catalogs into cards: [migration](references/migration.md).
 - Complete card shapes, one of each kind: [examples](references/examples.md); every `check` code: [check codes](references/check-codes.md).
 
@@ -71,6 +72,7 @@ labo book list [--route R] [--kind K] [--stale] [--legacy]
 labo book new KIND ID --title T --area A [--decision reuse|variant:<id>|new --reason ...]
 labo book new A3 ID --proves CLAIM [--decision alt --reason ...]
 labo book new D1 ID --route R --target CARD --severity major|minor --summary "..."
+labo book place ROUTE ID... [--section T] [--after ID]   # put cards in the route
 labo book anchor ID...                       # after rereading what the card depends on
 labo book closure ID... [--candidates]       # what it needs
 labo book impact ID... [--candidates]        # what to recheck
@@ -83,6 +85,10 @@ labo book promote ID [--only a,b]            # then settle them
 labo book reject ID [--only a,b]
 labo book review-input --route R --out DIR [--unreviewed math] [--section N | --cards a,b | --closure X] [--max-chars N]
 labo book record-review --manifest M --report FILE --result pass|findings [--ids a,b]
+labo book review-input ... --cards-file FILE   # also: ids from a file
+labo book record-review --packet PACKET      # a reviewer's result file ending in `RESULT: pass|findings`
+labo book next --route R --role producer|reviewer|all --review-dir D --work-dir W --source-text DIR --claim HOLDER
+labo book release UNIT [--done]               # a worker frees its unit
 labo book leak-check --route R --source-text DIR [--source-text DIR ...]
 labo book graph --route R
 labo book render --route R --level L3 [--standalone --language ja] --out FILE

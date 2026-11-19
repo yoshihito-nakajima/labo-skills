@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -506,8 +507,8 @@ class OperationTests(unittest.TestCase):
 TRIAL = ROOT / "skills/book-harness/assets/trial"
 
 
-class TrialKitTests(unittest.TestCase):
-    """A scripted take-in of the fictional excerpt through the CLI, as the reading loop prescribes."""
+class ScriptedTakeIn(unittest.TestCase):
+    """Helpers: a scripted take-in of the fictional excerpt through the CLI, as the reading loop prescribes."""
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -578,6 +579,9 @@ class TrialKitTests(unittest.TestCase):
             cmd += ["--review-input", str(packets)]
         return subprocess.run(cmd, capture_output=True, text=True)
 
+
+
+class TrialKitTests(ScriptedTakeIn):
     def test_scripted_take_in_passes_and_a_copy_fails(self):
         self.take_in()
         self.cli("check", "--route", "toy-parity")
@@ -759,6 +763,142 @@ class VerifyImportTests(unittest.TestCase):
             self.assertEqual(bad.returncode, 1)
             self.assertEqual(data["missing_cards"], ["def:even"])
             self.assertEqual([c["label"] for c in data["changed_text"]], ["lem:sum"])
+
+
+class RoundsTests(ScriptedTakeIn):
+    """`book next`: a coordinator that only follows its one-line answers drives the work to DONE."""
+
+    VENDORS = re.compile(r"claude|anthropic|gpt|openai|haiku|luna|sonnet|opus|codex|gemini|llama|mistral|fable", re.I)
+
+    def nxt(self, role, claim=None, sources=True, fmt="json"):
+        args = ["next", "--route", "toy-parity", "--role", role, "--review-dir", str(self.ws / "rev"),
+                "--work-dir", str(self.ws / "work"), "--format", fmt]
+        if claim:
+            args += ["--claim", claim]
+        if sources:
+            args += ["--source-text", str(TRIAL / "source")]
+        res = run_cli(self.ws, *args)
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+        return json.loads(res.stdout) if fmt == "json" else res.stdout
+
+    def run_command(self, answer):
+        import shlex
+        res = subprocess.run(shlex.split(answer["command"]), capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+        return res
+
+    def test_unfinished_source_rows_are_dispatched_once_with_a_portable_prompt(self):
+        (self.root / "route/toy-parity/route.yaml").write_text("title: toy-parity\nsections: []\n", encoding="utf-8")
+        self.cli("new", "C1", "src-toy", "--title", "T")
+        self.cli("new", "C2", "c2-prop-2-2", "--route", "toy-parity")
+        self.fill("route/toy-parity/map/c2-prop-2-2.md", unit="Prop 2.2", sources=[{"src": "src-toy", "loc": "Prop 2.2, p.14"}],
+                  S_difference="not yet read")
+        first = self.nxt("producer", claim="parent-a")
+        self.assertEqual((first["action"], first["tier"], first["worker_role"]), ("DISPATCH", "worker", "producer"))
+        self.assertEqual(first["unit"], "read:c2-prop-2-2")
+        prompt = Path(first["prompt_file"]).read_text(encoding="utf-8")
+        self.assertIn("Prop 2.2, p.14", prompt)
+        self.assertIn("SKILL.md", prompt)
+        self.assertIn("reading-loop.md", prompt)
+        self.assertIn("DONE read:c2-prop-2-2", prompt)
+        self.assertIsNone(self.VENDORS.search(prompt), self.VENDORS.search(prompt))
+        second = self.nxt("producer", claim="parent-b")
+        self.assertEqual(second["action"], "WAIT")
+        self.assertIn("read:c2-prop-2-2", second["reason"])
+        self.assertEqual(self.nxt("producer")["fingerprint"], second["fingerprint"])
+        self.assertIn("released", run_cli(self.ws, "release", "read:c2-prop-2-2").stdout)
+        again = self.nxt("producer")
+        self.assertEqual((again["action"], again["unit"]), ("DISPATCH", "read:c2-prop-2-2"))
+
+    def test_roles_do_not_cross_and_text_output_is_one_decision_line(self):
+        self.take_in()
+        producer = self.nxt("producer")
+        self.assertEqual(producer["action"], "WAIT")  # production has nothing left; reviews are the other role's
+        reviewer = self.nxt("reviewer")
+        self.assertEqual(reviewer["action"], "RUN")
+        text = self.nxt("reviewer", fmt="text")
+        self.assertTrue(text.splitlines()[0].startswith("RUN tier=coordinator command: "))
+        self.assertIn("FINGERPRINT=", text)
+
+    def test_the_coordinator_loop_reaches_done(self):
+        self.take_in()
+        run = self.nxt("reviewer", claim="rv")
+        self.assertEqual(run["action"], "RUN")
+        self.run_command(run)
+        job = self.nxt("reviewer", claim="rv")
+        self.assertEqual((job["action"], job["worker_role"]), ("DISPATCH", "reviewer"))
+        packet_prompt = Path(job["prompt_file"]).read_text(encoding="utf-8")
+        self.assertIn("RESULT: pass CHECKED:", packet_prompt)
+        self.assertIsNone(self.VENDORS.search(packet_prompt))
+        self.assertEqual(self.nxt("reviewer", claim="rv2")["action"], "WAIT")
+        report = next((self.ws / "rev").glob("*/result"), None) or next((self.ws / "rev").glob("*")) / "result"
+        report.mkdir(parents=True, exist_ok=True)
+        (report / "packet-01.md").write_text("No defect found.\nRESULT: pass CHECKED: all\n", encoding="utf-8")
+        rec = self.nxt("reviewer")
+        self.assertEqual(rec["action"], "RUN")
+        self.assertIn("record-review --packet", rec["command"])
+        self.run_command(rec)
+        status = json.loads(self.cli("status", "--route", "toy-parity", "--format", "json").stdout)
+        self.assertTrue(status["taken_in"])
+        self.assertEqual(self.nxt("reviewer", sources=False)["action"], "BLOCKED")
+        done = self.nxt("reviewer")
+        self.assertEqual(done["action"], "DONE")
+        self.assertEqual(self.nxt("producer")["action"], "DONE")
+
+    def test_findings_go_to_a_producer_until_the_unit_is_marked_done(self):
+        self.take_in()
+        self.run_command(self.nxt("reviewer"))
+        case = next((self.ws / "rev").iterdir())
+        (case / "result").mkdir()
+        (case / "result" / "packet-01.md").write_text("Step 2 of the product proof is wrong.\nRESULT: findings CHECKED: all\n",
+                                                      encoding="utf-8")
+        self.run_command(self.nxt("reviewer"))
+        triage = self.nxt("producer", claim="p")
+        self.assertEqual(triage["action"], "DISPATCH")
+        self.assertTrue(triage["unit"].startswith("triage:"))
+        self.assertIn("--done", Path(triage["prompt_file"]).read_text(encoding="utf-8"))
+        self.assertIn("marked done", run_cli(self.ws, "release", triage["unit"], "--done").stdout)
+        self.assertNotEqual(self.nxt("producer").get("unit"), triage["unit"])
+
+    def test_a_report_without_the_result_line_is_refused_and_a_changed_card_voids_the_packet(self):
+        self.take_in()
+        self.run_command(self.nxt("reviewer"))
+        case = next((self.ws / "rev").iterdir())
+        (case / "result").mkdir()
+        (case / "result" / "packet-01.md").write_text("Looks fine to me.\n", encoding="utf-8")
+        res = run_cli(self.ws, "record-review", "--packet", str(case / "input/packet-01"))
+        self.assertEqual(res.returncode, 2)
+        self.assertIn("RESULT", res.stderr)
+        (case / "result" / "packet-01.md").unlink()
+        card = self.root / "pool/parity/claim-even-sum.md"
+        card.write_text(card.read_text(encoding="utf-8") + "\nAn edit.\n", encoding="utf-8")
+        answer = self.nxt("reviewer")
+        self.assertEqual(answer["action"], "RUN")  # the old packet no longer covers the changed card; new ones are made
+
+
+class PlaceTests(unittest.TestCase):
+    def test_place_is_idempotent_ordered_and_safe_under_concurrency(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ws = Path(tmp).resolve()
+            make(ws / "book")
+            res = run_cli(ws, "place", "intro-a", "claim-parity", "--after", "def-even")
+            self.assertEqual(res.returncode, 0, res.stderr)
+            order = [e["id"] for e in bk.Book(ws / "book").sequence(bk.Book(ws / "book").load_route("intro-a"))]
+            self.assertLess(order.index("def-even"), order.index("claim-parity"))
+            self.assertEqual(order.count("claim-parity"), 1)
+            self.assertIn("nothing", run_cli(ws, "place", "intro-a", "claim-parity").stdout)
+            put(ws / "book", "pool/arith/def-new1.md", fact("def-new1", "A1", variant="predicate"), definition="d")
+            put(ws / "book", "pool/arith/def-new2.md", fact("def-new2", "A1", variant="predicate"), definition="d")
+            procs = [subprocess.Popen([sys.executable, "-I", str(ROOT / "scripts/labo.py"), "book", "place", "intro-a", cid,
+                                       "--section", "New", "--workspace", str(ws), "--root", "book"],
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE) for cid in ("def-new1", "def-new2")]
+            for p in procs:
+                p.communicate()
+            book = bk.Book(ws / "book")
+            listed = [e["id"] for e in book.sequence(book.load_route("intro-a"))]
+            self.assertIn("def-new1", listed)
+            self.assertIn("def-new2", listed)
+            self.assertEqual(run_cli(ws, "place", "intro-a", "nope").returncode, 2)
 
 
 if __name__ == "__main__":
