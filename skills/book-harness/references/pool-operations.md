@@ -56,5 +56,5 @@ Writers that rewrite the same card at once need the project's own ownership rule
 
 Parsed cards are cached in `<root>/.index/` (path, size, mtime), created automatically, ignored by its own
 `.gitignore` and safe to delete. A cached run of `check` on about 1,700 cards takes a quarter of a second; a few
-tens of thousands of cards remain interactive. The book root's Git (if any) is local only, with no remote and all
-pushes refused, as for other course material; originals and source text caches are outside it.
+tens of thousands of cards remain interactive. The book root lives in the local materials Git (`local/materials/book/`): local only, no remote, every push refused,
+as for other course material, with the guard tooling unchanged. Originals and source text caches are outside it.

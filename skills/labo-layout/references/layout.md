@@ -61,7 +61,7 @@ Each user normally forks the shared `labo-skills` repository and mounts
 their fork at `.agents`. The fork submodule is the policy/runtime boundary. Its `skills/`,
 `scripts/`, and `src/` remain inside its own Git history; research-program data stays
 in `labo/`. New local courses use `local/books/` or `local/topics/` without Git
-by default; a card book (`local/book/`, [book-harness](../../book-harness/SKILL.md)) is a local-only Git root; legacy courses keep `local/materials/`, whose independent Git never
+by default; a card book ([book-harness](../../book-harness/SKILL.md)) lives in `local/materials/book/`, inside that guarded Git; legacy courses keep `local/materials/`, whose independent Git never
 goes to GitHub. Originals, cache and output
 remain under `local/` but outside materials Git. The parent excludes all `/local/`.
 The parent tracks the user's fork URL in `.gitmodules` and

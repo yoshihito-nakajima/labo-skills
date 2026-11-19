@@ -12,7 +12,7 @@ from . import book_ops as ops
 from . import book_review as rev
 from .book import Book, BookError
 
-DEFAULT_ROOT = "local/book"
+DEFAULT_ROOT = "local/materials/book"
 ACTIONS = ("check", "status", "search", "new", "anchor", "closure", "impact", "graph", "render", "html",
            "show", "list", "merge", "rename", "retire", "restructure", "deps", "promote", "reject",
            "review-input", "record-review", "leak-check")

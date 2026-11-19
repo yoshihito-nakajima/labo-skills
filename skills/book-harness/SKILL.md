@@ -38,8 +38,9 @@ building a book means choosing a route. Joining, reusing, slicing or comparing b
 
 ## Start or resume
 
-1. Find the book root (default `local/book/`: `pool/`, `src/`, `route/<slug>/`). A project that has only TeX and a
-   catalog is [migrated](references/migration.md) first, as a read-only mirror until the owners agree to cut over.
+1. Find the book root (default `local/materials/book/`: `pool/`, `src/`, `route/<slug>/`; it sits inside the guarded
+   local materials Git, whose guard tooling names `materials/`, so it is not a separate Git). A project that has only
+   TeX and a catalog is [migrated](references/migration.md) first, as a read-only mirror until the owners agree to cut over.
 2. Run `book check --route R` and `book status --route R`; report errors, STALE cards, forward references, unlisted
    borrows, open findings and review coverage before new work.
 3. Take the next unit from the route and its source mapping (`TODO` rows), not from a prose log.
@@ -55,25 +56,37 @@ building a book means choosing a route. Joining, reusing, slicing or comparing b
 - Graph and HTML views, slices, queries across books: [views](references/views.md).
 - Rendering TeX, references, a whole document, building: [building](references/building.md).
 - Moving existing TeX and catalogs into cards: [migration](references/migration.md).
-- Complete card shapes, one of each kind: [examples](references/examples.md).
+- Complete card shapes, one of each kind: [examples](references/examples.md); every `check` code: [check codes](references/check-codes.md).
 
 Commands (`<labo-script>` is the checkout launcher `scripts/labo.py`). `--workspace DIR` and `--root DIR` come **after**
-the action, as in `labo book check --route R --workspace W --root book`; the root defaults to `local/book`. Card file
+the action, as in `labo book check --route R --workspace W --root book`; the root defaults to `local/materials/book`. Card file
 shapes: [examples](references/examples.md).
 
 ```sh
-labo book check|status [--route R]            labo book search "<words>" [--kind A2]
-labo book show ID...                          labo book list [--route R] [--kind K] [--stale] [--legacy]
+labo book check [--route R]                  # errors and warnings
+labo book status [--route R]                 # counts, review coverage, `complete`, `taken in`
+labo book search "<words>" [--kind A2]       # pool search, before creating a fact card
+labo book show ID...                         # a card with its neighbourhood
+labo book list [--route R] [--kind K] [--stale] [--legacy]
 labo book new KIND ID --title T --area A [--decision reuse|variant:<id>|new --reason ...]
+labo book new A3 ID --proves CLAIM [--decision alt --reason ...]
 labo book new D1 ID --route R --target CARD --severity major|minor --summary "..."
-labo book anchor ID...                        labo book closure|impact ID... [--candidates]
-labo book merge KEEP DROP | rename OLD NEW | retire ID --reason ...    [--apply]
-labo book restructure ID                      labo book deps --write, then promote|reject ID [--only a,b]
-labo book review-input --route R --out DIR [--unreviewed math|--section N|--cards a,b|--closure X] [--max-chars N]
+labo book anchor ID...                       # after rereading what the card depends on
+labo book closure ID... [--candidates]       # what it needs
+labo book impact ID... [--candidates]        # what to recheck
+labo book merge KEEP DROP [--apply]
+labo book rename OLD NEW [--apply]
+labo book retire ID --reason ... [--apply]
+labo book restructure ID                     # a legacy card into the template's sections
+labo book deps [--route R] --write           # dependency candidates; first
+labo book promote ID [--only a,b]            # then settle them
+labo book reject ID [--only a,b]
+labo book review-input --route R --out DIR [--unreviewed math] [--section N | --cards a,b | --closure X] [--max-chars N]
 labo book record-review --manifest M --report FILE --result pass|findings [--ids a,b]
 labo book leak-check --route R --source-text DIR [--source-text DIR ...]
-labo book graph --route R                     labo book render --route R --level L3 [--standalone --language ja] --out FILE
-labo book html --route R [--slice closure:ID] --name NAME
+labo book graph --route R
+labo book render --route R --level L3 [--standalone --language ja] --out FILE
+labo book html --route R [--slice closure:ID] [--candidates] --name NAME
 ```
 
 After any change to cards or a route run `check`; before changing a statement run `impact` and say which cards and

@@ -44,7 +44,7 @@ OCRの式・量化子・添字が疑わしければ原画像で確認する。�
 
 ## カードで作る場合
 
-カードのプールと route（`local/book/` など）があるとき、または新規教材をカードで作るときは、原著の読み方、
+カードのプールと route（`local/materials/book/` など）があるとき、または新規教材をカードで作るときは、原著の読み方、
 既存カードとの照合、カードの書き方、取り込み時の通常レビュー（自己点検・原文混入の検査・固定入力での独立確認）を
 [book-harness](../book-harness/SKILL.md) の[読む手順](../book-harness/references/reading-loop.md)と
 [導入時レビュー](../book-harness/references/intake-review.md)に従う。本スキルは原著の版・採否・証明義務・全訳指定の

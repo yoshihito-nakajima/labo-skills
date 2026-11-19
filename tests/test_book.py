@@ -637,6 +637,17 @@ class DocumentationTests(unittest.TestCase):
             self.assertTrue(route["sections"][0]["items"])
 
 
+class CodeDocumentationTests(unittest.TestCase):
+    def test_every_check_code_is_explained(self):
+        import re
+        src = (ROOT / "src/labo_tools/book.py").read_text(encoding="utf-8")
+        found = set(re.findall(r'add\(\s*"(?:error|warning)",\s*"([A-Z][A-Z-]+)"', src)) | \
+            set(re.findall(r'\("(?:error|warning)", "([A-Z-]+)"', src))
+        doc = (ROOT / "skills/book-harness/references/check-codes.md").read_text(encoding="utf-8")
+        self.assertGreater(len(found), 55)
+        self.assertEqual([c for c in sorted(found) if f"`{c}`" not in doc], [])
+
+
 class FollowUpTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -677,6 +688,77 @@ class FollowUpTests(unittest.TestCase):
         meta = yaml.safe_load((root / "route/intro-a/map/map-new.md").read_text().split("---")[1])
         self.assertEqual((meta["scope_audit"], meta["adoption"], meta["sources"]), ("TODO", "adopted", []))
         self.assertIn("edition", yaml.safe_load((root / "src/src-new.md").read_text().split("---")[1]))
+
+
+class RobustnessTests(unittest.TestCase):
+    """Malformed input is reported by `check`, never a traceback."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.ws = Path(self.tmp.name).resolve()
+        self.root = self.ws / "book"
+        make(self.root)
+
+    def test_wrongly_typed_front_matter_is_an_error_not_a_crash(self):
+        (self.root / "pool/arith/bad.md").write_text(
+            "---\nid: bad\nkind: A1\ntitle: t\nvariant: predicate\nstatus: drafted\nrequires: nope\n"
+            "anchors: 5\nmaps_to: 3\n---\n## 定義\nx\n", encoding="utf-8")
+        for action in ("check", "status", "list"):
+            res = run_cli(self.ws, action)
+            self.assertNotIn("Traceback", res.stderr, res.stderr)
+        self.assertIn("BAD-FIELD", codes(bk.check(bk.Book(self.root))))
+
+    def test_unreadable_files_and_routes(self):
+        (self.root / "pool/arith/binary.md").write_bytes(b"\xff\xfe\x00bad")
+        (self.root / "route/intro-a/route.yaml").write_text("sections: [: :", encoding="utf-8")
+        found = bk.check(bk.Book(self.root))
+        self.assertIn("PARSE", codes(found))
+        for action, extra in (("check", ["--route", "intro-a"]), ("status", ["--route", "intro-a"]),
+                              ("render", ["--route", "intro-a"]), ("html", ["--route", "intro-a", "--name", "x"])):
+            res = run_cli(self.ws, action, *extra)
+            self.assertNotIn("Traceback", res.stderr, (action, res.stderr))
+            self.assertEqual(res.returncode, 2, (action, res.stdout, res.stderr))
+
+    def test_every_action_on_an_empty_root_fails_cleanly_or_succeeds(self):
+        empty = self.ws / "empty"
+        (empty / "book").mkdir(parents=True)
+        for action, args in (("check", []), ("status", []), ("search", ["x"]), ("list", []), ("show", ["nope"]),
+                             ("closure", ["nope"]), ("impact", ["nope"]), ("graph", ["--route", "nope"]),
+                             ("deps", []), ("merge", ["a", "b"]), ("retire", ["a", "--reason", "r"])):
+            res = run_cli(empty, action, *args)
+            self.assertNotIn("Traceback", res.stderr, (action, res.stderr))
+            self.assertIn(res.returncode, (0, 1, 2))
+
+
+class VerifyImportTests(unittest.TestCase):
+    TEX = ImportTexTests.TEX + "\nSome prose between blocks that no card holds.\n"
+
+    def test_unchanged_import_verifies_and_edits_are_found(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp).resolve()
+            tex = tmp / "toy.tex"
+            tex.write_text(self.TEX, encoding="utf-8")
+            root = tmp / "book"
+            imp = ROOT / "skills/book-harness/scripts/import_tex.py"
+            ver = ROOT / "skills/book-harness/scripts/verify_import.py"
+            subprocess.run([sys.executable, "-I", str(imp), "--tex", str(tex), "--root", str(root), "--route", "toy",
+                            "--area", "arith"], capture_output=True, text=True, check=True)
+            ok = subprocess.run([sys.executable, "-I", str(ver), "--tex", str(tex), "--root", str(root), "--json"],
+                                capture_output=True, text=True)
+            data = json.loads(ok.stdout)
+            self.assertEqual(ok.returncode, 0, ok.stdout)
+            self.assertEqual((data["missing_cards"], data["changed_text"]), ([], []))
+            self.assertGreater(data["lines_not_in_any_card"], 0)
+            card = root / "pool/arith/lem-sum.md"
+            card.write_text(card.read_text(encoding="utf-8").replace("Sums of evens", "Products of evens"), encoding="utf-8")
+            (root / "pool/arith/def-even.md").unlink()
+            bad = subprocess.run([sys.executable, "-I", str(ver), "--tex", str(tex), "--root", str(root), "--json"],
+                                 capture_output=True, text=True)
+            data = json.loads(bad.stdout)
+            self.assertEqual(bad.returncode, 1)
+            self.assertEqual(data["missing_cards"], ["def:even"])
+            self.assertEqual([c["label"] for c in data["changed_text"]], ["lem:sum"])
 
 
 if __name__ == "__main__":

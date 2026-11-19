@@ -244,6 +244,36 @@ def dump_card(meta: dict, body: str) -> str:
     return "---\n" + yaml.safe_dump(meta, sort_keys=False, allow_unicode=True, width=100) + "---\n" + body
 
 
+LIST_OF_TEXT = ("requires", "requires_candidates", "references", "between", "forward", "answered_by", "conventions",
+                "well_defined", "aliases", "symbols", "index", "not_requires")
+LIST_OF_MAPS = ("maps_to", "borrows", "relations", "sources", "reviews")
+MAPS = ("anchors", "searched")
+TEXT = ("proves", "illustrates", "target", "variant", "status", "title", "area", "label")
+
+
+def sanitize(meta: dict) -> list:
+    """Coerce wrongly typed front matter to an empty value; return what was wrong, so `check` reports it
+    instead of a later step failing on it."""
+    wrong = []
+    for key in LIST_OF_TEXT:
+        if key in meta and not (isinstance(meta[key], list) and all(isinstance(x, str) for x in meta[key])):
+            wrong.append(f"{key} must be a list of ids")
+            meta[key] = [x for x in meta[key] if isinstance(x, str)] if isinstance(meta[key], list) else []
+    for key in LIST_OF_MAPS:
+        if key in meta and not (isinstance(meta[key], list) and all(isinstance(x, dict) for x in meta[key])):
+            wrong.append(f"{key} must be a list of mappings")
+            meta[key] = [x for x in meta[key] if isinstance(x, dict)] if isinstance(meta[key], list) else []
+    for key in MAPS:
+        if key in meta and not isinstance(meta[key], dict):
+            wrong.append(f"{key} must be a mapping")
+            meta[key] = {}
+    for key in TEXT:
+        if key in meta and meta[key] is not None and not isinstance(meta[key], str):
+            wrong.append(f"{key} must be text")
+            meta[key] = str(meta[key])
+    return wrong
+
+
 INDEX_DIR = ".index"  # generated parse cache and lock; keep it out of every Git
 
 
@@ -298,10 +328,13 @@ class Book:
                     card.kind = str(card.meta.get("kind", ""))
                     card.template = TEMPLATES.get(card.kind)
                     card.sections, card.unknown_sections = card._split()
-            except BookError as exc:
+            except (BookError, OSError, UnicodeDecodeError) as exc:
                 self.problems.append(("error", "PARSE", path.stem, str(exc)))
                 continue
-            fresh[key] = [st.st_mtime_ns, st.st_size, card.meta, card.body]
+            raw = json.loads(json.dumps(card.meta))  # the cache keeps what the file says, not the coerced copy
+            for msg in sanitize(card.meta):
+                self.problems.append(("error", "BAD-FIELD", card.id, msg))
+            fresh[key] = [st.st_mtime_ns, st.st_size, raw, card.body]
             card.route = slot[1]
             card.slot = slot[0]
             if card.id in self.cards:
@@ -339,7 +372,12 @@ class Book:
         path = self.root / "route" / slug / "route.yaml"
         if not path.is_file():
             raise BookError(f"route not found: {slug}")
-        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        try:
+            data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        except (yaml.YAMLError, UnicodeDecodeError) as exc:
+            raise BookError(f"route {slug}: route.yaml cannot be read: {exc}") from exc
+        if not isinstance(data, dict):
+            raise BookError(f"route {slug}: route.yaml must be a mapping")
         sections = []
         for inc in data.get("includes") or []:
             sections += self.load_route(inc, _chain + (slug,))["sections"]

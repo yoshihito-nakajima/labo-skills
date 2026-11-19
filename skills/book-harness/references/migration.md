@@ -11,9 +11,13 @@ restart boundary with every writer stopped.
    `requires` and `sources`. Existing labels stay as `label`, so references keep resolving.
    Prose between blocks becomes B cards in the route's order; the chapter's headings become the
    route's sections. Unlabelled blocks are counted and reported, not guessed at.
-2. **Check the split is lossless.** Render the route at L4 and compare with the original chapter
-   (same blocks in the same order after normalization, then the same compiled pages where the
-   book is built). Report every difference; do not proceed on a mismatch.
+2. **Check the mirror.** `scripts/verify_import.py --tex FILE --root R [--lines A-B ...]` compares every labelled
+   item (statement, proof, example, exercise, solution) with its card's text, ignoring comments and white space,
+   and reports missing cards, changed text and the share of non-blank TeX lines that no card holds (prose, remarks,
+   unlabelled material). Run it again before cut-over against the final TeX: a changed item means the TeX moved
+   after the import. Do not proceed on a missing or changed item. The uncovered share is the work a cut-over still
+   owes: that text becomes glue or fact cards before the TeX is retired, since the generated book must not lose it;
+   compare the rendered L4 with the original chapter and the compiled pages after that.
 3. **Use the mirror.** Search, graph, impact and views run on the mirror; findings that need a
    text change go to the TeX owner until cut-over.
 4. **Cut over.** Writers stopped; one last mirror from the final TeX; the cards become the

@@ -132,7 +132,10 @@ def _rewrite_routes(book: Book, mapping: dict, apply: bool) -> list:
     changed = []
     for slug in book.routes():
         path = book.root / "route" / slug / "route.yaml"
-        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        try:
+            data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        except (yaml.YAMLError, UnicodeDecodeError) as exc:
+            raise BookError(f"route {slug}: route.yaml cannot be read: {exc}") from exc
         hit = [False]
 
         def fix(item):

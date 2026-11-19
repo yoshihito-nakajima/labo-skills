@@ -1,6 +1,6 @@
 # 本から講義へ
 
-カードで作る場合（`local/book/`）の対応：資料 → C1、数学（ID・依存・確認範囲）→ A系カード、講義 → route とつなぎ
+カードで作る場合（`local/materials/book/`）の対応：資料 → C1、数学（ID・依存・確認範囲）→ A系カード、講義 → route とつなぎ
 カード、採用範囲の照合 → C2。手順は [book-harness](../../book-harness/SKILL.md)。以下は台帳と TeX で作る従来の流れ。
 
 ## 三つの識別層
