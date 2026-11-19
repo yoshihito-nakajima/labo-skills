@@ -794,6 +794,22 @@ def _route_checks(book: Book, slug: str, add):
                     add("warning", "OPEN-QUESTION", c.id, f"answering card {a} is not in route {slug}")
             if not c.meta.get("answered_by"):
                 add("warning", "OPEN-QUESTION", c.id, "no answered_by recorded")
+    owners: dict = {}
+    for c in cards.values():
+        if c.kind in ("A1", "A2", "A3", "A4", "A5", "A6"):
+            for lab in [c.meta.get("label")] + list(c.meta.get("aliases") or []) + re.findall(r"\\label\{([^}]+)\}", c.body):
+                if lab and lab not in owners:
+                    owners[lab] = c.id
+    for cid in sorted(shown):
+        c = cards[cid]
+        if not c.legacy:
+            continue
+        gone = sorted({owners[lab] for g in re.findall(r"\\(?:c|C|eq|auto)?ref\*?\{([^}]*)\}", c.body) for lab in g.split(",")
+                       if (lab.strip() in owners and owners[lab.strip()] not in pos and owners[lab.strip()] != cid)})
+        if gone:
+            add("warning", "LEGACY-REF-OUTSIDE-ROUTE", cid,
+                f"an imported card refers to {', '.join(gone[:4])}{' ...' if len(gone) > 4 else ''}, which route {slug} does not contain "
+                f"(the reference prints as ?? in the book)")
     for cid, c in cards.items():
         if c.route == slug and c.kind in ("B1", "B2", "B3", "B4", "B5") and cid not in pos:
             add("warning", "UNUSED-GLUE", cid, f"glue card of route {slug} is not placed in it")
@@ -1038,7 +1054,78 @@ def render_tex(book: Book, route: str, level: str = "L3", *, standalone: bool = 
     return (head + f"\n\\title{{{heading}}}\n\\date{{}}\n\\begin{{document}}\n\\maketitle\n\n{body}\n\\end{{document}}\n")
 
 
+# Unicode symbols that a text font lacks: written as \ensuremath so they work in text and in math alike
+TEX_UNICODE = {"⇒": r"\ensuremath{\Rightarrow}", "⇐": r"\ensuremath{\Leftarrow}", "⇔": r"\ensuremath{\Leftrightarrow}",
+               "−": r"\ensuremath{-}", "≤": r"\ensuremath{\le}", "≥": r"\ensuremath{\ge}", "≠": r"\ensuremath{\ne}",
+               "∈": r"\ensuremath{\in}", "∀": r"\ensuremath{\forall}", "∃": r"\ensuremath{\exists}",
+               "∅": r"\ensuremath{\varnothing}", "⊆": r"\ensuremath{\subseteq}", "⊂": r"\ensuremath{\subset}",
+               "∪": r"\ensuremath{\cup}", "∩": r"\ensuremath{\cap}", "×": r"\ensuremath{\times}", "ℵ": r"\ensuremath{\aleph}",
+               "∞": r"\ensuremath{\infty}", "→": r"\ensuremath{\to}", "↦": r"\ensuremath{\mapsto}",
+               **{g: "\\ensuremath{\\%s}" % n for g, n in zip("αβγδεζηθλμνξπρστφχψω", "alpha beta gamma delta varepsilon zeta eta theta lambda mu nu xi pi rho sigma tau varphi chi psi omega".split())}}
+MATH_SPAN = re.compile(r"(\$\$.*?\$\$|\$.*?\$)", re.S)
+
+
+def tex_unicode(text: str) -> str:
+    parts = MATH_SPAN.split(text)
+    # symbols the text font lacks: also inside math they are harmless (\ensuremath), so replace everywhere
+    for k, v in TEX_UNICODE.items():
+        parts = [p.replace(k, v) for p in parts]
+    return "".join(parts)
+
+
+BOLD_MD = re.compile(r"\*\*(.+?)\*\*", re.S)
+LIST_LINE = re.compile(r"^\s*(?:(\d+)[.)]|[-*])\s+(.*)$")
+
+
+def markdown_to_tex(text: str) -> str:
+    """The small part of Markdown card text uses: **bold** and ordered or bulleted lists (math is left alone)."""
+    parts = MATH_SPAN.split(text)
+    text = "".join(p if i % 2 else BOLD_MD.sub(r"\\textbf{\1}", p) for i, p in enumerate(parts))
+    out, items, kind = [], [], None
+
+    def flush():
+        nonlocal items, kind
+        if items:
+            env = "enumerate" if kind == "ol" else "itemize"
+            out.append("\\begin{%s}\n" % env + "".join("\\item %s\n" % x for x in items) + "\\end{%s}" % env)
+        items, kind = [], None
+
+    for line in text.splitlines():
+        m = LIST_LINE.match(line)
+        if m and not line.startswith(("$$", "\\")):
+            k = "ol" if m.group(1) else "ul"
+            if kind not in (None, k):
+                flush()
+            kind = k
+            items.append(m.group(2))
+        elif items and line.strip() and line.startswith((" ", "\t")):
+            items[-1] += " " + line.strip()  # continuation of a list item
+        else:
+            flush()
+            out.append(line)
+    flush()
+    return "\n".join(out)
+
+
+def tex_text(text: str) -> str:
+    return markdown_to_tex(tex_unicode(text))
+
+
+def tex_title(title: str) -> str:
+    """A card title as an optional argument: text outside $...$ gets its special characters escaped."""
+    parts = MATH_SPAN.split(tex_unicode(title))
+    return "".join(p if i % 2 else re.sub(r"([_&%#])", r"\\\1", p) for i, p in enumerate(parts))
+
+
 def _resolve(book: Book, text: str) -> str:
+    """`[[id]]` and the cites `[by: a, b]` become cross references (cleveref lists)."""
+    def by(m):
+        ids = [x.strip() for x in m.group(1).split(",") if x.strip()]
+        if ids and all(i in book.cards for i in ids):
+            return "（\\cref{%s}）" % ",".join(card_label(book.cards[i]) for i in ids)
+        return m.group(0)
+
+    text = BY_RE.sub(by, text)
     return MENTION_RE.sub(lambda m: f"\\cref{{{card_label(book.cards[m.group(1)])}}}"
                           if m.group(1) in book.cards else m.group(0), text)
 
@@ -1063,7 +1150,7 @@ def _index_lines(c: Card, macros: dict) -> str:
 
 def _tex_card(book: Book, c: Card, language: str = "ja", macros: dict | None = None) -> str:
     m = c.meta
-    s = {k: _resolve(book, v) for k, v in c.sections.items()}
+    s = {k: _resolve(book, v if c.legacy else tex_text(v)) for k, v in c.sections.items()}
     own_label = c.legacy and m.get("label")  # an imported body already carries its label
     label = "" if own_label else f"\\label{{{card_label(c)}}}\n"
     index = _index_lines(c, macros or {})
@@ -1072,7 +1159,7 @@ def _tex_card(book: Book, c: Card, language: str = "ja", macros: dict | None = N
                "A5": "exercise", "A6": m.get("env", "axiom")}[c.kind]
         mark = "" if c.kind == "A3" else label
         return f"\\begin{{{env}}}\n{mark}{s['body']}\n\\end{{{env}}}\n"
-    title = f"[{m['title']}]" if m.get("title") and c.kind in ("A1", "A2") else ""
+    title = f"[{tex_title(m['title'])}]" if m.get("title") and c.kind in ("A1", "A2") else ""
     if c.kind == "A1":
         return f"\\begin{{definition}}{title}\n{label}{index}{s.get('definition', '')}\n" \
                f"{s.get('notation', '')}\n\\end{{definition}}\n"
@@ -1088,6 +1175,9 @@ def _tex_card(book: Book, c: Card, language: str = "ja", macros: dict | None = N
         return (f"\\begin{{exercise}}\n{label}{s.get('question', '')}\n\\end{{exercise}}\n"
                 f"\\begin{{solution}}\n{s.get('solution', '')}\n\\end{{solution}}\n")
     if c.kind == "A6":
+        env = m.get("env") or ("axiom" if c.id.startswith("ax-") else None)
+        if env:
+            return f"\\begin{{{env}}}{title or (f'[{tex_title(m['title'])}]' if m.get('title') else '')}\n{label}{index}{s.get('convention', '')}\n\\end{{{env}}}\n"
         return f"\\paragraph{{{'規約' if language == 'ja' else 'Convention'}}}\n{label}{s.get('convention', '')}\n"
     if c.kind == "B5":
         return "\n".join(s[k] for k in ("endpoint", "known", "conventions", "reader") if s.get(k)) + "\n"
@@ -1113,14 +1203,15 @@ def status(book: Book, route: str | None = None) -> dict:
     audit = [c for c in book.cards.values() if c.kind == "C2" and (route is None or c.route == route)]
     complete = bool(audit) and all(c.meta.get("scope_audit") in ("OK", "OUT") for c in audit) \
         and not open_major and not result["errors"]
-    math = [c for c in book.cards.values() if c.kind in ("A1", "A2", "A3", "A4", "A5", "A6")
-            and (route is None or c.id in _route_ids(book, route))]
+    in_route = [c for c in book.cards.values() if c.kind in ("A1", "A2", "A3", "A4", "A5", "A6")
+                and (route is None or c.id in _route_ids(book, route))]
+    math = [c for c in in_route if not c.legacy]  # carried-over legacy cards are counted apart, not reviewed here
     review = {"math_cards": len(math), "reviewed_current": sum(1 for c in math if c.reviewed_ok(book)),
               "reviewed_stale": sum(1 for c in math if not c.reviewed_ok(book)
                                     and any(r.get("kind") == "math" for r in c.meta.get("reviews") or [])),
               "never_reviewed": sum(1 for c in math if not any(r.get("kind") == "math"
                                                                for r in c.meta.get("reviews") or []))}
-    return {"cards": len(book.cards), "review": review,
+    return {"cards": len(book.cards), "review": review, "carried_over_legacy": len(in_route) - len(math),
             "legacy": sum(1 for c in book.cards.values() if c.legacy),
             "candidates_pending": sum(1 for c in book.cards.values() if c.meta.get("requires_candidates")),
             "by_kind": by_kind, "errors": len(result["errors"]),

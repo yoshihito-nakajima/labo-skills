@@ -47,7 +47,8 @@ Never stop on a single worker's return; stop on `DONE` or an explicit stop by th
    producer unit. (Producer role.)
 3. **Source rows still `TODO`, `MISSING` or `PARTIAL`** → a producer unit `read:<row>`: the reading loop for one row.
 4. **Imported (legacy) cards**, **unconfirmed dependency candidates**, **stale cards** → producer units in bounded
-   batches (`--batch-chars`).
+   batches (`--batch-chars`). With `--skip-legacy` imported cards are *carried over* as they are (they render as their
+   original text, are not restructured and not reviewed here, and `status` counts them separately).
 5. **Ready fact cards without a current math review** (split into sections, variant chosen, not stated-only, fresh,
    no check error) → `RUN review-input ...` to make frozen packets in `--review-dir`; then each open packet →
    a reviewer unit `review:<case>/<packet>`. (Reviewer role.)

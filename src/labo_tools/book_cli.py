@@ -116,6 +116,8 @@ def register(areas, add_workspace) -> None:
             sub.add_argument("--claim", help="claim a dispatched unit for this holder (always pass it when running for real)")
             sub.add_argument("--ttl-hours", type=float, default=12.0, help="claims and unanswered packets expire after this")
             sub.add_argument("--batch-chars", type=int, default=30000)
+            sub.add_argument("--skip-legacy", action="store_true",
+                             help="carry imported (legacy) cards over as they are: no restructure or dependency units for them")
         if name == "place":
             sub.add_argument("route_name", metavar="ROUTE")
             sub.add_argument("ids", nargs="+")
@@ -178,7 +180,8 @@ def run(args) -> int:
     if act == "status":
         st = bk.status(book, args.route)
         lines = [f"cards: {st['cards']}  errors: {st['errors']}  warnings: {st['warnings']}  legacy: {st['legacy']}  "
-                 f"unconfirmed dependency candidates: {st['candidates_pending']}"]
+                 f"unconfirmed dependency candidates: {st['candidates_pending']}  "
+                 f"carried-over legacy cards in the route (not reviewed here): {st['carried_over_legacy']}"]
         lines += [f"  {k}: " + ", ".join(f"{s} {n}" for s, n in sorted(v.items())) for k, v in sorted(st["by_kind"].items())]
         r = st["review"]
         lines += [f"math review of fact cards: current {r['reviewed_current']}, stale {r['reviewed_stale']}, "
@@ -305,7 +308,8 @@ def run(args) -> int:
                             review_dir=_path(args, args.review_dir) if args.review_dir else None,
                             work_dir=_path(args, args.work_dir) if args.work_dir else None,
                             source_text=[str(_path(args, p)) for p in args.source_text or []] or None,
-                            ttl_hours=args.ttl_hours, batch_chars=args.batch_chars, claim=args.claim)
+                            ttl_hours=args.ttl_hours, batch_chars=args.batch_chars, claim=args.claim,
+                            skip_legacy=args.skip_legacy)
         if args.format == "json":
             print(json.dumps(out, ensure_ascii=False, indent=2))
         else:

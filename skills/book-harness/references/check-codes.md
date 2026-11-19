@@ -52,6 +52,7 @@ fix the cause.
 | `PREVIEW-REQUIRED` (error), `PREVIEW-EARLIER`, `PREVIEW-MISSING` (warning) | A previewed result may not be a prerequisite; it should come later in the route and exist. |
 | `OPEN-QUESTION` (warning) | A motivation card without an answering card in the route. |
 | `UNUSED-GLUE` (warning) | Glue of this route that the route does not place. |
+| `LEGACY-REF-OUTSIDE-ROUTE` (warning) | An imported (carried-over) card refers by `\cref`/`\ref` to a card the route lacks; the book prints `??`. Add the card to the route, or rewrite the reference. |
 
 ## Freshness, imports, reviews, mappings
 

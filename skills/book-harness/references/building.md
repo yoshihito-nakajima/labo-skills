@@ -9,6 +9,10 @@ and is not tracked, and nobody edits it.
   rendered fact card carries that label. Referring by id keeps references valid when a card moves between books.
   A mention of a card that is not in the route (and not borrowed) is warned about (`REF-OUTSIDE-ROUTE`).
   Legacy bodies keep their own labels.
+- **Text in cards.** Card text is Markdown-light: `**bold**`, numbered and bulleted lists, `$...$` math. Proof cites
+  `[by: a, b]` print as a cross reference (`\cref{...}`); an axiom card (`ax-...` or `env: axiom`) renders as an
+  `axiom` environment. Unicode symbols a text font lacks (⇒ ⇐ ⇔ ω ℵ ...) are written as `\ensuremath{...}`; a title with
+  `_`, `&`, `%`, `#` outside `$...$` is escaped.
 - **Whole document.** `--standalone --language ja|en [--title T]` adds a preamble (`ja`: upLaTeX + dvipdfmx,
   `jsarticle`; `en`: pdfLaTeX/XeLaTeX `article`; both with amsthm environments and cleveref) and the document
   wrapper; `--preamble FILE` replaces the built-in preamble with the project's own (it must define the environments

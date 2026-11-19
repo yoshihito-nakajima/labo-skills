@@ -956,5 +956,41 @@ class PerCardResultTests(ScriptedTakeIn):
         self.assertTrue(book.cards["claim-odd-product"].reviewed_ok(book))
 
 
+class CarriedOverLegacyTests(ScriptedTakeIn):
+    def test_legacy_cards_in_a_route_are_carried_over_not_chased(self):
+        self.take_in()
+        old = {"id": "def-old", "kind": "A1", "title": "Old", "variant": "unclassified", "legacy": True, "area": "parity",
+               "requires": [], "status": "self-checked"}
+        (self.root / "pool/parity/def-old.md").write_text(bk.dump_card(old, "## 本文\n\nOld text.\n"), encoding="utf-8")
+        run_cli(self.ws, "place", "toy-parity", "def-old")
+        st = json.loads(self.cli("status", "--route", "toy-parity", "--format", "json").stdout)
+        self.assertEqual(st["carried_over_legacy"], 1)
+        args = ["next", "--route", "toy-parity", "--role", "producer", "--format", "json"]
+        self.assertEqual(json.loads(run_cli(self.ws, *args).stdout)["unit"], "legacy:def-old")
+        skipped = json.loads(run_cli(self.ws, *args, "--skip-legacy").stdout)
+        self.assertEqual(skipped["action"], "WAIT")
+
+
+class TexSafetyTests(unittest.TestCase):
+    def test_titles_and_unicode_symbols_are_made_tex_safe(self):
+        self.assertEqual(bk.tex_title("自然数 N_R と $N_R$ & $x_1$"), "自然数 N\\_R と $N_R$ \\& $x_1$")
+        out = bk.tex_unicode("(⇒) と (⇐) と $a⇔b$ と 3−1")
+        self.assertNotIn("⇒", out)
+        self.assertIn("\\ensuremath{\\Rightarrow}", out)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "book"
+            make(root)
+            put(root, "pool/arith/def-x.md", fact("def-x", "A1", variant="predicate", title="数 N_R"), definition="a ⇒ b")
+            bk.place if False else None
+            import yaml as _y
+            p = root / "route/intro-a/route.yaml"
+            d = _y.safe_load(p.read_text(encoding="utf-8"))
+            d["sections"][0]["items"].append("def-x")
+            p.write_text(_y.safe_dump(d, allow_unicode=True), encoding="utf-8")
+            tex = bk.render_tex(bk.Book(root), "intro-a", "L0")
+            self.assertIn("[数 N\\_R]", tex)
+            self.assertNotIn("⇒", tex)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -187,7 +187,7 @@ def _chunks(ids: list, book: Book, limit: int) -> list:
 
 def decide(book: Book, route: str, *, workspace: Path, root: Path, role: str = "all", review_dir: Path | None = None,
            work_dir: Path | None = None, source_text: list | None = None, ttl_hours: float = 12.0,
-           batch_chars: int = 30000, claim: str | None = None) -> dict:
+           batch_chars: int = 30000, claim: str | None = None, skip_legacy: bool = False) -> dict:
     if role not in ROLES:
         raise BookError(f"role must be one of {', '.join(ROLES)}")
     producer, reviewer = role in ("producer", "all"), role in ("reviewer", "all")
@@ -303,7 +303,7 @@ def decide(book: Book, route: str, *, workspace: Path, root: Path, role: str = "
                                "DONE <unit> | cards: <ids> | row now: <state> | open: <obligations or none>")
                 if out:
                     break
-        if producer and out is None:
+        if producer and out is None and not skip_legacy:
             legacy = [i for i in seq_ids if book.cards[i].legacy]
             if legacy:
                 batch = _chunks(legacy, book, batch_chars)
@@ -312,7 +312,7 @@ def decide(book: Book, route: str, *, workspace: Path, root: Path, role: str = "
                                "Restructure these imported cards into the template's sections (book restructure), choose the "
                                "variant, delete the old '本文', set legacy false; settle their dependency candidates.",
                                ["pool-operations.md", "templates.md"], "DONE <unit> | restructured: <ids>")
-        if producer and out is None:
+        if producer and out is None and not skip_legacy:
             pend = [i for i in seq_ids if book.cards[i].meta.get("requires_candidates")]
             if pend:
                 batch = _chunks(pend, book, batch_chars)
