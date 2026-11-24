@@ -40,6 +40,13 @@ paper's notation decisions belong with that paper.
 - Distinguish a defining equality from an asserted one: write
   `\coloneqq` (mathtools) when a symbol is being defined and `=` only for
   equalities that are claimed or computed.
+- Lead a defining sentence with the new term, or define the symbol in a
+  display with `\coloneqq` and state the ranges of the variables after it.
+  Avoid "We call [a long noun phrase with formulas] the T": the term the
+  reader is waiting for comes last, and two formulas end up separated only by
+  "of" or "over". Display variants of one quantity side by side instead of
+  repeating the sentence for each, and pair the names with the display by
+  "respectively".
 - Typeset multi-part statements (a), (b), ... as a list.
 - When a definition extends a quantity to new arguments, write its formula
   again unless it is literally the same (an infimum over a family is not the
@@ -61,6 +68,11 @@ paper's notation decisions belong with that paper.
   statement text.
 
 ## Proof economy
+
+- Do not use Landau notation ($O$, $o$, $\Theta$, $\Omega$, or $\lesssim$
+  hiding constants) unless the author asks for it. State explicit bounds with
+  named constants and what they depend on, or write the limit.
+
 
 - Expand a lemma used only once into the proof that uses it, even at some cost
   in length; keep a separate lemma when it is reused or isolates a genuinely

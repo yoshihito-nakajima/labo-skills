@@ -1,25 +1,24 @@
-# Reading a source into the pool
+# Work through a book's scope
 
-The producer's loop for taking a book (or part of one) into the card pool. One pass takes one **unit**: the
-smallest piece of a source that can be adopted or declined as a whole — a section's definitions and results with
-their proofs, one exercise with its solution, one convention. Work a unit or a small group from one section at a
-time, in the order the route or plan gives. Intake is not finished at the last card: it ends with the
-[intake review](intake-review.md).
+Use this loop for an assigned source range, a topic, or a topic with assigned sources. A **unit** is a section or
+coherent group of results with a stated endpoint in the route plan. It may use a source passage, existing cards,
+or both. Work in plan order and keep the direct prerequisites within the unit's reading context.
+For Japanese text, apply the [writing rules](writing-rules.md) when drafting cards and reading the assembled section.
 
 ## The loop
 
-1. **Frame.** Know the book (route), the source and its record (`C1`; create it with `book new C1 <id>` if
-   missing, with edition, hash and the page map), and the unit's place in the route. Run `book check --route R`;
-   start from a state without new errors.
-2. **Read the unit completely**: statements, proofs, the exercises that belong to it. Note hypotheses, quantifier
-   order, boundary cases (empty sets, empty index, degenerate objects), what the source leaves to the reader, and
-   anything wrong.
+1. **Frame.** Find the unit's place, allowed prerequisites and endpoint in the route plan. For each source
+   being taken in, find or create its `C1` with edition, hash and page map. Run `book check --route R` to establish
+   the starting state.
+2. **Read the assigned material and check its mathematics.** Cover the relevant statements, proofs and adopted
+   exercises. Note hypotheses, quantifier order, boundary cases, omissions and errors. If the unit uses existing
+   cards, read those cards and their direct prerequisites against the requested endpoint.
 3. **Decide the cards** ([granularity](#granularity)).
-4. **Search the pool before writing** (the whole pool: every volume of the course must already be imported, or a result
-   owned by another volume is missed) (`book search`, at least three queries: the notion's name, its symbols, key
-   words, in each language the pool uses and under older names; `book show` the nearest candidates). Compare
-   hypotheses, quantifiers, normalization and the proof route, then choose:
-   - **same** statement → reuse: add the new locator to the card's `sources`, write the C2 row with relation `same`;
+4. **Search the pool before writing** (`book search`, then `book show`). Search across volumes by name, symbols and
+   key words, including relevant alternative names or languages. For material being migrated, import the other
+   volumes into the mirror before treating the search as exhaustive. Compare hypotheses, quantifiers, normalization
+   and the proof route, then choose:
+   - **same** statement → reuse; when adding a source, add its locator and a C2 row with relation `same`;
    - differing hypotheses, domain or strength → a new card with a `variant`, `implies`, `special-case` or
      `equivalent` relation that says what differs;
    - same statement, materially different proof → another A3 for the same claim (`owner: false`) only when it adds
@@ -27,22 +26,25 @@ time, in the order the route or plan gives. Intake is not finished at the last c
    - nothing fits → new, with `--decision new --reason`.
 5. **Write the cards in the book's own words** ([no copying](#no-copying)), in the template's sections: each step of
    a proof justified with `[by: card-id]`, boundary cases stated, hypotheses used. Name other cards in running text
-   as `[[card-id]]` so references survive moving cards between books.
-6. **Place the cards in the route** in reading order: `book place <route> <ids> [--section "Title"] [--after <card>]`
-   (a claim shows its owning proof by itself; never edit `route.yaml` by hand while others write). Then **write the
-   C2 row** for the unit: every source that covers it with locators, `maps_to` with relations,
-   `adoption` and `scope_audit`. `OK` only when the cards exist and their proofs are closed; otherwise `PARTIAL`,
-   `TODO` or `MISSING` with the remaining obligation. `OUT` names the book that owns it.
+   as `[[card-id]]` so references survive moving cards between books. Record terms, notation and key formulas at
+   their introduction when the book carries an index. Check that the reader-facing fields contain everything
+   needed to understand and use the fact.
+6. **Place the cards in the route** with `book place <route> <ids> [--section "Title"] [--after <card>]`.
+   A claim shows its owning proof by default. Use the locked commands for concurrent writes. If taking source
+   material in, record each covered source range in C2 with locators, `maps_to`, `adoption` and `scope_audit`.
+   Use `OK` when the cards exist and required proofs are closed. Record the reason and outstanding obligation
+   for other states, including the owning book for a deferred item. Reused cards retain their source locators.
 7. **Self-check** every definition, construction, proof, calculation and solution; set `status: self-checked`
    only for what was actually checked. Run `book anchor` on cards whose neighbours you read, `book check --route R`,
    and settle `book deps` candidates for imported cards.
-8. **End of a batch** (a section group; tens of pages, see capacity below): intake review.
+8. **End of a batch** (a related group of units): [review the new or changed cards](intake-review.md).
 
 ## Granularity
 
 - One statement, one proof, one example or one exercise per card; statement and proof are separate cards.
-- A lemma a proof needs and others may cite is its own card. Sub-items (i)(ii)(iii) stay together unless cited or
-  proved separately.
+- A lemma a proof needs and others may cite is its own card. Keep sub-items together when they form one
+  statement. Split them when a proof or a route needs one independently, and cite the exact card that
+  introduces each notation or supplies each inference used. The route can present related cards together.
 - One definition card per notion. Notation shared by several definitions is an `A1 notation-only` card; a rule that
   governs a whole book part (product measure convention, "numbers are integers") is an `A6`.
 - A remark with no mathematics gets no card. A remark that is mathematics ("this fails without X") is an A4
@@ -81,6 +83,16 @@ changes. Glue belongs to one route: another book that reuses the cards writes it
 - Choosing exercises: adopt those later text uses, those that test a definition, and counterexamples; each adopted
   one is an A5 with a worked solution; each declined one that the plan expects has a C2 reason.
 
+## Adapt a result from a paper
+
+Read the exact cited statement and proof before choosing what to carry into the route. Use the
+[result reuse check](../../knowledge-dependencies/SKILL.md#reuse-a-result-across-artifacts) and record the paper
+version and locators in C1/C2. Follow the book's agreed prerequisite boundary to decide which cited results or
+omitted steps to supply, and note additions or changes in the mapping. If a published or shareable source is
+available, use its precise locator in the rendered book. For a local unpublished source, follow its existing
+access and citation constraints. Self-check and independently review new or changed mathematics under the
+[route review rules](intake-review.md).
+
 ## Several sources for one content
 
 Read the second source against the cards of the first. Compare statements; add its locator and a C2 row with the
@@ -89,9 +101,10 @@ joining books on the pool must settle which one a route uses.
 
 ## A unit is done when
 
-`check --route` has no error for it; its cards are in the template's sections (not `legacy`), with variants chosen;
-its C2 rows are not `TODO`; locators and relations are recorded; the self-check is real. The batch is done when the
-intake review is.
+The cards placed in the route reach the unit's stated endpoint, the self-check is recorded, and structural
+checks have no unresolved errors for the unit. New cards use the appropriate templates and variants. For source
+intake, the C2 rows reflect actual adoption and coverage. Track independent review at the batch boundary and
+confirm route-wide closure at the book boundary.
 
 ## Capacity
 

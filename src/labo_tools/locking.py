@@ -17,6 +17,36 @@ else:
 
 
 @contextmanager
+def try_exclusive_lock(stream: BinaryIO) -> Iterator[bool]:
+    """Try once to acquire the retained file lock, yielding whether it succeeded."""
+    if _msvcrt is not None:
+        stream.seek(0)
+        try:
+            _msvcrt.locking(stream.fileno(), _msvcrt.LK_NBLCK, 1)
+        except OSError as exc:
+            if exc.errno != errno.EACCES:
+                raise
+            yield False
+            return
+        try:
+            yield True
+        finally:
+            stream.seek(0)
+            _msvcrt.locking(stream.fileno(), _msvcrt.LK_UNLCK, 1)
+    else:
+        assert _fcntl is not None
+        try:
+            _fcntl.flock(stream.fileno(), _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+        except BlockingIOError:
+            yield False
+            return
+        try:
+            yield True
+        finally:
+            _fcntl.flock(stream.fileno(), _fcntl.LOCK_UN)
+
+
+@contextmanager
 def exclusive_lock(stream: BinaryIO) -> Iterator[None]:
     """Hold a native exclusive lock until exit, including exceptional exit.
 

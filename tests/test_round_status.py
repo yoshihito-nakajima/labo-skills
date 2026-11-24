@@ -111,7 +111,7 @@ class RoundStatusTest(unittest.TestCase):
     def test_fingerprint_moves_with_actionable_changes_only(self):
         fp0 = self.fp(self.status("writing"))
         self.assertEqual(fp0, self.fp(self.status("writing")))
-        with (self.root / "logs/writing.md").open("a") as f:
+        with (self.root / "logs/writing.md").open("a", encoding="utf-8") as f:
             f.write("01-02 10:00 確認後に変更の整理 v1：記録 1\n")
         out = self.status("writing")
         self.assertIn("整理（本文側）: 済 01-02 10:00", out)

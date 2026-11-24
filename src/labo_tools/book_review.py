@@ -34,9 +34,10 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def select(book: Book, route: str, *, cards: list | None = None, section: int | None = None,
+def select(book: Book, route: str, *, cards: list | None = None, section: int | str | None = None,
            closure: str | None = None, unreviewed: str | None = None) -> list:
-    seq = book.sequence(book.load_route(route))
+    data = book.load_route(route)
+    seq = book.sequence(data)
     order = list(dict.fromkeys(e["id"] for e in seq if e["id"] in book.cards))
     pool = [i for i in order if book.cards[i].kind in ("A1", "A2", "A3", "A4", "A5", "A6")]
     if cards:
@@ -46,6 +47,14 @@ def select(book: Book, route: str, *, cards: list | None = None, section: int | 
         want = set(cards) | {p.id for c in cards for p in book.proofs_of(c)}
         return [i for i in pool if i in want] + [c for c in cards if c not in pool]
     if section is not None:
+        if isinstance(section, str):
+            if section.isdecimal():
+                section = int(section)
+            else:
+                indexes = [i for i, row in enumerate(data["sections"]) if row["id"] == section]
+                if len(indexes) != 1:
+                    raise BookError(f"route {route}: section id {section!r} must identify one section")
+                section = indexes[0]
         return [e["id"] for e in seq if e["section"] == section and e["id"] in pool]
     if closure:
         if closure not in book.cards:

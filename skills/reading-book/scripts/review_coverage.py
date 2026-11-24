@@ -31,7 +31,7 @@ the case with the current hashes of the case's target results, and those hashes 
 ``current`` (reported as accepted minor repairs). A later change of the block makes it ``changed``
 again. Repairs of major or medium findings are not recorded this way; they get a recheck.
 
-``--groups`` JSON: {"groups": [{"name": "f06", "spans": [{"file": "chapters/x.tex", "start": 1,
+``--groups`` JSON: {"groups": [{"name": "intro", "spans": [{"file": "chapters/x.tex", "start": 1,
 "end": 400, "priority": false}], "stable_with": ["volumes/x/preliminaries.tex"]}]}. With groups,
 blocks outside every span are ignored. ``priority`` spans (e.g. new proofs) are proposed first.
 A chunk is stable when its file and every ``stable_with`` file were last written at least
@@ -46,6 +46,9 @@ import json
 import pathlib
 import sys
 import time
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import tex_blocks  # noqa: E402
@@ -148,13 +151,13 @@ def read_repair(case: pathlib.Path) -> dict | None:
 
 def load_groups(root: pathlib.Path, path: pathlib.Path | None, files: list[pathlib.Path]) -> list[dict]:
     if path is None:
-        return [{"name": str(f.relative_to(root)), "spans": [{"file": str(f.relative_to(root)), "start": 1,
+        return [{"name": f.relative_to(root).as_posix(), "spans": [{"file": f.relative_to(root).as_posix(), "start": 1,
                  "end": 10 ** 9, "priority": False}], "stable_with": []} for f in files]
     return json.loads(path.read_text(encoding="utf-8"))["groups"]
 
 
 def same_file(a: str, b: str) -> bool:
-    a, b = a.lstrip("./"), b.lstrip("./")
+    a, b = a.replace("\\", "/").lstrip("./"), b.replace("\\", "/").lstrip("./")
     return a == b or a.endswith("/" + b) or b.endswith("/" + a)
 
 

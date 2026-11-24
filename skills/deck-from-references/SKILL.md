@@ -38,7 +38,8 @@ colour, language and length choices in the project and the author profile, not h
 3. **Build every page with the shared pieces.** `assets/beamer/talkstyle.sty`
    gives the navigation header with progress bar, subsection tag, title and grey
    subtitle, closing bar, panels, source tag, figure caption and code style, and a
-   language switch (`\T{English}{日本語}`). Use one source with two thin roots per
+   language switch (`\T{English}{日本語}`), and a recall line (`\recall{...}`) that restates
+   in one grey line a definition from pages back when it is used again. Use one source with two thin roots per
    language so that pages correspond one to one and the build slugs differ. See
    `assets/beamer/example.tex`.
 4. **Link everything, and write the why.** Apply [transitions](references/transitions.md):
@@ -63,7 +64,12 @@ colour, language and length choices in the project and the author profile, not h
 7. **Review.** Run the two-stage review over every page of both decks, in both stages with fresh
    agents ([motivation review](../paper-talk-planning/references/motivation-review.md), then
    [blind referee](../paper-talk-planning/references/blind-referee.md)).
-8. **Check the result.** Build both languages without overfull vertical boxes; run
+8. **Let the author comment on pages.** `scripts/slide_comment_view.py <deck.pdf> <out-dir> --tex <deck.tex>`
+   writes one HTML page: each slide as an image with a selectable text layer and the comment layer of
+   [writing-harness](../writing-harness/SKILL.md). The author selects text on a slide, comments, and
+   copies the comments (labelled by slide number and frame title) back to the agent. Rebuild it after
+   each build; put it where the workspace serves private pages.
+9. **Check the result.** Build both languages without overfull vertical boxes; run
    `scripts/deck_audit.py` and compare with the examples; look at every page at
    presentation scale, not zoomed; place a sample next to the examples again. Report
    what was inspected, which pages were measured and not looked at, and whether

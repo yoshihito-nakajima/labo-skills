@@ -121,6 +121,145 @@ class BookTests(unittest.TestCase):
         put(self.root, "route/intro-a/card/entrance-a.md", meta, endpoint="x", known="y", conventions="z")
         found = bk.check(self.book(), "intro-a")
         self.assertIn("UNLISTED-BORROW", codes(found))
+        self.assertNotIn("NO-FIELD", codes(found))
+
+    def test_borrow_pins_follow_proof_and_prerequisites_but_not_printed_numbers(self):
+        from labo_tools.book_reader import build_reader
+
+        def route(slug, items, strict=False):
+            path = self.root / "route" / slug / "route.yaml"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(yaml.safe_dump({
+                "title": slug, "strict_borrows": strict, "typed_navigation": True,
+                "chapters": {f"{slug}-intro": {"title": "Introduction"}},
+                "sections": [{"id": f"{slug}-start", "chapter": f"{slug}-intro",
+                              "title": "Start", "items": items}],
+            }), encoding="utf-8")
+            return path
+
+        def premise(text="Integers belong to the stipulated set."):
+            put(self.root, "pool/arith/def-pinned-premise.md",
+                fact("def-pinned-premise", "A1", variant="predicate"), definition=text)
+
+        def use(text="Use [[claim-pinned]].", depends=True):
+            put(self.root, "pool/arith/def-use-pinned.md",
+                fact("def-use-pinned", "A1", variant="predicate", requires=["claim-pinned"] if depends else []),
+                definition=text)
+
+        def entrance(entry):
+            put(self.root, "route/using/card/entrance-using.md",
+                {"id": "entrance-using", "kind": "B5", "title": "Entrance", "status": "drafted", "borrows": entry},
+                endpoint="A stipulated use.", known="From the owning book.", conventions="None beyond the source.")
+
+        premise()
+        use()
+        put(self.root, "pool/arith/claim-pinned.md", fact("claim-pinned", "A2", variant="existence"),
+            hypotheses="Given the setup.", conclusion="There is a witness.", quantifiers="For this setup.")
+        for name, owner in (("proof-pinned", True), ("alternate-pinned", False)):
+            put(self.root, f"pool/arith/{name}.md",
+                fact(name, "A3", variant="direct", proves="claim-pinned", owner=owner, requires=["def-pinned-premise"]),
+                plan="Use the stipulated witness.", steps=f"Apply the setup for {name} [by: def-pinned-premise].")
+
+        path = route("owning", ["def-pinned-premise", "claim-pinned"])
+        route("using", ["entrance-using", "def-use-pinned"], strict=True)
+        cli = run_cli(self.root.parent, "borrow", "claim-pinned", "--route", "owning", "--format", "json")
+        self.assertEqual(cli.returncode, 0, cli.stderr)
+        borrow = json.loads(cli.stdout)
+        self.assertRegex(borrow["version"], r"^sha256:[0-9a-f]{64}$")
+        borrow["why"] = "Its witness is used here."
+        entrance([borrow])
+        base = self.book()
+        self.assertEqual(bk.check(base, "using")["errors"], [])
+        self.assertIn("Use claim-pinned.", bk.render_tex(base, "using", "L4", language="en"))
+        downstream = bk.BorrowSnapshots(base).version("using", "def-use-pinned")
+
+        # Adding a displayed chapter before the owner's proof changes its number only.
+        route_data = yaml.safe_load(path.read_text())
+        route_data["chapters"]["owning-preface"] = {"title": "Preface"}
+        route_data["sections"].insert(0, {"id": "owning-preface", "chapter": "owning-preface",
+                                          "title": "A marker", "items": ["def-odd"]})
+        path.write_text(yaml.safe_dump(route_data))
+        self.assertEqual(bk.BorrowSnapshots(self.book()).version("owning", "claim-pinned"), borrow["version"])
+        self.assertEqual(bk.check(self.book(), "using")["errors"], [])
+        self.assertEqual(bk.BorrowSnapshots(self.book()).version("using", "def-use-pinned"), downstream)
+
+        premise("The stipulated set changed.")
+        changed = self.book()
+        self.assertIn("BORROW-STALE", codes(bk.check(changed, "using")))
+        with self.assertRaisesRegex(ValueError, "upstream borrow.*stale"):
+            bk.BorrowSnapshots(changed).version("using", "def-use-pinned")
+        with self.assertRaisesRegex(bk.BookError, "BORROW-STALE"):
+            bk.render_tex(changed, "using", "L4")
+        with self.assertRaisesRegex(bk.BookError, "BORROW-STALE"):
+            build_reader(changed, "using")
+        premise()
+
+        route("owning", ["def-pinned-premise", {"card": "claim-pinned", "proof": "alternate-pinned"}])
+        self.assertIn("BORROW-STALE", codes(bk.check(self.book(), "using")))
+        route("owning", ["def-pinned-premise", {"card": "claim-pinned", "proof": "omit"}])
+        self.assertIn("BORROW-INVALID", codes(bk.check(self.book(), "using")))
+        route("owning", ["def-pinned-premise", "claim-pinned"])
+
+        entrance([{**borrow, "owner": "intro-b"}])
+        self.assertIn("BORROW-INVALID", codes(bk.check(self.book(), "using")))
+        entrance([{k: v for k, v in borrow.items() if k != "version"}])
+        self.assertIn("BORROW-INVALID", codes(bk.check(self.book(), "using")))
+        entrance([])
+        self.assertIn("UNLISTED-BORROW", codes(bk.check(self.book(), "using")))
+        use("Use [by: claim-pinned].", depends=False)
+        self.assertIn("REF-OUTSIDE-ROUTE", codes(bk.check(self.book(), "using")))
+        use("Use [[typo-in-prerequisite]].", depends=False)
+        with self.assertRaisesRegex(bk.BookError, "REF-OUTSIDE-ROUTE"):
+            build_reader(self.book(), "using")
+
+        entrance([borrow])
+        use(r"See \cref{card:claim-pinned} in \ref{chapter:owning-intro}.")
+        with self.assertRaisesRegex(bk.BookError, "TEX-REF-OUTSIDE-ROUTE"):
+            bk.render_tex(self.book(), "using", "L4")
+
+    def test_shared_card_renumbers_per_book_and_external_borrow_has_no_local_tex_link(self):
+        from labo_tools.book_reader import build_reader
+
+        put(self.root, "pool/arith/def-marker.md", fact("def-marker", "A1", variant="predicate"),
+            definition="A marker used for this fixture.")
+        put(self.root, "pool/arith/def-even.md",
+            fact("def-even", "A1", variant="predicate", title="Even integer"),
+            definition="An integer of the form $2k$.")
+        put(self.root, "pool/arith/def-uses-even.md",
+            fact("def-uses-even", "A1", variant="predicate", requires=["def-even"]),
+            definition="Use [[def-even]]. Cite both [by: def-even, def-marker].")
+        for slug, definitions in (("intro-a", ["def-even", "def-marker", "def-uses-even"]),
+                                  ("intro-b", ["def-marker", "def-even", "def-uses-even"]),
+                                  ("intro-c", ["def-marker", "def-uses-even"])):
+            route = self.root / "route" / slug / "route.yaml"
+            route.parent.mkdir(parents=True, exist_ok=True)
+            if slug == "intro-c":
+                put(self.root, "route/intro-c/card/entrance-c.md",
+                    {"id": "entrance-c", "kind": "B5", "title": "Entrance C", "status": "drafted",
+                     "borrows": [{"card": "def-even", "owner": "intro-a", "why": "parity",
+                                  "version": bk.BorrowSnapshots(self.book()).version("intro-a", "def-even")}]},
+                    endpoint="Parity.", known="Even integers.", conventions="Integers.")
+                definitions.insert(0, "entrance-c")
+            route.write_text(yaml.safe_dump({"title": slug, "chapters": {"intro": {"title": "Introduction"}},
+                                             "sections": [{"id": f"first-{slug}", "chapter": "intro", "title": "First",
+                                                           "items": definitions}]}),
+                             encoding="utf-8")
+        book = self.book()
+        self.assertEqual(book.node_requires("def-uses-even"), ["def-even"])
+        for slug, number in (("intro-a", "1.1.1"), ("intro-b", "1.1.2")):
+            self.assertEqual(bk.check(book, slug)["errors"], [])
+            self.assertIn(f'href="#def-even">Definition {number}</a>', build_reader(book, slug, language="en"))
+            self.assertIn(r"Use \cref{card:def-even}.", bk.render_tex(book, slug, "L4", language="en"))
+        self.assertEqual(bk.check(book, "intro-c")["errors"], [])
+        tex = bk.render_tex(book, "intro-c", "L4", language="en")
+        self.assertIn(r"Use Even integer. Cite both （Even integer、\cref{card:def-marker}）.", tex)
+        self.assertNotIn(r"\cref{card:def-even}", tex)
+
+        joint = self.root / "route/joint/route.yaml"
+        joint.parent.mkdir()
+        joint.write_text("title: Joint\nincludes: [intro-a, intro-b]\n", encoding="utf-8")
+        with self.assertRaisesRegex(bk.BookError, "chapter id 'intro' is shared by separate routes"):
+            book.load_route("joint")
 
     def test_stale_after_a_definition_changes_and_anchor_clears_it(self):
         book = self.book()
@@ -247,6 +386,56 @@ class BookTests(unittest.TestCase):
         page = run("book", "html", "--route", "intro-a", "--name", "toy-a", "--slice", "closure:claim-parity")
         self.assertEqual(page.returncode, 0, page.stderr)
         self.assertTrue((ws / "output/toy-a.html").is_file())
+        bundle = ws / "mathjax.js"
+        bundle.write_text('const svgBundle = "</script>";', encoding="utf-8")
+        reader = run("book", "read", "--route", "intro-a", "--language", "en", "--mathjax-bundle", str(bundle))
+        self.assertEqual(reader.returncode, 0, reader.stderr)
+        page = (ws / "output/book-intro-a.html").read_text(encoding="utf-8")
+        self.assertIn('href="#sec-2">2　Odd</a>', page)
+        self.assertIn('href="#def-even">Definition 1.1</a>', page)
+        self.assertIn('class="proof" id="proof-even-sum" data-card="proof-even-sum"', page)
+        self.assertIn('"version": "intro-a / ', page)
+        self.assertIn(r'const svgBundle = "<\/script>";', page)
+        self.assertNotIn("<script defer src=", page)
+
+
+class ChapterRouteTests(unittest.TestCase):
+    def test_chapter_structure_is_shared_by_tex_and_html(self):
+        from labo_tools.book_reader import build_reader
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for cid in ("first-definition", "second-definition", "appendix-definition"):
+                put(root, f"pool/arith/{cid}.md", fact(cid, "A1", variant="predicate"),
+                    definition="A fictional definition.")
+            route = root / "route" / "chaptered" / "route.yaml"
+            route.parent.mkdir(parents=True)
+            route.write_text(
+                "title: A small book\nchapters:\n"
+                "  main: {title: Main chapter}\n"
+                "  extra: {title: Technical details, appendix: true}\n"
+                "sections:\n"
+                "  - {id: start, chapter: main, title: First, items: [first-definition]}\n"
+                "  - {id: continue, chapter: main, title: Second, items: [second-definition]}\n"
+                "  - {id: details, chapter: extra, title: Details, items: [appendix-definition]}\n",
+                encoding="utf-8",
+            )
+            book = bk.Book(root)
+            tex = bk.render_tex(book, "chaptered", standalone=True, language="en")
+            html = build_reader(book, "chaptered", language="en")
+            self.assertIn(r"\documentclass[11pt]{book}", tex)
+            self.assertEqual(tex.count(r"\chapter{Main chapter}"), 1)
+            self.assertIn(r"\section{Second}\label{section:continue}", tex)
+            self.assertIn("\\appendix\n\n\\chapter{Technical details}", tex)
+            self.assertIn('href="#chapter-main"', html)
+            self.assertIn('<h3 id="sec-continue">1.2　Second</h3>', html)
+            self.assertIn('<h3 id="sec-details">A.1　Details</h3>', html)
+            for label in ("Definition 1.1.1", "Definition 1.2.1", "Definition A.1.1"):
+                self.assertIn(label, html)
+
+            route.write_text(route.read_text().replace("id: continue", "id: start"))
+            with self.assertRaisesRegex(bk.BookError, "duplicate section id"):
+                book.load_route("chaptered")
 
 
 class ImportTexTests(unittest.TestCase):
@@ -481,6 +670,48 @@ class OperationTests(unittest.TestCase):
         self.assertNotIn("Unrelated", res.stdout)
         clean = rv.leak_check(self.book(), [src], min_run=60)
         self.assertEqual(clean, [])
+
+    def test_equations_and_exercises_have_typed_targets_in_both_editions(self):
+        from labo_tools.book_reader import build_reader
+
+        path = self.root / "route/intro-b/route.yaml"
+        route = yaml.safe_load(path.read_text(encoding="utf-8"))
+        route["typed_navigation"] = True
+        route["sections"][0]["items"] += ["def-formula", "exer-formula"]
+        path.write_text(yaml.safe_dump(route), encoding="utf-8")
+        entry = {"term": "$t(c)=c$", "reading": "rule", "target": "eq:exercise-rule"}
+        put(self.root, "pool/arith/def-formula.md",
+            fact("def-formula", "A1", variant="notation-only", formula_index=[entry]),
+            definition=r"Use the rule $a=a\label{eq:identity}$ and see \cref{eq:identity}." +
+                       "\n\n" + r"\[b=b\]")
+        put(self.root, "pool/arith/exer-formula.md",
+            fact("exer-formula", "A5", requires=["def-formula"]),
+            question=r"Apply [[def-formula]] and \eqref{eq:identity}.",
+            solution=r"\[t(c)=c\label{eq:exercise-rule}\]")
+        book = self.book()
+        self.assertNotIn("EQUATION-NAVIGATION", codes(bk.check(book, "intro-b")))
+        tex = bk.render_tex(book, "intro-b", "L4", standalone=True, language="en")
+        self.assertIn(r"\bookinlineequation{eq:identity}{$a=a$}", tex)
+        self.assertIn(r"\begin{equation}\label{eq:exercise-rule}", tex)
+        self.assertIn(r"\bookformulaindex{eq:exercise-rule}{rule}{$t(c)=c$}", tex)
+        self.assertIn(r"\cref{card:exer-formula}", tex)
+        self.assertIn(r"\newaliascnt{exercise}{theorem}", tex)
+        self.assertIn(r"\cref{eq:identity}", tex)
+        self.assertIn(r"\eqref{eq:identity}", tex)
+        self.assertNotIn(r"\bookformulaindex{eq:exercise-rule}",
+                         bk.render_tex(book, "intro-b", "L0", index_macros={"formula": "bookformulaindex"}))
+        reader = build_reader(book, "intro-b", language="en", tex_numbers={"eq:identity": "9.7"})
+        self.assertIn('id="eq:exercise-rule"', reader)
+        self.assertIn('href="#eq:identity">(9.7)</a>', reader)
+        self.assertIn('href="#eq:identity">Equation (9.7)</a>', reader)
+        self.assertIn('href="#exer-formula">Exercise ', reader)
+        self.assertGreaterEqual(reader.count('href="#eq:exercise-rule"'), 3)
+
+        entry["target"] = "eq:missing"
+        put(self.root, "pool/arith/def-formula.md",
+            fact("def-formula", "A1", variant="notation-only", formula_index=[entry]),
+            definition=r"\[b=b\]")
+        self.assertIn("EQUATION-NAVIGATION", codes(bk.check(self.book(), "intro-b")))
 
     def test_render_standalone_resolves_card_mentions(self):
         put(self.root, "pool/arith/claim-ref.md", fact("claim-ref", "A2", variant="existence", requires=["def-even"]),

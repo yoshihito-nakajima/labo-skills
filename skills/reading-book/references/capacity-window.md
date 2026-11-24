@@ -1,6 +1,6 @@
 # Running long unattended rounds within the usage window
 
-Long book and course runs (parent threads that wake on a schedule and hand work to workers; how to set them up and correct them is in [long-run-rounds](../../long-run-rounds/SKILL.md)) share one account's usage limits. The usual one is the 5-hour window; there is also a weekly limit. A thread cannot read its remaining quota. When a limit is reached, the API answers each request with a synthetic message such as `You've hit your 5-hour limit · resets 7:20am (Asia/Tokyo)` until the reset time. Workers running at that moment stop in the middle of their unit.
+Long book and course runs (parent threads that wake on a schedule and hand work to workers; how to set them up and correct them is in [long-run-rounds](../../long-run-rounds/SKILL.md)) share one account's usage limits. The usual one is the 5-hour window; there is also a weekly limit. A thread cannot read its remaining quota. Parsing reset messages with named timezones other than UTC requires a system IANA timezone database or the Python `tzdata` package. When a limit is reached, the API answers each request with a synthetic message such as `You've hit your 5-hour limit · resets 10:20pm (UTC)` until the reset time. Workers running at that moment stop in the middle of their unit.
 
 ## Estimate, calibrate, stage
 

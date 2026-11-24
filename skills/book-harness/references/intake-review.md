@@ -1,15 +1,28 @@
-# Intake review: normal review when a book is taken in
+# Review and close a card route
 
-Taking a source into the pool ends with a **normal review**, not with the last card. It combines the producer's
-self-check, mechanical gates and a bounded independent review of the new or changed cards. It is not the hard
-(adversarial) review, which is a separate explicit task.
+Use normal review for any route, with a route-wide check at the book boundary. An explicit hard review is a
+separate task.
+
+## When to call an independent reviewer
+
+Self-check new or changed work inside the production unit. Send ordinary independent reviews once a coherent
+section or group of units has stabilized. Freeze the new or changed material and give the reviewer its direct
+prerequisites and relevant source passages. Carry forward valid reviews for unchanged versions and inputs.
+Group related repairs and recheck the changed mathematics and affected uses. Handle requested output checks at
+coherent build boundaries.
+
+Bring a bounded review forward when the next work relies on a decisive new proof or a serious issue in a
+direct prerequisite puts that work in doubt. Hold only the dependent work and continue other units. At the
+book boundary, close
+remaining required reviews and check the assembled route. For sizing and budget, use the
+[course handoff guidance](../../course-authoring/references/production-handoff.md#まとまった範囲で提出する).
 
 ## 1. Self-check (producer)
 
 For every new or changed fact card: hypotheses and quantifier order stated; boundary cases handled; every notion
 used defined earlier or borrowed (entrance `borrows`); every proof step justified and the cites equal to `requires`;
-no run of source sentences; locators and relations recorded; C2 rows written; exercise solutions worked. Mark
-`self-checked` only for what was checked, and say what was not.
+exercise solutions worked. Where using sources, check the wording, locators and relations, and record C2 source
+coverage for material being taken in. Mark `self-checked` for the actual scope checked.
 
 ## 2. Mechanical gates
 
@@ -21,9 +34,10 @@ book deps --route R                       # imported cards: promote real prerequ
 book leak-check --route R --source-text <dir of the sources' local text> [--source-text ...]
 ```
 
-`leak-check` must scan every source the C2 rows name, and it fails when nothing was scanned. It reports card ids,
-run lengths and the card's own words; fix by rewriting the card, then rerun. A clean result covers English runs of
-at least 12 words outside math; it does not cover paraphrase or translation.
+When taking source material in, `leak-check` must scan every source the relevant C2 rows name, and it fails
+when nothing was scanned. It reports card ids, run lengths and the card's own words; fix by rewriting the card,
+then rerun. A clean result covers English runs of at least 12 words outside math. Check paraphrase and translation
+as part of the producer's reading.
 
 ## 3. Independent review
 
@@ -33,16 +47,16 @@ book review-input --route R --unreviewed math --out local/review/<case>/input [-
 
 writes frozen packets (`manifest.json` with each card's id and fingerprint, `cards.md`, a reader note); an existing
 folder is never overwritten. Hand a packet to [reading-book-math-review](../../reading-book-math-review/SKILL.md)
-(a fresh context, a capable model; a lightweight coordinator does not read and judge itself). If the book was
-rendered and built, [reading-book-output-review](../../reading-book-output-review/SKILL.md) takes the PDF and the
-matching `render` source. Continue independent production while waiting. When no independent reviewer is available,
-record the unperformed range in the project's progress and do not record a pass.
+(a fresh context with the [capability required by the work](rounds.md#roles-and-model-capability)). For a check
+needed before a dependent unit, use `--cards` for the exact claims and proofs. If an independent reviewer is
+unavailable, record the unchecked range in the project's progress.
 
 ## 4. Returned report
 
 Triage every finding: for each real one `book new D1 <id> --route R --target <card> --severity major|minor --summary
 "..."` (it records the target's fingerprint); repair the cards; `book anchor` the cards that read them; `book check`.
-Then review only what changed: `review-input --cards <changed ids>`, and record the result:
+Group related repairs. Use `review-input --cards <ids>` for changed mathematics and affected uses that need
+independent confirmation, and record the result:
 
 ```sh
 book record-review --manifest <packet>/manifest.json --report <report file> --result pass|findings [--ids ...]
@@ -53,18 +67,27 @@ stays unreviewed. A `pass` of a math review lifts a card from `drafted` or `self
 report is stored by hash, not copied. `check` warns when a card marked `independent` no longer matches a review.
 List `--ids` as the cards the reviewer checked completely; do not pass the whole packet if the reviewer covered less.
 
-## 5. The batch is taken in when
+For a PDF comment, keep the reviewed artifact and route version, physical page and label or card ID, and the
+issue. Repair reader text in the card. Record a common build defect once with representative locations and
+the affected scope. Distinguish the author's repair and regeneration from a checked repair of the new version.
 
-- `check --route R` has no error and `leak-check` is clean;
-- no new card is `legacy` or lacks a chosen variant;
-- every new or changed fact card has a current math review (`book status` shows `never` and `stale` zero for the
-  batch), or the unperformed range is written down with its reason;
-- no open major finding (D1) for the batch;
-- the C2 rows of the batch are not `TODO`.
+## 5. Route closure
 
-`book status` prints `complete` (source mappings) and `taken in` (complete and every fact card has a current math
-review). The second is the criterion above; do not report a batch as taken in on `complete` alone.
+- **Scope and reading order.** Compare the route to the agreed plan. Check each unit, stated prerequisites and
+  borrows, definition order, proof obligations and joins between sources or sections. Check the requested
+  transitions or lecture structure. Run `book check` and resolve errors and relevant findings.
+- **Mathematics.** New and changed fact cards use the appropriate templates and carry current independent
+  reviews. Reused reviews apply to the recorded fingerprint and its prerequisites. Use `book impact` after a
+  change to reread affected cards and prose and reopen the relevant confirmation. Report remaining unchecked
+  work and carried-over legacy cards with their actual coverage.
+- **Sources.** Resolve the C2 rows for the assigned source scope and run the verbatim check for material taken in.
+- **Requested output.** For a reader-facing PDF, check representative card text, references, colors and
+  indexes at the first assembled preview. Later checks follow coherent build boundaries and cover changes
+  and their effects, with wider coverage after a shared build change. Record the route, build settings and PDF
+  identity for [output review](../../reading-book-output-review/SKILL.md). Carry forward relevant math review
+  evidence while the mathematical content and prerequisites are unchanged.
 
-Report separately what was written, what was self-checked, what was independently reviewed and what was not.
-Changed mathematics later restarts only the affected cards: `impact`, reread the anchored prose, review again what
-changed.
+The current `book status` prints `complete` for source mappings and `taken in` for source coverage plus review of
+in-scope non-legacy fact cards. It reports carried-over legacy separately. To close an assembled route, record the
+reading-order and scope check against the plan, including for routes with no new C2 rows. Report written,
+self-checked and independently reviewed ranges with their versions.

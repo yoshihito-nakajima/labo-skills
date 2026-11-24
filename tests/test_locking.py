@@ -74,6 +74,19 @@ class OutputLockTests(unittest.TestCase):
         stdout, stderr = process.communicate(input="release\n" if release else None, timeout=10)
         self.assertEqual(process.returncode, 0, stdout + stderr)
 
+    def test_nonblocking_lock_reports_contention_and_release(self):
+        path = self.root / "try.lock"
+        child = ("import sys; sys.path.insert(0, sys.argv[1]); "
+                 "from labo_tools.locking import try_exclusive_lock; "
+                 "f = open(sys.argv[2], 'a+b'); "
+                 "exec('with try_exclusive_lock(f) as acquired:\\n print(acquired)')")
+        def attempt():
+            return subprocess.run([sys.executable, "-I", "-c", child, str(SOURCE_ROOT), str(path)],
+                                  capture_output=True, text=True, check=True).stdout.strip()
+        with path.open("a+b") as stream, locking.exclusive_lock(stream):
+            self.assertEqual(attempt(), "False")
+        self.assertEqual(attempt(), "True")
+
     def test_native_processes_serialize_and_reuse_the_retained_file(self):
         first_marker = self.root / "first.acquired"
         first = self.child(first_marker, "hold")

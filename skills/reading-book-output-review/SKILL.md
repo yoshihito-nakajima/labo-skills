@@ -20,13 +20,20 @@ description: Review indexes, rendering and navigation in a frozen long-course PD
 
 カードの本では、出力は `book render` の生成物（標準は `--standalone` か本体の `\input`）とその route の版を固定して
 受け取る。所見は PDF 側の位置に加えて対応するカード id を示す。生成物の TeX は直さず、直すのはカードである。
+共通の組版に起因する所見は、代表位置と影響範囲を制作・統合担当へ報告する。
 
+- HTMLの読者版も渡す場合は [カードの読書画面](../book-harness/references/views.md#reader-facing-html) を使う。
+  同版PDFとの参照先、目次、証明の開閉、選択コメントが該当するカードと版に戻ることを代表箇所で確認する。
+- [カードと読者版の対応](../book-harness/references/building.md#card-content-in-the-reader-edition)に従い、適用範囲・例外・
+  読者向けの注意が実際の本文に届くかを照合する。証明やつなぎに番号がなければ、節または主張のラベルとカード id を使う。
+- [読者向けの見出し](../book-harness/references/building.md#reader-facing-build)に従い、表紙・節見出し・目次・PDF のしおり・
+  HTML の見出しに制作単位 ID や版管理用のコードが表示されていれば、該当箇所と route のタイトルを記録する。
 - 索引・番号・参照は [mathematical-navigation](../mathematical-navigation/SKILL.md)、
   検査と証拠の引継ぎはその [PDF手順](../mathematical-navigation/references/pdf-checks.md)を使う。
   その通常ビルド手順はこの担当に公式ビルドの権限を与えない。
 - 本文内部参照の種類名・番号・対象環境の一致は
   [型付き参照](../mathematical-navigation/references/typed-references.md)も確認する。
-  リンクが到達しても、手書きの「命題」が実際の「定理」と異なる場合は参照表示の所見として返す。
+  表示された種類名・番号、リンクの色、見出し・番号の色、到達先をそれぞれ確認する。
 - 対象範囲の本文、定義・記法・式の登録元、生成索引、導入先を突き合わせる。
   本文起点の意味上の網羅性と、既存リンクの構造的な正常性を区別する。
   一つの定義で構造・追加性質・関連概念を複数導入した場合も、各概念の読みから引ける見出し／別名と導入先を確認する。
@@ -63,6 +70,20 @@ mathematical-navigation の構造検査、前版から本文が変わった頁�
 
 所見は共通契約の形式で、対象版、本文ラベル、物理頁と必要なら印刷頁、
 索引項目または経路、問題と修正案、影響先、再確認箇所を示す。
+カードの本では route の版、使用した共通設定の版、PDF のハッシュを残し、再生成後の確認を対応する版へ結び付ける。
 組版・描画・操作の未確認と、実際に発見した欠陥を分ける。数学の疑いは位置と理由を
 本文担当へ戻し、この確認だけで証明の正しさを認定しない。
 正本・出力への反映は本文担当が行う。後続版には、引き継げる証拠と再確認が必要な範囲を返す。
+
+
+For a chaptered card route, compare the planned hierarchy with the generated PDF contents, bookmarks and
+the HTML navigation. Test representative cross-references and index links across chapter boundaries.
+Use `python3 .agents/skills/reading-book-output-review/scripts/check_reader_outline.py --root local/materials/book --route ROUTE --pdf FILE --html FILE --toc-pages FIRST LAST`. Pass the inclusive physical pages of the printed contents. The checker compares their chapter and section numbers, PDF bookmarks, HTML headings and HTML anchors against the route. It uses `pdftotext` from Poppler and `mutool` from MuPDF. Inspect the printed titles, representative destinations and index links. When PDF text extraction is unreliable, record the printed pages checked visually.
+See [card build and navigation checks](../book-harness/references/building.md#reader-facing-build).
+
+
+## カード本の式・索引・番号一覧
+
+`typed_navigation: true` を使うカード本では、同じ版の aux の型と番号、PDF の索引・番号一覧ページにあるリンク、
+HTML のアンカーと表示番号を照合する。数式索引では式への着地を確認する。
+代表操作では本文の式参照と、折りたたまれた証明または解答への索引リンクを確認する。

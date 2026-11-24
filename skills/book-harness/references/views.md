@@ -2,6 +2,24 @@
 
 All views are generated from the cards and may be regenerated at any time.
 
+## Reader-facing HTML
+
+Use `book read --route R` for the page you give a reader. It follows the [paper reading layout](../../writing-harness/references/cards.md#reading-page) for the book's route. The page has a contents menu, readable paragraphs and transitions, adjustable type
+size and width, light and dark themes, and folded proofs and solutions. The default output is
+`output/book-R.html`. In the workspace that serves `output/` locally, give the reader its loopback URL.
+The local bundle at `local/cache/mathjax/3.2.2/tex-svg-full.js` is embedded when available.
+Use `--mathjax-bundle FILE` to choose another local MathJax SVG bundle. The self-contained
+copy supports touch selection, comment export, and a control to expand all proofs.
+
+The book supplies the displayed kind and number of each target. Compare HTML and PDF
+from the same route when handing off both. Where a project uses custom PDF counters, compare with
+those actual numbers. Check a section link, a typed reference, a folded proof and a selection
+comment on the first assembled preview. Later check the changed content and affected controls.
+Comments carry the selected text, the source card and the reading version. In a folded proof,
+the comment points to the proof card. Apply reader-text corrections to the cards and regenerate.
+
+## Card and dependency tools
+
 - `book graph --route R` writes `route/R/dependencies.yaml` in schema v1 of
   [knowledge-dependencies](../../knowledge-dependencies/SKILL.md): nodes are the route's
   definitions, claims, examples, exercises and conventions; a node requires what its statement

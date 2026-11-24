@@ -31,7 +31,10 @@ import re
 import statistics
 import sys
 from pathlib import Path
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 WINDOW = dt.timedelta(hours=5)
 # Relative weights: input-token equivalents per token type, times a model factor.
@@ -56,9 +59,9 @@ def parse_ts(s):
 def parse_reset(hit, text, tzname):
     """Next occurrence of the clock time `text` (e.g. '7:20am') after `hit`."""
     try:
-        tz = ZoneInfo(tzname)
-    except Exception:
-        tz = dt.timezone.utc
+        tz = dt.timezone.utc if tzname == "UTC" else ZoneInfo(tzname)
+    except ZoneInfoNotFoundError:
+        return None
     m = re.match(r"(?:(\w{3}) (\d+),? )?(\d{1,2})(?::(\d{2}))?\s*([ap]m)", text.strip(), re.I)
     if not m:
         return None
@@ -118,7 +121,7 @@ def scan(root, since):
                 w = sum(TOKEN_W[k] * (u.get(k) or 0) for k in TOKEN_W) * model_factor(msg.get("model"))
                 events.append((t, w / 1e6, msg.get("model") or "?"))
     events.sort()
-    limits.sort()
+    limits.sort(key=lambda limit: limit[0])
     return events, limits
 
 
@@ -146,7 +149,7 @@ def windows(events, limits, now):
 def load_calib(path):
     if path and path.exists():
         try:
-            return json.loads(path.read_text())
+            return json.loads(path.read_text(encoding="utf-8"))
         except ValueError:
             pass
     return {"observed": []}
@@ -176,20 +179,23 @@ def main(argv=None):
     ap.add_argument("--learn-days", type=float, default=3)
     ap.add_argument("--save", type=float, default=0.6)
     ap.add_argument("--stop", type=float, default=0.8)
-    ap.add_argument("--tz", default="Asia/Tokyo")
+    ap.add_argument("--tz", help="display timezone (defaults to the system timezone)")
     ap.add_argument("--now")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
     root = Path(os.path.expanduser(a.projects_dir))
     now = parse_ts(a.now) if a.now else dt.datetime.now(dt.timezone.utc)
-    tz = ZoneInfo(a.tz)
+    try:
+        tz = (dt.timezone.utc if a.tz == "UTC" else ZoneInfo(a.tz)) if a.tz else None
+    except ZoneInfoNotFoundError:
+        ap.error(f"timezone data unavailable for {a.tz!r}")
     calib_path = Path(a.calib) if a.calib else None
     calib = load_calib(calib_path)
     if a.learn:
         calib = learn(calib, root, now, a.learn_days)
         if calib_path:
             calib_path.parent.mkdir(parents=True, exist_ok=True)
-            calib_path.write_text(json.dumps(calib, ensure_ascii=False, indent=1) + "\n")
+            calib_path.write_text(json.dumps(calib, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
     events, limits = scan(root, now - dt.timedelta(hours=24))
     blocks, cur = windows(events, limits, now)

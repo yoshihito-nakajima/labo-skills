@@ -80,6 +80,11 @@ read, with precise theorem, section, or page details where available.
 Never invent references or attribute
 a result from memory when the source can be checked.
 
+When a result is borrowed from another manuscript or located through a book or lecture card, use the
+[result reuse check](../knowledge-dependencies/SKILL.md#reuse-a-result-across-artifacts). Cite the exact source,
+show where the manuscript's objects and assumptions meet the result's hypotheses, and make the manuscript's own
+argument and contribution identifiable. Apply the relevant positioning checks to that contribution.
+
 Treat Lean as evidence for exactly the definitions and statements it checks.
 Do not imply that an informal argument is machine-checked, that a placeholder
 proves a result, or that formalization of a nearby statement establishes the
@@ -136,6 +141,16 @@ to make the prose more formal. Make new stylistic additions only when the user
 asks or the draft clearly calls for them. Raise substantive changes to claims,
 emphasis, or tone for the author to decide.
 
-For an independent report-only assessment, use `paper-referee`; compile or
-refresh the PDF and SyncTeX through `labo-build` when the user wants a rendered
-manuscript.
+## Draft, check and integrate findings
+
+Within an authorized writing or revision task, carry the affected scope through drafting, self-check, any needed
+review, repair and recheck. The producer owns integration. Check statements, proof steps, citations and the
+reader's route as you write. Follow the [shared review timing](../book-harness/references/intake-review.md#when-to-call-an-independent-reviewer)
+for independent checks. Group ordinary reviews at stable section boundaries. Before relying on a decisive new
+proof, give its fixed statement, proof and permitted sources to [math-verifier](../math-verifier/SKILL.md) in a
+fresh context. Continue unrelated writing while it is pending. After repairs, recheck affected mathematics and
+uses against the recorded review scope. For an author-led card manuscript, follow the
+[writing-harness review round](../writing-harness/references/review-loop.md).
+
+For a requested report-only assessment, use [paper-referee](../paper-referee/SKILL.md) within that scope.
+Compile or refresh the requested PDF and SyncTeX through [labo-build](../labo-build/SKILL.md).

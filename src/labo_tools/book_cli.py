@@ -12,9 +12,11 @@ from . import book_ops as ops
 from . import book_review as rev
 from . import book_rounds as rounds
 from .book import Book, BookError
+from .book_borrows import BorrowSnapshots
 
 DEFAULT_ROOT = "local/materials/book"
-ACTIONS = ("check", "status", "search", "new", "anchor", "closure", "impact", "graph", "render", "html",
+LOCAL_MATHJAX = "local/cache/mathjax/3.2.2/tex-svg-full.js"
+ACTIONS = ("check", "status", "search", "new", "anchor", "borrow", "closure", "impact", "graph", "outline", "render", "read", "html",
            "show", "list", "merge", "rename", "retire", "restructure", "deps", "promote", "reject",
            "review-input", "record-review", "leak-check", "next", "release", "place")
 
@@ -27,8 +29,9 @@ def register(areas, add_workspace) -> None:
         add_workspace(sub)
         sub.add_argument("--root", default=DEFAULT_ROOT, help=f"book root, workspace-relative (default {DEFAULT_ROOT})")
         sub.add_argument("--format", choices=("text", "json"), default="text")
-        if name in ("check", "status", "graph", "render", "html", "deps", "review-input", "leak-check", "list", "next"):
-            sub.add_argument("--route", required=name in ("graph", "render", "html", "review-input", "next"), help="route slug")
+        if name in ("check", "status", "borrow", "graph", "outline", "render", "read", "html", "deps", "review-input", "leak-check", "list", "next"):
+            sub.add_argument("--route", required=name in ("borrow", "graph", "outline", "render", "read", "html", "review-input", "next"),
+                             help="route slug")
         if name in ("closure", "impact", "graph", "html"):
             sub.add_argument("--candidates", action="store_true",
                              help="also follow requires_candidates (unconfirmed dependency candidates)")
@@ -49,6 +52,8 @@ def register(areas, add_workspace) -> None:
             sub.add_argument("--target", help="finding (D1): the card it is about")
             sub.add_argument("--severity", choices=bk.SEVERITY)
             sub.add_argument("--summary", help="finding (D1): one-line statement")
+        if name == "borrow":
+            sub.add_argument("id", help="prerequisite card in the owning route")
         if name in ("anchor", "closure", "impact", "show", "restructure"):
             sub.add_argument("ids", nargs="+")
         if name == "list":
@@ -89,15 +94,19 @@ def register(areas, add_workspace) -> None:
         if name == "html":
             sub.add_argument("--slice", dest="slice_", help="closure:<id> | impact:<id> | section:<n> | area:<name> "
                                                               "| kinds:A1,A2")
+        if name in ("read", "html"):
             sub.add_argument("--name", help="write output/<name>.html (the page is regenerable, so output/ is fine)")
             sub.add_argument("--out", help="write to this path instead")
+        if name == "read":
+            sub.add_argument("--language", default="ja", choices=("ja", "en"))
+            sub.add_argument("--mathjax-bundle", help=f"MathJax SVG bundle to embed (uses {LOCAL_MATHJAX} if present)")
         if name == "review-input":
             sub.add_argument("--out", required=True, help="new folder for the frozen packets (workspace-relative)")
             sub.add_argument("--kind", default="math", choices=("math", "output"))
             sub.add_argument("--max-chars", type=int, default=60000, help="split packets above this size")
             sub.add_argument("--cards", help="comma-separated card ids (their proofs follow)")
             sub.add_argument("--cards-file", help="file with one card id per line")
-            sub.add_argument("--section", type=int, help="route section index")
+            sub.add_argument("--section", help="stable route section id or zero-based index")
             sub.add_argument("--closure", help="a card and everything it needs")
             sub.add_argument("--unreviewed", choices=("math", "output"), help="cards without a current review of this kind")
         if name == "record-review":
@@ -121,7 +130,7 @@ def register(areas, add_workspace) -> None:
         if name == "place":
             sub.add_argument("route_name", metavar="ROUTE")
             sub.add_argument("ids", nargs="+")
-            sub.add_argument("--section", help="section title (created if missing) or index; default the last section")
+            sub.add_argument("--section", help="section id, title or index; declare missing sections in chaptered routes")
             sub.add_argument("--after", help="put the cards right after this listed card")
         if name == "release":
             sub.add_argument("unit")
@@ -206,6 +215,14 @@ def run(args) -> int:
                            severity=args.severity, summary=args.summary)
         print("reuse the existing card; nothing written" if path is None else f"wrote {_rel(args, path)}")
         return 0
+    if act == "borrow":
+        try:
+            version = BorrowSnapshots(book).version(args.route, args.id)
+        except ValueError as exc:
+            raise BookError(str(exc)) from exc
+        data = {"card": args.id, "owner": args.route, "version": version}
+        _emit(args, data, yaml.safe_dump([data], sort_keys=False).splitlines())
+        return 0
     if act == "anchor":
         for cid in args.ids:
             if cid not in book.cards:
@@ -237,6 +254,31 @@ def run(args) -> int:
         print(f"wrote {_rel(args, target)} ({len(graph['nodes'])} nodes); check it with "
               f"`labo dependencies check --graph {_rel(args, target)}`")
         return 0
+    if act == "outline":
+        data = book.load_route(args.route)
+        seq = book.sequence(data)
+        outline = bk.route_outline(data, (entry["section"] for entry in seq))
+        lines = [f"# {data['title']}", ""]
+        for index, heading in outline.items():
+            if chapter := heading.get("chapter"):
+                title = chapter["title"] or "付録"
+                lines.extend((f"## {chapter['number']}　{title} 〔{chapter['id']}〕", ""))
+            title = heading["title"] or "付録"
+            lines.extend((f"### {heading['number']}　{title} 〔{heading['id']}〕", "",
+                          "| カード | 種類・題名 | 直接前提・証明対象 |", "|---|---|---|"))
+            heading["cards"] = []
+            for entry in (row for row in seq if row["section"] == index):
+                card = book.cards.get(entry["id"])
+                if card is None:
+                    raise BookError(f"missing card in outline: {entry['id']}")
+                title = str(card.meta.get("title") or card.id).replace("|", r"\|").replace("\n", " ")
+                deps = list(dict.fromkeys(card.requires + ([card.meta["proves"]] if card.meta.get("proves") else [])))
+                heading["cards"].append({"id": card.id, "kind": card.kind, "title": title, "requires": deps})
+                links = "、".join(f"`{cid}`" for cid in deps) or "—"
+                lines.append(f"| `{card.id}` | {card.kind} {title} | {links} |")
+            lines.append("")
+        _emit(args, list(outline.values()), lines)
+        return 0
     if act == "render":
         pre = _path(args, args.preamble).read_text(encoding="utf-8") if args.preamble else None
         text = bk.render_tex(book, args.route, args.level, standalone=args.standalone, language=args.language,
@@ -250,11 +292,19 @@ def run(args) -> int:
         else:
             print(text)
         return 0
-    if act == "html":
+    if act in ("read", "html"):
         from .book_html import build_page, write_page
-        book.use_candidates = args.candidates
-        page = build_page(book, args.route, args.slice_)
-        print(f"wrote {write_page(args.workspace, page, args.name, str(_path(args, args.out)) if args.out else None)}")
+        name = args.name
+        if act == "read":
+            from .book_reader import build_reader
+            bundle_path = _path(args, args.mathjax_bundle or LOCAL_MATHJAX)
+            bundle = bundle_path.read_text(encoding="utf-8") if args.mathjax_bundle or bundle_path.is_file() else None
+            page = build_reader(book, args.route, language=args.language, mathjax_bundle=bundle)
+            name = name or f"book-{args.route}"
+        else:
+            book.use_candidates = args.candidates
+            page = build_page(book, args.route, args.slice_)
+        print(f"wrote {write_page(args.workspace, page, name, str(_path(args, args.out)) if args.out else None)}")
         return 0
     if act == "show":
         infos = [ops.show(book, cid) for cid in args.ids]

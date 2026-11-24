@@ -21,3 +21,9 @@ author = ""
 
 # [mathjax_macros]
 # dist = "d_{\\mathrm{dist}}"
+
+# [build]               # cards.py build / watch / hook / serve (references/outputs-and-editor.md)
+# tex = ["cards.tex"]   # TeX targets under paper_dir; {out = "part1.tex", sections = 3} for a part
+# pdf = false           # TeX and pages only
+# pdf_command = ["latexmk", "-pdf", "{tex}"]   # default in a labo checkout: labo.py output build --source {tex}
+# quiet = 3             # seconds without edits before a background build

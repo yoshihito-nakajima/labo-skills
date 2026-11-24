@@ -1,8 +1,9 @@
 # Review round on a rendered part
 
-Use this when a part of the paper (a section range or the whole draft) is ready
-for the author to read as a paper. It is the harness-specific record of a
-round; the reviewing itself follows [exposition-review](../../exposition-review/SKILL.md)
+Use this when a coherent section range or the whole draft is ready for the author to read as a paper. Follow
+[paper-writing's review timing](../../paper-writing/SKILL.md#draft-check-and-integrate-findings) for checks during
+production. A decisive proof can receive its own fixed-scope check before this rendered review. This round
+follows [exposition-review](../../exposition-review/SKILL.md)
 for prose and [proof-adversarial-review](../../proof-adversarial-review/SKILL.md)
 when a decisive proof needs several independent viewpoints.
 
@@ -32,7 +33,7 @@ Neither edits the source.
 
 ## 3. Triage
 
-Write `reviews/<date>-<part>/README.md`:
+Write `reviews/<date>-<part>/README.md` (template: `assets/review-README.md`):
 
 ```
 # Review of <part> (frozen <date>, <file> sha256 prefix <16 hex>)

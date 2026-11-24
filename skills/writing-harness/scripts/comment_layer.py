@@ -15,14 +15,15 @@ ASSET = Path(__file__).resolve().parents[1] / 'assets' / 'comment-layer.js'
 MARK = '<!-- comment-layer -->'
 
 
-def script(lang=None):
-    cfg = f'<script>window.CommentLayer={json.dumps({"lang": lang})};</script>' if lang else ''
+def script(lang=None, extra=None):
+    opts = {**({'lang': lang} if lang else {}), **(extra or {})}
+    cfg = f'<script>window.CommentLayer={json.dumps(opts, ensure_ascii=False)};</script>' if opts else ''
     return f'{MARK}{cfg}<script>\n{ASSET.read_text(encoding="utf-8")}</script>{MARK}'
 
 
-def inject(html, lang=None):
+def inject(html, lang=None, extra=None):
     html = re.sub(re.escape(MARK) + r'.*?' + re.escape(MARK), '', html, flags=re.S)
-    tag = script(lang)
+    tag = script(lang, extra)
     i = html.lower().rfind('</body>')
     return html[:i] + tag + html[i:] if i >= 0 else html + tag
 

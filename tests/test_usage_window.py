@@ -23,12 +23,12 @@ def assistant(ts, mid, model="claude-sonnet-x", out=0, inp=1_000_000):
                         "content": [{"type": "text", "text": "ok"}]}}
 
 
-def limit(ts, reset="7:20am"):
+def limit(ts, reset="10:20pm"):
     return {"type": "assistant", "timestamp": ts, "isApiErrorMessage": True,
             "message": {"id": "x" + ts, "model": "<synthetic>", "role": "assistant",
                         "usage": {"input_tokens": 0, "output_tokens": 0},
                         "content": [{"type": "text",
-                                     "text": f"You've hit your 5-hour limit · resets {reset} (Asia/Tokyo)"}]}}
+                                     "text": f"You've hit your 5-hour limit · resets {reset} (UTC)"}]}}
 
 
 class UsageWindowTest(unittest.TestCase):
@@ -51,7 +51,7 @@ class UsageWindowTest(unittest.TestCase):
         p.write_text("".join(json.dumps(r) + "\n" for r in rows))
 
     def test_calibrates_from_limit_message_and_stages_current_window(self):
-        # Window 02:20-07:20 JST = 17:20-22:20 UTC. 10 sonnet Mtok (weight 30) then the limit.
+        # Window 17:20–22:20 UTC. 10 sonnet Mtok (weight 30) then the limit.
         prev = [assistant(f"2026-11-17T18:{i:02d}:00Z", f"a{i}") for i in range(10)]
         self.write("one.jsonl", prev + [limit("2026-11-17T20:51:00Z")])
         # The same message logged twice (streaming) counts once; a subagent file counts too.

@@ -88,6 +88,14 @@ ctg = "../../compact-target-gds/harness"   # relative to this harness
 otherwise. Such cards are cited, never rendered here; list them under
 `external:` in `structure.yaml` once the structure exists.
 
+For a result borrowed from another paper or found through a book or lecture card, apply the
+[result reuse check](../../knowledge-dependencies/SKILL.md#reuse-a-result-across-artifacts). Use the existing
+`source` field and notes to record the owner, exact locator and version, the form used and the prior review scope
+if known. Check the paper's application and any change to the proof in the paper's own review. Use `ns:id` for
+companion paper harnesses with the documented layout. For book cards, record their provenance in the card notes
+and give the appropriate mathematical citation in the manuscript. If a reused statement or proof is adapted,
+record the difference and the uses it affects.
+
 ## Status ladder
 
 `stated` -> `drafted` (a proof exists) -> `gap-free` (every step justified) ->
@@ -159,7 +167,15 @@ python3 <skill>/scripts/cards.py read           # reading page: paper order, lar
 python3 <skill>/scripts/cards.py impact ID...
 python3 <skill>/scripts/cards.py anchor ID
 python3 <skill>/scripts/cards.py terms [FILE] [--assumed profile.json] [--json]
+python3 <skill>/scripts/cards.py build [--no-pdf]   # check + render + PDF + html + read
+python3 <skill>/scripts/cards.py watch [--no-pdf]   # background build on every source change
+python3 <skill>/scripts/cards.py hook               # Claude Code PostToolUse hook
+python3 <skill>/scripts/cards.py new KIND ID [--title T] [--requires A,B] [--explains X,Y]
+python3 <skill>/scripts/cards.py serve [--port P]   # reading page + card editor
 ```
+
+`build`, `watch`, `hook`, `serve`, `new` and the `OUTDATED` warning are
+described in [outputs and the editor](outputs-and-editor.md).
 
 `graph` writes `dependencies.yaml` with workspace-relative source paths (the
 enclosing Git root, or `workspace` in `harness.toml`), so
@@ -173,19 +189,24 @@ hand-written root of the same paper). The preamble is generated for
 [labo-build](../../labo-build/SKILL.md):
 `python3 <labo-script> output build --source <harness>/paper/cards.tex`.
 
-`read` writes `read.html` next to the viewer: the paper in reading order with the
+### Reading page
+
+`read` writes `read.html` next to the viewer with the paper in reading order and the
 paper's numbers, proofs folded, references as links, adjustable type size and line
 length (remembered by the browser), light and dark themes. The author selects text,
 adds a comment and copies all comments, each with its card id and the quoted text,
 to paste back to the agent. Comments stay in the browser tab. `reader_font_px` and
 `reader_width_em` in `harness.toml` set the defaults.
 
-The comments come from `assets/comment-layer.js`, which works on any HTML page
+The [book reader](../../book-harness/references/views.md#reader-facing-html) follows the same reading layout.
+The comment layer in `assets/comment-layer.js` works on any HTML page
 with MathJax 3 or KaTeX (formulas are quoted as their TeX source; "where" is the
 card, a `data-comment-label`, or the nearest heading). Add it to another page,
 for example a reading-proof-review page, with
 `python3 <skill>/scripts/comment_layer.py page.html --lang ja`; the script is
 inlined and a rerun replaces it.
+
+### Card viewer
 
 `html` writes one static viewer (`html/index.html`) with search, status
 colors, links between uses, and the warnings of `check`. With `[html_index]` in

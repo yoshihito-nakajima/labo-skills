@@ -39,6 +39,15 @@ For existing courses, include a current-passage to proposed-home mapping. Do
 not equate an old planning ID with a physical chapter or completion status.
 Do not treat the presence of a source section in a ledger as proof completion.
 
+For books and long notes with a chapter hierarchy, specify the proposed printable contents down to section level.
+Give each chapter and section a stable ID, title, question, incoming facts and outgoing results. A production
+assignment can span several sections or part of one. For each section give an ordered list with one row per
+planned definition, claim, proof, example, exercise or convention. State the role, exact claim or scope,
+direct inputs and the existing card ID when known. Source numbers stay in the source map. Use the card pool
+and route order to generate the inventory for material already placed. The plan also records outstanding
+items and intended placement. Render the hierarchy from the route, and compare the printed contents,
+bookmarks and HTML with the plan.
+
 ## Preliminaries and source ownership
 
 Apply [volume entrances and borrowed results](preliminaries.md) when designing or

@@ -17,6 +17,7 @@ MAP = CHECKOUT / "skills/paper-talk-planning/scripts/source_map.py"
 NOTES = CHECKOUT / "skills/paper-talk-planning/scripts/notes_map.py"
 SYMBOLS = CHECKOUT / "skills/paper-talk-planning/scripts/plan_symbols.py"
 CARDS_TO_PLAN = CHECKOUT / "skills/paper-talk-planning/scripts/cards_to_plan.py"
+VIEW = CHECKOUT / "skills/deck-from-references/scripts/slide_comment_view.py"
 PLAN = """**Assumed known**: `R^D`
 
 - **1. [problem] Points near a curve**
@@ -199,6 +200,22 @@ class TalkToolTests(unittest.TestCase):
         subprocess.run([sys.executable, str(SHEET), str(out), f"{self.pdf}:1-2", "--cols", "2", "--width", "200"],
                        capture_output=True, text=True, check=True)
         self.assertGreater(out.stat().st_size, 1000)
+
+    @unittest.skipUnless(shutil.which("pdftoppm"), "needs pdftoppm")
+    def test_slide_comment_view_writes_labelled_pages_with_comment_layer(self):
+        frames = self.dir / "deck.tex"
+        frames.write_text("\\begin{frame}[plain]x\\end{frame}\n"
+                          "\\begin{frame}\\frametitle{A fictional {claim}}y\\end{frame}\n")
+        out = self.dir / "view"
+        subprocess.run([sys.executable, str(VIEW), self.pdf, str(out), "--tex", str(frames),
+                        "--lang", "en", "--title", "Fictional deck"],
+                       capture_output=True, text=True, check=True)
+        page = (out / "index.html").read_text(encoding="utf-8")
+        self.assertEqual(len(list(out.glob("p-*.png"))), 2)
+        self.assertIn('data-comment-label="Slide 1: Title page"', page)
+        self.assertIn('data-comment-label="Slide 2: A fictional {claim}"', page)
+        self.assertIn("comment-layer", page)
+        self.assertIn("Fictional", page)  # text layer from the PDF
 
 
 class ExtractCodeTests(unittest.TestCase):

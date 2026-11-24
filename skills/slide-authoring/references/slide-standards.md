@@ -27,7 +27,13 @@ one criticism per criterion.
   visible setup or declared prerequisite. Earlier setup suffices while plainly
   in scope. Use operational definitions when enough; do not front-load unused
   generality. A later appendix or notes-only definition cannot repair a claim
-  that is unintelligible now. Keep the symbols on each frame sparse enough to
+  that is unintelligible now. In a live talk "earlier" fades: when a term or
+  formula defined several frames back is used again in a decisive step, restate
+  it in one line on that frame (a recall line). An undefined term is acceptable
+  when its wording conveys the right intuition to the declared audience; it is a
+  defect when it is opaque, misleading, or explained only later. Do not reuse a
+  symbol for two objects in one deck (a sphere of radius one and of radius
+  $\sqrt d$, a space and a random point, a limit and an exponent). Keep the symbols on each frame sparse enough to
   follow at talk pace. Introduce a symbol or abbreviation when it makes a
   comparison, inference or repeated expression easier to follow; write one-off
   quantities directly when that takes less decoding. Give a lemma, estimate,
@@ -62,7 +68,10 @@ one criticism per criterion.
   proof; its name alone is insufficient. For a method, show inputs, essential
   settings, operation and output. State comparisons near the relevant result
   and verify both sides; a tool used by the method is not automatically a rival.
-- **S9 Render** — Inspect every in-scope rendered frame, including overlays
+- **S9 Render** — Working marks meant for the author (to-check notes,
+  card or file identifiers in the body, unresolved question marks) are not on
+  frames the audience sees; source locators in the source tag are fine.
+  Inspect every in-scope rendered frame, including overlays
   and backup when included in the review; disclose any subset. Start at normal
   presentation scale, then zoom to diagnose. Check clipping, glyphs, equations,
   contrast, figures, labels and reading order. Add redundant labels for color
@@ -70,7 +79,11 @@ one criticism per criterion.
   legibility only after zooming is not evidence of projection readability.
 - **S10 Repair and closure** — State the smallest needed change, the lightest
   visible one; a repair that adds unnecessary hedges, meta-comments or avoidable
-  complexity to a live talk is itself a defect. Correct a
+  complexity to a live talk is itself a defect. When a frame is too dense, first
+  say the idea in words and then give the formula inside the same definition or
+  theorem box; when time allows, split the frame rather than replace a precise
+  statement by a rough one, and put only the statements kept for questions in an
+  appendix. Correct a
   claim, expose a condition, reorder a bridge, add an example, split an
   overloaded frame or move optional detail to backup. Preserve concise correct
   algebra, sketches and figures. Batch supported repairs and recheck affected

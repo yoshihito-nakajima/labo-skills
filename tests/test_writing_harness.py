@@ -256,6 +256,106 @@ class WritingHarnessTests(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("refusing to overwrite", r.stderr)
 
+    # ------------------------------------------------------------ outputs, templates, hook, editor
+
+    def test_build_records_outputs_and_check_reports_outdated(self):
+        r = self.run_cards("build", "--no-pdf")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        for out in ("paper/cards.tex", "html/index.html", "html/read.html"):
+            self.assertTrue((self.h / out).is_file(), out)
+        self.assertNotIn("{proof}", (self.h / "html/read.html").read_text())
+        stamps = json.loads((self.h / "paper/.build.json").read_text())["outputs"]
+        self.assertEqual(set(stamps), {"tex:cards.tex", "html", "read"})
+        self.assertEqual(self.check_json()[1]["warnings"], [])
+        self.edit("cards/def/def-settled.md", "A real sequence", "A sequence of reals")
+        outdated = [w for w in self.check_json()[1]["warnings"] if w.startswith("OUTDATED")]
+        self.assertEqual(len(outdated), 3)
+        self.assertIn("outdated", self.run_cards("status").stdout)
+        self.assertEqual(self.run_cards("build", "--no-pdf").returncode, 0)
+        self.assertEqual(self.check_json()[1]["warnings"], [])
+
+    def test_build_stops_on_errors_and_keeps_outputs(self):
+        self.assertEqual(self.run_cards("build", "--no-pdf").returncode, 0)
+        before = (self.h / "paper/cards.tex").read_text()
+        self.edit("cards/prop/lem-tail.md", "requires: [def-settled]", "requires: [def-missing]")
+        r = self.run_cards("build", "--no-pdf")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("build stopped", r.stdout)
+        self.assertEqual((self.h / "paper/cards.tex").read_text(), before)
+
+    def test_pdf_command_from_settings(self):
+        with open(self.h / "harness.toml", "a") as f:
+            f.write('\n[build]\ntex = ["full.tex"]\n'
+                    'pdf_command = ["{python}", "-c", "import sys; open(sys.argv[1] + \'.pdf\', \'w\').write(\'x\')", "{tex}"]\n')
+        r = self.run_cards("build")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertTrue((self.h / "paper/full.tex.pdf").is_file())
+        stamps = json.loads((self.h / "paper/.build.json").read_text())["outputs"]
+        self.assertTrue(stamps["pdf:full.tex"]["ok"])
+
+    def test_new_card_from_template(self):
+        r = self.run_cards("new", "lemma", "lem-extra", "--title", "Extra", "--requires", "lem-tail")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        text = (self.h / "cards/prop/lem-extra.md").read_text()
+        self.assertIn("kind: lemma", text)
+        self.assertIn("requires: [lem-tail]", text)
+        r = self.run_cards("new", "explanation", "x-extra", "--explains", "lem-extra")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        code, out = self.check_json()
+        self.assertEqual(out["errors"], [])
+        self.assertFalse([w for w in out["warnings"] if "x-extra" in w and "STALE" in w])
+        self.assertNotEqual(self.run_cards("new", "lemma", "lem-extra").returncode, 0)
+        self.assertNotEqual(self.run_cards("new", "lemma", "Bad_Id").returncode, 0)
+        (self.h / "templates").mkdir()
+        (self.h / "templates/definition.md").write_text("---\nid: {id}\nkind: definition\nstatus: stated\n---\n## Statement\nOWN\n")
+        self.assertEqual(self.run_cards("new", "definition", "def-own").returncode, 0)
+        self.assertIn("OWN", (self.h / "cards/def/def-own.md").read_text())
+
+    def test_hook_builds_in_background_only_for_sources(self):
+        with open(self.h / "harness.toml", "a") as f:
+            f.write("\n[build]\npdf = false\nquiet = 0.2\n")
+        def hook(path):
+            return subprocess.run([sys.executable, str(CARDS), "hook"], input=json.dumps(
+                {"tool_name": "Edit", "tool_input": {"file_path": str(path)}}), capture_output=True, text=True)
+        self.assertEqual(hook(self.ws / "elsewhere.md").returncode, 0)
+        self.assertEqual(hook(self.h / "story.md").returncode, 0)
+        self.assertFalse((self.h / "paper/.dirty").exists())
+        self.edit("cards/def/def-settled.md", "A real sequence", "A sequence of reals")
+        self.assertEqual(hook(self.h / "cards/def/def-settled.md").returncode, 0)
+        import time
+        for _ in range(100):
+            if (self.h / "html/read.html").exists() and not (self.h / "paper/.dirty").exists():
+                break
+            time.sleep(0.1)
+        self.assertTrue((self.h / "html/read.html").exists())
+        self.assertEqual(self.check_json()[1]["warnings"], [])
+
+    def test_editor_saves_with_conflict_check(self):
+        sys.path.insert(0, str(CARDS.parent))
+        import cards as C
+        import editor
+        app = editor.App(C.Harness(self.h), build=False)
+        p = self.h / "cards/prop/lem-tail.md"
+        text = p.read_text()
+        base = editor.sha(text)
+        self.assertIn("Lemma", app.preview("lem-tail", text)["html"])
+        self.assertIn("error", app.preview("lem-tail", "no front matter"))
+        self.assertTrue(app.save("lem-tail", text, "0" * 16).get("conflict"))
+        self.assertFalse(app.save("lem-tail", "broken", base)["ok"])
+        self.assertFalse(app.save("lem-tail", text.replace("id: lem-tail", "id: lem-other"), base)["ok"])
+        changed = text.replace(r"N(a)", r"N(a)\,", 1)
+        res = app.save("lem-tail", changed, base)
+        self.assertTrue(res["ok"], res)
+        self.assertEqual(p.read_text(), changed)
+        self.assertIn("thm-sum-settled", res["impact"]["facts"])
+        self.assertTrue(app.new("lemma", "lem-web", "")["ok"])
+        self.assertTrue((self.h / "cards/prop/lem-web.md").exists())
+        res = app.comments("Lemma 2.1\n「quote」\n→ fix this")
+        self.assertTrue((self.h / res["path"].split("settled/harness/")[-1]).read_text().strip().endswith("fix this"))
+        for page in (app.page_read(), app.page_cards(), app.page_edit("lem-tail")):
+            self.assertIn("</html>", page)
+        self.assertIn("saveUrl", app.page_read())
+
 
 if __name__ == "__main__":
     unittest.main()

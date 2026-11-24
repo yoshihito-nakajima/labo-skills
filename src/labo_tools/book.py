@@ -21,12 +21,15 @@ import json
 import os
 import re
 from contextlib import contextmanager
+from copy import copy
 from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
 
 from .locking import exclusive_lock
+from .book_borrows import BorrowSnapshots, declarations, pin_issues
+from .book_equations import Equations, INLINE_TEX, LABEL, fields, reference_directory_tex, tex_cards
 
 
 class BookError(ValueError):
@@ -186,12 +189,13 @@ class Card:
     def references(self) -> list:
         return list(self.meta.get("references") or [])
 
-    def fingerprint(self) -> str:
+    def fingerprint(self, *, full=False) -> str:
         parts = [self.kind, str(self.meta.get("variant", ""))]
         for key, text in sorted(self.sections.items()):
             if key not in VOLATILE:
                 parts.append(key + ":" + " ".join(text.split()))
-        return hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()[:8]
+        digest = hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()
+        return digest if full else digest[:8]
 
     def summary(self, limit: int = 160) -> str:
         t = self.template
@@ -400,7 +404,30 @@ class Book:
         sections = []
         for inc in data.get("includes") or []:
             sections += self.load_route(inc, _chain + (slug,))["sections"]
-        for s in data.get("sections") or []:
+        title = data.get("title", slug)
+        chapters = data.get("chapters", {})
+        if not isinstance(chapters, dict):
+            raise BookError(f"route {slug}: chapters must be a mapping of ids to headings")
+        for cid, chapter in chapters.items():
+            if (not isinstance(cid, str) or not ID_RE.fullmatch(cid)
+                    or not isinstance(chapter, dict) or not isinstance(chapter.get("title"), str)
+                    or not chapter["title"].strip()
+                    or not isinstance(chapter.get("appendix", False), bool)):
+                raise BookError(f"route {slug}: invalid chapter {cid!r}")
+        current_sections = data.get("sections") or []
+        for s in current_sections:
+            if not isinstance(s, dict):
+                raise BookError(f"route {slug}: sections must contain mappings")
+            chapter_id = s.get("chapter")
+            section_id = s.get("id")
+            if chapter_id is not None and (not isinstance(chapter_id, str) or chapter_id not in chapters):
+                raise BookError(f"route {slug}: unknown chapter {chapter_id!r}")
+            if (chapter_id is not None or section_id is not None) and (
+                    not isinstance(section_id, str) or not ID_RE.fullmatch(section_id)
+                    or not isinstance(s.get("title"), str) or not s["title"].strip()):
+                raise BookError(f"route {slug}: named sections need a stable id and a title")
+            if chapters and chapter_id is None:
+                raise BookError(f"route {slug}: every local section must belong to a chapter")
             items = []
             for it in s.get("items") or []:
                 if isinstance(it, str):
@@ -408,9 +435,28 @@ class Book:
                 if not isinstance(it, dict) or not ({"card", "proof_of"} & set(it)):
                     raise BookError(f"route {slug}: bad item {it!r}")
                 items.append(it)
-            sections.append({"title": str(s.get("title", "")), "items": items})
-        appendix = [{"card": x} if isinstance(x, str) else x for x in data.get("appendix") or []]
-        return {"slug": slug, "title": data.get("title", slug), "sections": sections, "appendix": appendix}
+            chapter = None
+            if chapter_id:
+                declaration = chapters[chapter_id]
+                chapter = {"id": chapter_id, "title": declaration["title"],
+                           "appendix": declaration.get("appendix", False)}
+            work_units = s.get("work_units") or ([s["work_unit"]] if s.get("work_unit") else [])
+            sections.append({"title": str(s.get("title", "")), "items": items,
+                             "id": section_id, "chapter": chapter, "origin": (slug, title),
+                             "work_units": work_units})
+        result = {"slug": slug, "title": title, "sections": sections,
+                  "appendix": [{"card": x} if isinstance(x, str) else x for x in data.get("appendix") or []]}
+        if data.get("typed_navigation"):
+            result["typed_navigation"] = True
+        strict = data.get("strict_borrows", False)
+        if not isinstance(strict, bool):
+            raise BookError(f"route {slug}: strict_borrows must be true or false")
+        if strict:
+            result["strict_borrows"] = True
+        if any(s["chapter"] for s in sections):
+            result["hierarchical"] = True
+            route_outline(result, range(len(sections)))
+        return result
 
     def sequence(self, route: dict) -> list:
         """Reading order: dicts {id, section, role}; role is item | proof | appendix."""
@@ -579,6 +625,8 @@ def check(book: Book, route: str | None = None) -> dict:
         if m.get("status") == "independent" and not card.reviewed_current():
             add("warning", "STALE-REVIEW", cid, "marked independent but no review matches the current fingerprint")
         for f in () if card.legacy and t.scope == "pool" else t.fields:
+            if card.kind == "B5" and f == "borrows" and m.get(f) == []:
+                continue
             if m.get(f) in (None, "", []):
                 add("error", "NO-FIELD", cid, f"{f} is required for {card.kind}")
         if card.legacy:
@@ -593,7 +641,7 @@ def check(book: Book, route: str | None = None) -> dict:
         for title in card.unknown_sections:
             add("warning", "UNKNOWN-SECTION", cid, f"section '{title}' is not part of {card.kind}")
         for r in card.ref_ids():
-            if r not in cards:
+            if not isinstance(r, str) or r not in cards:
                 add("error", "UNKNOWN-REF", cid, f"refers to unknown card {r}")
         for f in ("requires", "references"):
             if len(set(m.get(f) or [])) != len(m.get(f) or []):
@@ -642,7 +690,15 @@ def check(book: Book, route: str | None = None) -> dict:
     if cyc:
         add("error", "CYCLE", cyc[0], "hard prerequisites form a cycle: " + " -> ".join(cyc))
     if route:
-        _route_checks(book, route, add)
+        data = book.load_route(route)
+        _route_checks(book, data, book.sequence(data), add)
+        try:
+            if data.get("typed_navigation"):
+                visible = [book.cards[e["id"]] for e in book.sequence(data) if e["id"] in book.cards]
+                Equations(visible, strict=True)
+        except ValueError as exc:
+            if not isinstance(exc, BookError):
+                add("error", "EQUATION-NAVIGATION", route, str(exc))
     return {"errors": errors, "warnings": warnings}
 
 
@@ -734,28 +790,78 @@ def _shape(card: Card, steps: str, add):
             add("error", "SHAPE", cid, "a double-inclusion proof must show both inclusions")
 
 
-def _route_checks(book: Book, slug: str, add):
-    cards = book.cards
-    route = book.load_route(slug)
-    seq = book.sequence(route)
-    pos, shown = {}, set()
+def _borrowed_cards(cards):
+    """Card IDs named as external prerequisites by a route's entrance cards."""
+    return {entry["card"] for _, entry in declarations(cards)
+            if isinstance(entry, dict) and isinstance(entry.get("card"), str)}
+
+
+def _strict_borrows(route, cards):
+    return route.get("strict_borrows", False) or any(
+        isinstance(entry, dict) and entry.get("owner") not in (None, "pool")
+        for _, entry in declarations(cards))
+
+
+RAW_TEX_REFERENCE = re.compile(
+    r"\\(?:cref|Cref|eqref|ref|pageref|autoref)\*?\{([^{}]+)\}|\\hyperref\[([^\]]+)\]"
+)
+
+
+def _check_local_tex_references(route, cards, seq, add):
+    """Catch copied PDF labels in chaptered, versioned books before either renderer runs."""
+    labels = {card_label(card) for card in cards.values() if card_environment(card) or card.kind == "A6"}
+    for row in route_outline(route, (entry["section"] for entry in seq)).values():
+        if chapter := row.get("chapter"):
+            labels.add("chapter:" + chapter["id"])
+        if route.get("hierarchical"):
+            labels.add("section:" + row["id"][4:])
+    bodies = {card.id: "\n".join(card.sections.get(field, "") for field in fields(card)) for card in cards.values()}
+    for body in bodies.values():
+        labels.update(LABEL.findall(body))
+    for cid, body in bodies.items():
+        for match in RAW_TEX_REFERENCE.finditer(body):
+            for label in (match[1] or match[2]).split(","):
+                label = label.strip()
+                if route.get("typed_navigation") and label.startswith("eq:") and match[1] is not None:
+                    continue  # checked against the equation registry at check/build time
+                if label not in labels:
+                    add("error", "TEX-REF-OUTSIDE-ROUTE", cid,
+                        f"{label} is not a local target; use a registered card ID for an external prerequisite")
+
+
+def require_route_dependencies(book, route, seq):
+    cards = {e["id"]: book.cards[e["id"]] for e in seq if e["id"] in book.cards}
+    if _strict_borrows(route, cards.values()):
+        errors = []
+
+        def record(level, code, cid, message):
+            if level == "error":
+                errors.append(f"{code} {cid}: {message}")
+
+        _route_checks(book, route, seq, record)
+        if errors:
+            raise BookError("\n".join(errors))
+
+
+def _route_checks(book: Book, route: dict, seq: list, add):
+    cards, slug = book.cards, route["slug"]
+    placed = {e["id"]: cards[e["id"]] for e in seq if e["id"] in cards}
+    strict = _strict_borrows(route, placed.values())
+    pos = {}
     for i, e in enumerate(seq):
         if e["id"] not in cards:
             add("error", "ROUTE-UNKNOWN", slug, f"route lists unknown card {e['id']}")
             continue
         if e["id"] in pos:
-            add("warning", "DUPLICATE-IN-ROUTE", e["id"],
+            add("error" if strict else "warning", "DUPLICATE-IN-ROUTE", e["id"],
                 f"appears twice in route {slug}; a claim already shows its proof (use `proof_of` only with `proof: later`)")
         pos.setdefault(e["id"], i)
-        shown.add(e["id"])
-    borrows = {}
-    for cid in shown:
-        c = cards[cid]
-        if c.kind == "B5":
-            for b in c.meta.get("borrows") or []:
-                if isinstance(b, dict) and b.get("card"):
-                    borrows[b["card"]] = b
-    for b in borrows:
+    borrows = _borrowed_cards(placed.values())
+    if strict:
+        for code, entrance, message in pin_issues(book, slug, placed):
+            add("error", code, entrance, message)
+        _check_local_tex_references(route, placed, seq, add)
+    for b in sorted(borrows):
         if b in pos:
             add("warning", "BORROW-IN-ROUTE", slug, f"{b} is borrowed but also appears in the route")
     for e in seq:
@@ -766,7 +872,7 @@ def _route_checks(book: Book, slug: str, add):
         for conv in c.meta.get("conventions") or []:
             deps.append(conv)
         for r in deps:
-            if r not in cards:
+            if not strict and r not in cards:
                 continue
             if r not in pos:
                 if r not in borrows:
@@ -774,10 +880,13 @@ def _route_checks(book: Book, slug: str, add):
                         f"needs {r}, which is neither in route {slug} nor listed in an entrance card's borrows")
             elif pos[r] > pos[c.id]:
                 add("error", "FORWARD", c.id, f"needs {r}, which comes later in route {slug}")
-        for mention in c.mentions():
-            if mention in cards and mention not in pos and mention not in borrows:
-                add("warning", "REF-OUTSIDE-ROUTE", c.id,
-                    f"cites [[{mention}]], which is neither in route {slug} nor borrowed")
+        mentions = set(c.mentions())
+        if strict:
+            mentions.update(cid.strip() for m in BY_RE.finditer(c.body) for cid in m[1].split(','))
+        for mention in sorted(mentions):
+            if (strict or mention in cards) and mention not in pos and mention not in borrows:
+                add("error" if strict else "warning", "REF-OUTSIDE-ROUTE", c.id,
+                    f"cites {mention}, which is neither in route {slug} nor borrowed")
         if c.kind == "B3":
             for f in c.meta.get("forward") or []:
                 if f in pos and pos[f] < pos[c.id]:
@@ -800,8 +909,7 @@ def _route_checks(book: Book, slug: str, add):
             for lab in [c.meta.get("label")] + list(c.meta.get("aliases") or []) + re.findall(r"\\label\{([^}]+)\}", c.body):
                 if lab and lab not in owners:
                     owners[lab] = c.id
-    for cid in sorted(shown):
-        c = cards[cid]
+    for cid, c in sorted(placed.items()):
         if not c.legacy:
             continue
         gone = sorted({owners[lab] for g in re.findall(r"\\(?:c|C|eq|auto)?ref\*?\{([^}]*)\}", c.body) for lab in g.split(",")
@@ -995,29 +1103,108 @@ def build_graph(book: Book, route: str, workspace: Path) -> dict:
 # ---------------------------------------------------------------- TeX output
 
 ENV = {"A1": "definition", "A2": "theorem", "A4": "example"}
-THEOREMS = {
-    "en": ("\\theoremstyle{plain}\n\\newtheorem{theorem}{Theorem}[section]\n\\newtheorem{lemma}[theorem]{Lemma}\n"
-           "\\newtheorem{proposition}[theorem]{Proposition}\n\\newtheorem{corollary}[theorem]{Corollary}\n"
-           "\\newtheorem{axiom}[theorem]{Axiom}\n\\theoremstyle{definition}\n\\newtheorem{definition}[theorem]{Definition}\n"
-           "\\newtheorem{example}[theorem]{Example}\n\\newtheorem{exercise}[theorem]{Exercise}\n"
-           "\\newenvironment{solution}{\\begin{proof}[Solution]}{\\end{proof}}\n"),
-    "ja": ("\\theoremstyle{plain}\n\\newtheorem{theorem}{定理}[section]\n\\newtheorem{lemma}[theorem]{補題}\n"
-           "\\newtheorem{proposition}[theorem]{命題}\n\\newtheorem{corollary}[theorem]{系}\n"
-           "\\newtheorem{axiom}[theorem]{公理}\n\\theoremstyle{definition}\n\\newtheorem{definition}[theorem]{定義}\n"
-           "\\newtheorem{example}[theorem]{例}\n\\newtheorem{exercise}[theorem]{演習}\n"
-           "\\newenvironment{solution}{\\begin{proof}[解答]}{\\end{proof}}\n"),
-}
+def typed_theorems(language):
+    ja = language == "ja"
+    names = dict(zip(
+        ("theorem", "lemma", "proposition", "corollary", "axiom", "definition", "example", "exercise"),
+        ("定理", "補題", "命題", "系", "公理", "定義", "例", "演習") if ja else
+        ("Theorem", "Lemma", "Proposition", "Corollary", "Axiom", "Definition", "Example", "Exercise")))
+    theorem = names.pop("theorem")
+    lines = [rf"\newtheorem{{theorem}}{{{theorem}}}[section]", r"\numberwithin{equation}{section}"]
+    for kind, title in names.items():
+        if kind == "definition":
+            lines.append(r"\theoremstyle{definition}")
+        lines += [rf"\newaliascnt{{{kind}}}{{theorem}}", rf"\newtheorem{{{kind}}}[{kind}]{{{title}}}",
+                  rf"\aliascntresetthe{{{kind}}}"]
+    names = {"theorem": theorem, **names, "equation": "式" if ja else "equation"}
+    for kind, title in names.items():
+        lines += [rf"\crefname{{{kind}}}{{{title}}}{{{title}}}",
+                  rf"\Crefname{{{kind}}}{{{title}}}{{{title}}}"]
+    if ja:
+        lines.append(r"\renewcommand{\proofname}{証明}")
+    solution = "解答" if ja else "Solution"
+    lines.append(rf"\newenvironment{{solution}}{{\begin{{proof}}[{solution}]}}{{\end{{proof}}}}")
+    return "\n".join(lines) + "\n"
+
+
 HEADS = {
     "en": "% !TeX program = xelatex\n\\documentclass[11pt]{article}\n\\usepackage{amsmath,amssymb,amsthm,mathtools}\n"
-          "\\usepackage{enumitem}\n\\usepackage[hidelinks]{hyperref}\n\\usepackage{cleveref}\n",
+          "\\usepackage{enumitem}\n\\usepackage[hidelinks]{hyperref}\n\\usepackage{aliascnt}\n\\usepackage[nameinlink]{cleveref}\n",
     "ja": "% !TeX program = uplatex\n\\documentclass[uplatex,dvipdfmx,11pt]{jsarticle}\n"
           "\\usepackage{amsmath,amssymb,amsthm,mathtools}\n\\usepackage{enumitem}\n"
-          "\\usepackage[dvipdfmx,hidelinks]{hyperref}\n\\usepackage{cleveref}\n",
+          "\\usepackage[dvipdfmx,hidelinks]{hyperref}\n\\usepackage{aliascnt}\n\\usepackage[nameinlink]{cleveref}\n",
 }
 
 
 def card_label(card: Card) -> str:
     return card.meta.get("label") or f"card:{card.id}"
+
+
+def card_environment(card: Card) -> str | None:
+    """Numbered environment selected for an item in the assembled book."""
+    if card.kind == "A2":
+        return card.meta.get("env", "theorem")
+    if card.kind == "A6":
+        if card.legacy and card.sections.get("body"):
+            return card.meta.get("env", "axiom")
+        return card.meta.get("env") or ("axiom" if card.id.startswith("ax-") else None)
+    return {"A1": "definition", "A4": "example", "A5": "exercise"}.get(card.kind)
+
+
+def route_outline(route: dict, section_indexes) -> dict:
+    """Number the visible section sequence once for TeX, HTML and navigation checks."""
+    outline = {}
+    chapter_count = appendix_count = section_count = 0
+    previous, chapter_origins, seen_sections = None, {}, set()
+    for index in sorted(set(section_indexes)):
+        if index == len(route["sections"]):
+            if route.get("hierarchical"):
+                appendix_count += 1
+                if appendix_count > 26:
+                    raise BookError(f"route {route['slug']}: too many appendices")
+                letter = chr(64 + appendix_count)
+                outline[index] = {"title": None, "number": f"{letter}.1", "id": "sec-appendix-material",
+                                  "chapter": {"id": "legacy-appendix", "title": None, "number": letter,
+                                              "appendix": True, "begin_appendix": appendix_count == 1}}
+            else:
+                outline[index] = {"title": None, "number": "A", "id": "sec-A", "legacy_appendix": True}
+            continue
+        section = route["sections"][index]
+        data = {"title": section["title"], "number": str(index + 1), "id": f"sec-{index + 1}"}
+        if route.get("hierarchical"):
+            chapter = section["chapter"]
+            if chapter is None:
+                origin, title = section["origin"]
+                chapter = {"id": f"included-{origin}", "title": title}
+            cid, origin = chapter["id"], section["origin"][0]
+            if cid in chapter_origins and chapter_origins[cid] != origin:
+                raise BookError(f"route {route['slug']}: chapter id {cid!r} is shared by separate routes")
+            if cid != previous:
+                if cid in chapter_origins:
+                    raise BookError(f"route {route['slug']}: noncontiguous chapter {cid!r}")
+                chapter_origins[cid] = origin
+                previous, section_count = cid, 0
+                is_appendix = chapter.get("appendix", False)
+                if is_appendix:
+                    appendix_count += 1
+                    if appendix_count > 26:
+                        raise BookError(f"route {route['slug']}: too many appendices")
+                    prefix = chr(64 + appendix_count)
+                elif appendix_count:
+                    raise BookError(f"route {route['slug']}: main chapters must precede appendices")
+                else:
+                    chapter_count += 1
+                    prefix = str(chapter_count)
+                data["chapter"] = {**chapter, "number": prefix,
+                                   "begin_appendix": is_appendix and appendix_count == 1}
+            section_count += 1
+            key = section["id"] or f"included-section-{index + 1}"
+            if key in seen_sections:
+                raise BookError(f"route {route['slug']}: duplicate section id {key!r}")
+            seen_sections.add(key)
+            data.update(number=f"{prefix}.{section_count}", id=f"sec-{key}")
+        outline[index] = data
+    return outline
 
 
 def render_tex(book: Book, route: str, level: str = "L3", *, standalone: bool = False, language: str = "ja",
@@ -1028,30 +1215,98 @@ def render_tex(book: Book, route: str, level: str = "L3", *, standalone: bool = 
         raise BookError(f"level must be one of {', '.join(LEVELS)}")
     show = set(LEVELS[level])
     data = book.load_route(route)
-    seq = book.sequence(data)
+    sequence = book.sequence(data)
+    require_route_dependencies(book, data, sequence)
+    all_entries = [e for e in sequence if e["id"] in book.cards]
+    seq = [e for e in all_entries if book.cards[e["id"]].kind in show]
+    outline = route_outline(data, (e["section"] for e in seq))
     out, last_section = [], None
+    visible = list(dict.fromkeys(e["id"] for e in seq))
+    cards = [book.cards[cid] for cid in visible]
+    typed = data.get("typed_navigation", False)
+    route_cards = {e["id"]: book.cards[e["id"]] for e in all_entries}
+    borrowed = _borrowed_cards(route_cards.values()) - route_cards.keys()
+    if typed:
+        equations = Equations(route_cards.values(), strict=True)
+        book = tex_cards(book, cards, equations)
+    elif borrowed:
+        book = copy(book)
+    if borrowed:
+        book._external_prerequisites = borrowed
+    builtin_indexes = standalone and preamble is None and typed
+    macros = dict(index_macros or {})
+    if builtin_indexes:
+        macros = {"term": "booktermindex", "formula": "bookformulaindex"}
     for e in seq:
-        c = book.cards.get(e["id"])
-        if c is None or c.kind not in show:
-            continue
         if e["section"] != last_section:
             last_section = e["section"]
-            if last_section < len(data["sections"]):
-                out.append(f"\\section{{{data['sections'][last_section]['title']}}}\n")
-            else:
+            heading = outline[last_section]
+            chapter = heading.get("chapter")
+            if chapter:
+                if chapter["begin_appendix"]:
+                    out.append("\\appendix\n")
+                chapter_title = chapter["title"] or ("付録" if language == "ja" else "Appendix")
+                out.append(f"\\chapter{{{tex_title(chapter_title)}}}\\label{{chapter:{chapter['id']}}}\n")
+            if heading.get("legacy_appendix"):
                 out.append("\\appendix\n\\section{Appendix}\n")
-        out.append(_tex_card(book, c, language, index_macros or {}))
+            elif data.get("hierarchical"):
+                section_title = heading["title"] or ("補足資料" if language == "ja" else "Supplement")
+                out.append(f"\\section{{{tex_title(section_title)}}}\\label{{section:{heading['id'][4:]}}}\n")
+            else:
+                out.append(f"\\section{{{heading['title']}}}\n")
+        out.append(_tex_card(book, book.cards[e["id"]], language, macros))
     body = "\n".join(out)
     if not standalone:
         return body
     if preamble is not None:
         head = preamble.rstrip() + "\n"
     elif language in HEADS:
-        head = HEADS[language] + "\n" + THEOREMS[language]
+        head = HEADS[language] + "\n" + typed_theorems(language)
+        if data.get("hierarchical"):
+            head = head.replace("{jsarticle}", "{jsbook}").replace("{article}", "{book}")
     else:
         raise BookError(f"no built-in preamble for language {language!r}; pass a preamble file")
+    if typed:
+        head += INLINE_TEX
+    back = ""
+    if builtin_indexes:
+        head += r"\usepackage{multicol}" + "\n"
+        index_head, index_body = standalone_indexes(body, language)
+        head += index_head
+        statement_labels = [card_label(card) for card in cards if card_environment(card)]
+        equation_labels = [key for key, f in equations.selected.items() if f.card in visible]
+        back = index_body + reference_directory_tex(
+            statement_labels, equation_labels, language=language, hierarchical=data.get("hierarchical", False))
     heading = title or str(data["title"]).replace("_", "\\_")
-    return (head + f"\n\\title{{{heading}}}\n\\date{{}}\n\\begin{{document}}\n\\maketitle\n\n{body}\n\\end{{document}}\n")
+    contents = "\\tableofcontents\n" if data.get("hierarchical") else ""
+    return (head + f"\n\\title{{{heading}}}\n\\date{{}}\n\\begin{{document}}\n"
+            f"\\maketitle\n{contents}\n{body}\n{back}\\end{{document}}\n")
+
+
+def standalone_indexes(body, language):
+    names = (
+        ("terms", "booktermindex", "用語索引" if language == "ja" else "Term index", "booktermref"),
+        ("formulas", "bookformulaindex", "記号・主要式索引" if language == "ja" else "Formula index", "bookformularef"),
+    )
+    head, back = [], []
+    for name, macro, title, ref in names:
+        if f"\\{macro}{{" in body:
+            head.append(rf"\makeindex[name={name},title={{{title}}}]"
+                        "\n" + rf"\newcommand{{\{macro}}}[3]{{\index[{name}]{{#2@#3|{ref}{{#1}}}}}}")
+            back.append(rf"\printindex[{name}]")
+    if head:
+        eq_name = "式" if language == "ja" else "Equation "
+        head[:0] = [
+            r"\usepackage[noautomatic]{imakeidx}",
+            r"\newcommand{\booktermref}[2]{\hyperref[#1]{\pageref*{#1}}}",
+            rf"\newcommand{{\bookformularef}}[2]{{\hyperref[#1]{{{eq_name}(\ref*{{#1}})}}}}",
+        ]
+    return "\n".join(["", *head, ""]), "\n".join([*back, ""])
+
+
+def format_index_term(text):
+    text = re.sub(r'["!@|]', lambda match: '"' + match[0], text)
+    return re.sub(r"\\([A-Za-z]+)", r"\\protect\\\1", text)
 
 
 # Unicode symbols that a text font lacks: written as \ensuremath so they work in text and in math alike
@@ -1118,29 +1373,47 @@ def tex_title(title: str) -> str:
 
 
 def _resolve(book: Book, text: str) -> str:
-    """`[[id]]` and the cites `[by: a, b]` become cross references (cleveref lists)."""
+    """Resolve local references and name any prerequisites outside the rendered book."""
+    external = getattr(book, "_external_prerequisites", ())
+
+    def reference(cid):
+        card = book.cards[cid]
+        if cid in external:
+            return tex_title(str(card.meta.get("title") or cid))
+        label = card_label(card)
+        if card.kind == "A6" and not card_environment(card):
+            title = tex_title(str(card.meta.get("title") or cid))
+            return rf"\hyperref[{label}]{{{title}}}"
+        return rf"\cref{{{label}}}"
+
     def by(m):
         ids = [x.strip() for x in m.group(1).split(",") if x.strip()]
         if ids and all(i in book.cards for i in ids):
-            return "（\\cref{%s}）" % ",".join(card_label(book.cards[i]) for i in ids)
+            if all(i not in external and card_environment(book.cards[i]) for i in ids):
+                return "（\\cref{%s}）" % ",".join(card_label(book.cards[i]) for i in ids)
+            return "（" + "、".join(reference(i) for i in ids) + "）"
         return m.group(0)
 
     text = BY_RE.sub(by, text)
-    return MENTION_RE.sub(lambda m: f"\\cref{{{card_label(book.cards[m.group(1)])}}}"
-                          if m.group(1) in book.cards else m.group(0), text)
+    return MENTION_RE.sub(lambda m: reference(m[1]) if m[1] in book.cards else m[0], text)
 
 
 def _index_lines(c: Card, macros: dict) -> str:
     """Index registrations of a card.  `index` and `formula_index` entries are plain strings (`\\index{term}`) or
-    mappings {term, reading}; with a project macro (`macros['term']`, `macros['formula']`, e.g. termat, formulaat) a
-    mapping becomes `\\macro{<card label>}{reading}{term}`, the three-argument form some courses register with."""
+    mappings with a term, reading, and optional target. Project macros receive the label, reading and term."""
     out = []
     for key, macro_key in (("index", "term"), ("formula_index", "formula")):
         for x in c.meta.get(key) or []:
             macro = macros.get(macro_key)
+            if isinstance(x, str) and macro in ("booktermindex", "bookformulaindex"):
+                x = {"term": x}
             if isinstance(x, dict) and x.get("term"):
                 if macro:
-                    out.append(f"\\{macro}{{{card_label(c)}}}{{{x.get('reading') or x['term']}}}{{{x['term']}}}\n")
+                    target = x.get("target") or card_label(c)
+                    reading, term = x.get("reading") or x["term"], x["term"]
+                    if macro in ("booktermindex", "bookformulaindex"):
+                        reading, term = format_index_term(reading), format_index_term(term)
+                    out.append(f"\\{macro}{{{target}}}{{{reading}}}{{{term}}}\n")
                 else:
                     out.append(f"\\index{{{x['term']}}}\n")
             elif isinstance(x, str):
@@ -1155,8 +1428,7 @@ def _tex_card(book: Book, c: Card, language: str = "ja", macros: dict | None = N
     label = "" if own_label else f"\\label{{{card_label(c)}}}\n"
     index = _index_lines(c, macros or {})
     if c.legacy and s.get("body") and c.kind in ("A1", "A2", "A3", "A4", "A5", "A6"):
-        env = {"A1": "definition", "A2": m.get("env", "theorem"), "A3": "proof", "A4": "example",
-               "A5": "exercise", "A6": m.get("env", "axiom")}[c.kind]
+        env = "proof" if c.kind == "A3" else card_environment(c)
         mark = "" if c.kind == "A3" else label
         return f"\\begin{{{env}}}\n{mark}{s['body']}\n\\end{{{env}}}\n"
     title = f"[{tex_title(m['title'])}]" if m.get("title") and c.kind in ("A1", "A2") else ""
@@ -1164,7 +1436,7 @@ def _tex_card(book: Book, c: Card, language: str = "ja", macros: dict | None = N
         return f"\\begin{{definition}}{title}\n{label}{index}{s.get('definition', '')}\n" \
                f"{s.get('notation', '')}\n\\end{{definition}}\n"
     if c.kind == "A2":
-        env = m.get("env", "theorem")
+        env = card_environment(c)
         body = "\n".join(x for x in (s.get("hypotheses"), s.get("conclusion")) if x)
         return f"\\begin{{{env}}}{title}\n{label}{index}{body}\n\\end{{{env}}}\n"
     if c.kind == "A3":
@@ -1172,13 +1444,15 @@ def _tex_card(book: Book, c: Card, language: str = "ja", macros: dict | None = N
     if c.kind == "A4":
         return f"\\begin{{example}}\n{label}{index}{s.get('setting', '')}\n{s.get('verification', '')}\n\\end{{example}}\n"
     if c.kind == "A5":
-        return (f"\\begin{{exercise}}\n{label}{s.get('question', '')}\n\\end{{exercise}}\n"
+        return (f"\\begin{{exercise}}\n{label}{index}{s.get('question', '')}\n\\end{{exercise}}\n"
                 f"\\begin{{solution}}\n{s.get('solution', '')}\n\\end{{solution}}\n")
     if c.kind == "A6":
-        env = m.get("env") or ("axiom" if c.id.startswith("ax-") else None)
+        env = card_environment(c)
         if env:
-            return f"\\begin{{{env}}}{title or (f'[{tex_title(m['title'])}]' if m.get('title') else '')}\n{label}{index}{s.get('convention', '')}\n\\end{{{env}}}\n"
-        return f"\\paragraph{{{'規約' if language == 'ja' else 'Convention'}}}\n{label}{s.get('convention', '')}\n"
+            convention_title = title or ("[" + tex_title(m["title"]) + "]" if m.get("title") else "")
+            return f"\\begin{{{env}}}{convention_title}\n{label}{index}{s.get('convention', '')}\n\\end{{{env}}}\n"
+        return (f"\\paragraph{{{'規約' if language == 'ja' else 'Convention'}}}\n"
+                f"\\phantomsection\n{label}{index}{s.get('convention', '')}\n")
     if c.kind == "B5":
         return "\n".join(s[k] for k in ("endpoint", "known", "conventions", "reader") if s.get(k)) + "\n"
     return "\n".join(v for v in s.values() if v) + "\n"

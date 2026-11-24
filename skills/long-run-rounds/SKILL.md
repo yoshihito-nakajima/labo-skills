@@ -1,6 +1,6 @@
 ---
 name: long-run-rounds
-description: Set up, restart, monitor and correct unattended long runs in which a light producer parent thread and a reviewer parent thread wake on a schedule and hand bounded units to workers — instruction documents, paste-ready restart prompts, status fingerprints, capacity stages and volume-by-volume closing. Use when designing, restarting, diagnosing or revising such runs; not for the mathematical writing or review itself.
+description: Set up, restart, monitor and correct unattended long runs in which one or more light coordinators wake on a schedule and hand bounded production and review units to workers — instruction documents, paste-ready restart prompts, status fingerprints, capacity stages and volume-by-volume closing. Use when designing, restarting, diagnosing or revising such runs; not for the mathematical writing or review itself.
 ---
 
 # 長時間の無人ラウンド
@@ -14,19 +14,34 @@ description: Set up, restart, monitor and correct unattended long runs in which 
 | 役 | 誰 | すること | しないこと |
 |---|---|---|---|
 | 指示役 | ユーザーと話すセッション | 方針を決め、指示書・貼付文・状況表示の道具を書き、ときどき様子を見て規則を直す | スレッドの代わりに worker を回すこと。本文を書くこと |
-| 親 | 本文側・レビュー側の各スレッド（軽いモデル） | 状況表示を見て、表どおりに worker を一つ出し、一行記録し、定期再開で起きる | 本文・report・原著を読むこと。数学の判断。ユーザーへの質問 |
+| 親 | 制作とレビューを回す軽いモデル。一つの親、または役割別の親 | 状況表示を見て、表どおりに worker を一つ出し、一行記録し、定期再開で起きる | 本文・report・原著を読むこと。数学の判断。ユーザーへの質問 |
 | worker | 毎回新しい文脈 | 指示書の §1・§6 を読み、一単位をして、2〜3行で返す | 単位をまたいで続けること。親の判断を代わりにすること |
 
 親を軽くし、重い読み書きは worker に閉じ込める。親が本文を読むと、待機のたびに文脈が膨らんで容量が尽きる。
 
-カードの本（[book-harness](../book-harness/SKILL.md)）では、親の表を `labo book next` が計算する。
-親は軽い調整役、worker は能力のある役という段階だけで指示し、モデル名・ホストの道具名は指示書に入れない
-（[カードの本のラウンド](../book-harness/references/rounds.md)）。
+カードの本（[book-harness](../book-harness/SKILL.md)）では、一つの親が `labo book next --role all` を使い、
+制作・独立確認・修復を一周として進められる。独立確認では固定版を新しい文脈の担当へ渡す。
+この構成の指示書は[カードの本のラウンド](../book-harness/references/rounds.md)に従う。
+親は軽い調整役とし、worker の能力は作業の役割で指定する。
+
+## 親の実行モデルを確認する
+
+親モデルを指定した運転では、初回・自動継続・手動再開の各ターンで、配付前に
+ホストの実行記録を照合する。画面の選択値や前ターンの値は配付の根拠に使わない。
+ローカル Codex では現在のシェルに渡るスレッド ID と実行中のターンを
+[check_codex_parent.py](scripts/check_codex_parent.py) で結び付ける。指示書から親モデルの
+正確な ID を渡し、ネイティブ goal が必須なら `--require-active-goal` も付ける。
+`--` の後ろに受付等のコマンドを置くと、照合が通った場合だけ実行する。
+別モデルまたは照合不能なら新規配付・受付を止め、再開条件を一度表示する。
+停止時の goal や起床の扱いは、ユーザーが指定した範囲で指示書に定める。
+ホストの配付ツールを直接呼ぶ運転でも、直前の照合を配付契約に含める。
 
 ## 手順
 
+以下は本文側とレビュー側に親を置く構成の手順。既存の役割別運用や、両側を並行して進める場合に使う。
+
 1. **方針を決める。** ユーザーに次を確かめ、指示書の §1 に書く：自走か（スレッドはユーザーに聞かず規則で決める）、
-   採るか迷ったときの既定（採る／採らない）、冊の順序（前から閉じる等）、自己完結の要否、容量の扱い。
+   採るか迷ったときの既定（採る／採らない）、冊の順序（前から閉じる等）、自己完結の要否、容量の扱い、指定がある場合の親モデルと照合失敗時の扱い。
    指示役が推奨を出してよいが、決めるのはユーザー。
 2. **状況表示を用意する。** 親が見るのはこの出力だけ。[round_status.py](scripts/round_status.py) に
    プロジェクトの設定 JSON（冊・queue・記録・case の置き場所など。鍵は script の先頭）を渡して使い、
@@ -51,12 +66,13 @@ description: Set up, restart, monitor and correct unattended long runs in which 
      新しいスレッドからは消せない。新しいスレッドで始めるなら、先に古いスレッドを止める（親が二人になる）。
    - 状況表示の道具に欄を足すときは、その欄を FINGERPRINT にも入れる（入れないと待機中の親が気づかない）。
    - 大きな方針の変更は、言葉で示してユーザーの同意を得てから。
-7. **止める・再開する。** 止めるのはユーザーの指示だけ（「止まれ」→ 親が定期再開を消して終える）。
-   上限到達・WAIT・ALL_DONE 却下では定期再開を消さない。再開は貼付文を貼る。
+7. **止める・再開する。** ユーザーの停止指示では定期再開を解除する。親モデルの照合失敗では配付を止め、
+   §1 で決めた goal・起床の停止手順を使う。上限到達・WAIT・ALL_DONE 却下では定期再開を維持する。
+   再開は貼付文を貼り、指定モデルがある運転では新しいターンで照合する。
 
 ## 既定の規則（指示書に必ず入れる）
 
-- 親は WAIT・正当な ALL_DONE・容量の段階による待機・実際の上限・ユーザーの停止指示以外で止まらない。
+- 親は WAIT・正当な ALL_DONE・容量の段階による待機・実際の上限・親モデル照合の停止条件・ユーザーの停止指示以外で止まらない。
   一周や build の終わりで最終回答を出さない。
 - 「完了」は、冊ごとの採用範囲の照合表が閉じたときだけ。レビュー queue が空なことは完了ではない
   （reading-book の[完了判定](../reading-book/references/book-workflow.md#章講義の完了判定)）。

@@ -21,7 +21,11 @@ from __future__ import annotations
 import datetime as _dt
 import hashlib
 import json
+import os
 import re
+import shlex
+import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -218,8 +222,12 @@ def decide(book: Book, route: str, *, workspace: Path, root: Path, role: str = "
         fp = hashlib.sha256(json.dumps([summary, stale, [(p["unit"], p["state"]) for p in pks],
                                         sorted(done)], sort_keys=True, default=str).encode()).hexdigest()[:10]
         base = {"route": route, "role": role, "fingerprint": fp, "summary": summary}
-        lc = f"python3 {Path(__file__).resolve().parents[2] / 'scripts' / 'labo.py'}"
-        wsroot = f"--workspace {workspace} --root {Path(root).resolve()}"
+        def shell_path(p):
+            s = Path(p).as_posix()
+            return subprocess.list2cmdline([s]) if os.name == "nt" else shlex.quote(s)
+
+        lc = f"{shell_path(sys.executable)} {shell_path(Path(__file__).resolve().parents[2] / 'scripts' / 'labo.py')}"
+        wsroot = f"--workspace {shell_path(workspace)} --root {shell_path(Path(root).resolve())}"
 
         def run(cmd, reason):
             return {**base, "action": "RUN", "tier": "coordinator", "reason": reason, "command": f"{lc} book {cmd} {wsroot}"}
@@ -248,7 +256,7 @@ def decide(book: Book, route: str, *, workspace: Path, root: Path, role: str = "
         if reviewer and out is None:
             for p in pks:
                 if p["state"] == "returned":
-                    out = run(f"record-review --packet {p['packet']}", f"a reviewer returned {p['unit']}")
+                    out = run(f"record-review --packet {shell_path(p['packet'])}", f"a reviewer returned {p['unit']}")
                     break
         # 2. repair check errors, findings, verbatim runs (producer)
         if producer and out is None and result["errors"]:
@@ -338,7 +346,7 @@ def decide(book: Book, route: str, *, workspace: Path, root: Path, role: str = "
                 listing = Path(work_dir or review_dir) / f"cards-for-review-{fp}.txt"
                 listing.write_text("\n".join(fresh), encoding="utf-8")
                 case = _dt.datetime.now().strftime("r%Y%m%d-%H%M%S")
-                out = run(f"review-input --route {route} --cards-file {listing} --out {Path(review_dir) / case / 'input'}",
+                out = run(f"review-input --route {shlex.quote(route)} --cards-file {shell_path(listing)} --out {shell_path(Path(review_dir) / case / 'input')}",
                           f"{len(fresh)} ready fact cards have no current math review")
             if out is None:
                 for p in pks:

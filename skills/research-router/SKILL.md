@@ -116,12 +116,15 @@ review found, how the result differs from prior work and whether it looks like a
 private page, use [reading-proof-review](../reading-proof-review/SKILL.md). Both apply to the user's
 own manuscript or to a published paper, and both are report-only.
 
-To read a source into a shared pool of cards, build or join books from cards, or audit and view a card pool
-(including the intake review of a taken-in book), use [book-harness](../book-harness/SKILL.md).
+For a card-based book or lecture route specified by sources, a mathematical topic, or both, use
+[book-harness](../book-harness/SKILL.md). It also handles source intake, joining books and auditing the shared pool.
+Use [course-planning](../course-planning/SKILL.md) for the book's design and
+[course-authoring](../course-authoring/SKILL.md) for production and output.
 
-When the author writes a paper themselves and wants the agent to keep facts,
-names, reading order and style beside them, use
-[writing-harness](../writing-harness/SKILL.md).
+Use [paper-writing](../paper-writing/SKILL.md) to draft or revise a research manuscript. When the author writes
+it themselves and wants support with fact cards, reading order and style, use
+[writing-harness](../writing-harness/SKILL.md). For mathematics reused between a book and a paper, apply the
+[result reuse check](../knowledge-dependencies/SKILL.md#reuse-a-result-across-artifacts) at the destination.
 
 For whole-paper architecture or structural reassessment, use
 [paper-structure](../paper-structure/SKILL.md). It maps section roles and

@@ -40,9 +40,11 @@ counts. Use a size preference from the project, including preliminaries,
 appendices and indexes, with allowance for uncertain proof work. Do not impose
 a universal page range or compress necessary explanation to satisfy a target.
 
-A dependency-safe order alone is not a compelling reading route. Explain how
-each part answers the preceding question and prepares the next. When exact
-dependency management materially helps, use
+For each part, say what question it answers, which inputs the reader uses,
+what it establishes, and where that output is used next. Use these roles to
+write the transitions or set the question and endpoint of a lecture. The same
+reader-order principle applies in [paper-structure](../paper-structure/SKILL.md#produce-a-reviewable-architecture).
+When exact dependency management materially helps, use
 [knowledge-dependencies](../knowledge-dependencies/SKILL.md) on the bounded
 scope; do not require a complete theorem graph before useful planning.
 
@@ -65,8 +67,9 @@ rather than requiring an exercise-by-exercise review schedule. Integration is a
 later stage unless the user requests an intermediate collected output.
 
 When the books are built from cards ([book-harness](../book-harness/SKILL.md)), the plan's reading order becomes
-each book's route, the preliminaries below become its entrance card with exact `borrows`, a joined book is a route
-that `includes` the others, and completion evidence is `book status` over the source mappings.
+each book's route, including the reader-facing chapter and section hierarchy, and the preliminaries below become its entrance card with exact `borrows`. The route plan
+supplies the agreed scope and endpoint for [route closure](../book-harness/references/intake-review.md#5-route-closure).
+Source mappings supply evidence for the assigned source ranges.
 
 ## Connect books without duplicating mathematics
 

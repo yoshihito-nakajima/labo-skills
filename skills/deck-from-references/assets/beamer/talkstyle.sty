@@ -65,6 +65,9 @@
 % filled panel: \begin{tbox}[optional tcolorbox keys, e.g. equal height group=g]{title}
 \newtcolorbox{tbox}[2][]{enhanced,colback=tspanel,colframe=tspanel,coltext=tstext,coltitle=tsteal,
   fonttitle=\bfseries\fontsize{10}{12}\selectfont,title={#2},boxrule=0pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,before skip=3pt,after skip=3pt,#1}
+% recall line: when a term defined pages earlier returns, restate it in one grey line under the title
+% \recall{<term>: <one-line meaning>}   (label switches with the language option)
+\newcommand{\recall}[1]{\begin{tcolorbox}[enhanced,frame hidden,colback=tsbg,coltext=tsgrey,borderline west={1.5pt}{0pt}{tsgrey},boxrule=0pt,arc=0pt,left=5pt,top=0pt,bottom=0pt,before skip=0pt,after skip=3pt]{\fontsize{8.5}{11}\selectfont\textbf{\T{Recall}{思い出す}}\quad #1\par}\end{tcolorbox}}
 % white card for figures taken from a paper (their backgrounds and labels are made for white paper)
 \newcommand{\figcard}[1]{\begin{tcolorbox}[enhanced,hbox,colback=white,colframe=white,boxrule=0pt,arc=2pt,left=2pt,right=2pt,top=2pt,bottom=2pt,before skip=2pt,after skip=2pt]#1\end{tcolorbox}}
 % small chip, e.g. \chip{supplementary experiment}

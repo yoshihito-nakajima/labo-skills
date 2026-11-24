@@ -30,7 +30,11 @@ Give a fresh reader the reader's view and the brief, nothing else. Ask for, per 
 Then, from the frames alone, the reader writes the message of the whole deck and what they would
 tell someone else afterwards. A mismatch with the brief's message is a major finding, whatever the
 individual frames look like. The reader also lists terms and symbols used before they are defined
-and frames whose point they could not recover.
+and frames whose point they could not recover. For a term audit, the reader sorts every technical
+term and symbol into (a) defined at or before its use, (b) not defined but its wording conveys the
+right intuition to this audience, (c) opaque, misleading, used before its introduction, or one symbol
+for two objects; and returns only (c) and doubtful (b), each with frame, reason and a gloss of a few
+words or a one-line definition as the repair.
 
 ## 3. Flow review, then critique
 

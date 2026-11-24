@@ -40,6 +40,9 @@ import re
 import subprocess
 import sys
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 HERE = pathlib.Path(__file__).resolve().parent
 USAGE_WINDOW = HERE.parents[1] / "reading-book" / "scripts" / "usage_window.py"
 AUDIT_STATES = ("TODO", "MISSING", "PARTIAL", "OK", "OUT")
@@ -68,7 +71,7 @@ def pages(p: pathlib.Path) -> str:
 def tail(p: pathlib.Path, n: int) -> list[str]:
     if not p.exists():
         return ["(なし)"]
-    lines = [l.rstrip() for l in p.read_text(errors="replace").splitlines() if l.strip()]
+    lines = [l.rstrip() for l in p.read_text(encoding="utf-8", errors="replace").splitlines() if l.strip()]
     return [l[:220] for l in lines[-n:]]
 
 
@@ -133,7 +136,7 @@ def scope_audits(cfg: Config) -> list[tuple[str, str, dict]]:
         if not p.exists():
             out.append((v["name"], "未作成", {}))
             continue
-        t = p.read_text(errors="replace")
+        t = p.read_text(encoding="utf-8", errors="replace")
         c = {k: len(re.findall(rf"\|\s*{k}\s*\|", t)) for k in AUDIT_STATES}
         m = re.search(r"^CLOSED:\s*(.+)$", t, re.M)
         out.append((v["name"], f"閉鎖 {m.group(1).strip()[:40]}" if m else "照合・補完中", c))
@@ -144,7 +147,7 @@ def wait_hours(log: pathlib.Path, now: dt.datetime) -> int:
     """Hours since the last WAIT line; in the fingerprint, so a waiting parent wakes once an hour."""
     if not log.exists():
         return 0
-    for l in reversed(log.read_text(errors="replace").splitlines()):
+    for l in reversed(log.read_text(encoding="utf-8", errors="replace").splitlines()):
         m = re.match(r"\s*(\d\d-\d\d \d\d:\d\d) .*\bWAIT FP=", l)
         if m:
             t = dt.datetime.strptime(f"{now.year}-{m.group(1)}", "%Y-%m-%d %H:%M")
@@ -154,14 +157,14 @@ def wait_hours(log: pathlib.Path, now: dt.datetime) -> int:
 
 def capacity(cfg: Config) -> dict:
     """Stage of the 5-hour window (reading-book usage_window.py); never stops the display."""
-    cmd = [sys.executable, str(USAGE_WINDOW), "--learn", "--json"]
+    cmd = [sys.executable, "-X", "utf8", str(USAGE_WINDOW), "--learn", "--json"]
     calib = cfg.opt("capacity_calib")
     if calib:
         cmd += ["--calib", str(calib)]
     if cfg.get("capacity_projects_dir"):
         cmd += ["--projects-dir", str(cfg.opt("capacity_projects_dir"))]
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", timeout=120)
         return json.loads(r.stdout)
     except Exception as e:
         return {"stage": "未較正", "error": str(e)}
@@ -175,8 +178,8 @@ def coverage(cfg: Config, *args: str) -> str:
     cmd = cfg.get("coverage_cmd")
     if not cmd:
         return ""
-    cmd = [sys.executable if c == "{python}" else c for c in cmd]
-    return subprocess.run([*cmd, *args], capture_output=True, text=True, timeout=120, cwd=cfg.root).stdout
+    cmd = [item for c in cmd for item in ([sys.executable, "-X", "utf8"] if c == "{python}" else [c])]
+    return subprocess.run([*cmd, *args], capture_output=True, text=True, encoding="utf-8", timeout=120, cwd=cfg.root).stdout
 
 
 def main(argv=None) -> int:
@@ -206,11 +209,11 @@ def main(argv=None) -> int:
     models = cfg.opt("role_models")
     if models and models.exists():
         print("-- worker役割（Agentに必ず明示で渡す。親のモデルを継承させない）")
-        for k, v in json.loads(models.read_text())["roles"].items():
+        for k, v in json.loads(models.read_text(encoding="utf-8"))["roles"].items():
             print(f"   {k:26s} type={v['agent_type']:18s} model={v['model']:7s} effort={v['effort']}")
 
     qpath = cfg.opt("queue")
-    q = json.loads(qpath.read_text()) if qpath and qpath.exists() else {"entries": []}
+    q = json.loads(qpath.read_text(encoding="utf-8")) if qpath and qpath.exists() else {"entries": []}
     keys = cfg.get("queue_keys", [])
     print("-- queue: " + " ".join(f"{k}={q.get(k)}" for k in keys))
     ret = collections.defaultdict(list)
@@ -248,7 +251,7 @@ def main(argv=None) -> int:
     print(f"-- 正本の最終書込: " + (f"{mtime(last)} {last.relative_to(cfg.root)}" if last else "なし"))
     lock = cfg.opt("lock")
     if lock:
-        print(f"-- {lock.name}: {lock.read_text().strip() if lock.exists() else 'なし（重いモデル使用可）'}  (mtime {mtime(lock)})")
+        print(f"-- {lock.name}: {lock.read_text(encoding='utf-8').strip() if lock.exists() else 'なし（重いモデル使用可）'}  (mtime {mtime(lock)})")
 
     cov_fp = ""
     cursor = next((v for v, state, _ in audits if not state.startswith("閉鎖")), None)
@@ -261,7 +264,7 @@ def main(argv=None) -> int:
             acc = sum(r["state"] == "current" and r.get("accepted_repair") for r in res)
             marker = cfg.get("triage_marker", "確認後に変更の整理 {cursor}").format(cursor=cursor)
             plog = log_dir / f"{cfg.producer}.md"
-            tri = [l[:11] for l in (plog.read_text(errors="replace").splitlines() if plog.exists() else [])
+            tri = [l[:11] for l in (plog.read_text(encoding="utf-8", errors="replace").splitlines() if plog.exists() else [])
                    if marker in l or marker.replace(cursor, cursor.upper()) in l]
             print(f"-- 今の冊 {cursor} の被覆: 未確認 {cc['unreviewed']}  確認後に変更 {cc['changed']}  確認中 {cc['in-review']}"
                   f"  （軽微修復の記録で確認済み {acc}）")

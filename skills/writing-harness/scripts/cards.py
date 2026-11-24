@@ -15,6 +15,11 @@ the current directory.
     python3 cards.py impact ID...      # facts and prose to recheck after a change
     python3 cards.py anchor ID         # record current fingerprints in a prose card
     python3 cards.py terms [FILE] [--assumed PROFILE.json]
+    python3 cards.py build [--no-pdf]  # check, TeX, PDF, viewer and reading page in one go
+    python3 cards.py watch [--no-pdf]  # rebuild in the background whenever a source file changes
+    python3 cards.py hook              # Claude Code PostToolUse hook (reads the event on stdin)
+    python3 cards.py new KIND ID [--title T] [--requires A,B] [--explains X,Y]
+    python3 cards.py serve [--port P]  # local reading page with card editing and live reload
 """
 import argparse
 import hashlib
@@ -27,6 +32,9 @@ import tomllib
 from pathlib import Path
 
 import yaml
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pipeline  # noqa: E402
 
 SKILL = Path(__file__).resolve().parents[1]
 TEMPLATE = SKILL / 'assets' / 'template'
@@ -77,13 +85,15 @@ def find_root(start=None):
 # ---------------------------------------------------------------- loading
 
 class Card:
-    def __init__(self, path):
+    def __init__(self, path, text=None):
         self.path = path
-        text = path.read_text(encoding='utf-8')
+        text = path.read_text(encoding='utf-8') if text is None else text
         m = re.match(r'^---\n(.*?)\n---\n?(.*)$', text, re.S)
         if not m:
             raise ValueError(f'{path.name}: missing YAML front matter')
         self.meta = yaml.safe_load(m.group(1)) or {}
+        if not isinstance(self.meta, dict):
+            raise ValueError(f'{path.name}: front matter is not a mapping')
         self.body = m.group(2)
         self.sections = {}
         cur = None
@@ -279,6 +289,7 @@ def cmd_init(a):
 def cmd_check(h, a):
     cards, errors = load_cards(h)
     errors, warn = check(h, cards, errors)
+    warn += pipeline.outdated(h)
     if a.json:
         print(json.dumps({'cards': len(cards), 'errors': errors, 'warnings': warn}, ensure_ascii=False, indent=1))
     else:
@@ -299,6 +310,10 @@ def cmd_status(h, a):
     for s in STATUS:
         print(f'{s:9s} {len(by.get(s, [])):3d}')
     print(f'explanations {sum(c.kind == "explanation" for c in cards.values())}')
+    stale_outputs = pipeline.outdated(h)
+    outs = pipeline.read_stamps(h).get('outputs', {})
+    print('outputs:', 'not built yet (run build)' if not outs else
+          'up to date' if not stale_outputs else f'{len(stale_outputs)} outdated (run build)')
     qs = [(c.id, c.meta['questions']) for c in cards.values() if c.meta.get('questions')]
     if qs:
         print('\nopen questions:')
@@ -506,6 +521,7 @@ def cmd_render(h, a):
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(preamble(h, title) + '\\begin{document}\n\\maketitle\n\n' + '\n'.join(body) + bib + '\\end{document}\n',
                    encoding='utf-8')
+    pipeline.write_stamp(h, f'tex:{out.name}')
     print(f'-> {h.rel(out)}')
     return 0
 
@@ -627,6 +643,7 @@ def cmd_html(h, a):
     outp = h.path('html_out', 'html') / 'index.html'
     outp.parent.mkdir(parents=True, exist_ok=True)
     outp.write_text(page, encoding='utf-8')
+    pipeline.write_stamp(h, 'html')
     print(f'-> {h.rel(outp)}')
     idx = h.cfg.get('html_index')
     if idx is not None:
@@ -705,6 +722,7 @@ def cmd_read(h, a):
     outp = h.path('html_out', 'html') / 'read.html'
     outp.parent.mkdir(parents=True, exist_ok=True)
     outp.write_text(page, encoding='utf-8')
+    pipeline.write_stamp(h, 'read')
     print(f'-> {h.rel(outp)}')
     return 0
 
@@ -768,6 +786,75 @@ def cmd_terms(h, a):
     return 1 if groups['unregistered'] else 0
 
 
+# ---------------------------------------------------------------- build, watch, hook, new, serve
+
+def cmd_build(h, a):
+    if a.background:
+        return pipeline.background(h, pdf=not a.no_pdf)
+    return pipeline.build(h, pdf=not a.no_pdf)
+
+
+def cmd_watch(h, a):
+    return pipeline.watch(h, pdf=not a.no_pdf)
+
+
+KIND_DIRS = {'definition': 'def', 'explanation': 'expl', **{k: 'prop' for k in PROP_KINDS}}
+
+
+def card_template(h, kind):
+    """Template text for a new card: <harness>/templates/<kind>.md overrides the skill's."""
+    lang = 'ja' if h.language == 'ja' else 'en'
+    name = 'proposition' if kind in PROP_KINDS else kind
+    for p in (h.root / 'templates' / f'{kind}.md', h.root / 'templates' / f'{name}.md',
+              SKILL / 'assets' / 'card-templates' / lang / f'{name}.md'):
+        if p.exists():
+            return p.read_text(encoding='utf-8')
+    raise FileNotFoundError(f'no template for {kind}')
+
+
+def new_card(h, kind, cid, title='', requires=(), explains=()):
+    """Create cards/<dir>/<id>.md from the template; returns the path. Never overwrites."""
+    if kind not in KIND_DIRS:
+        raise ValueError(f'kind must be one of {sorted(KIND_DIRS)}')
+    if not ID_RE.match(cid or ''):
+        raise ValueError(f'bad id {cid!r}: lowercase letters, digits and hyphens, starting with a letter')
+    cards, _ = load_cards(h)
+    if cid in cards or any(h.cards_dir.glob(f'*/{cid}.md')):
+        raise FileExistsError(f'card {cid} exists')
+    for r in [*requires, *explains]:
+        if r not in cards and ':' not in r:
+            raise ValueError(f'unknown card {r}')
+    lst = lambda xs: '[' + ', '.join(xs) + ']'
+    anchors = '{' + ', '.join(f'{x}: {cards[x].fingerprint()}' for x in explains) + '}'
+    text = (card_template(h, kind).replace('{id}', cid).replace('{kind}', kind)
+            .replace('{title}', title.replace("'", "''")).replace('{requires}', lst(requires))
+            .replace('{explains}', lst(explains)).replace('{anchors}', anchors))
+    Card(h.cards_dir / KIND_DIRS[kind] / f'{cid}.md', text)   # the template must parse
+    p = h.cards_dir / KIND_DIRS[kind] / f'{cid}.md'
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(text, encoding='utf-8')
+    return p
+
+
+def cmd_new(h, a):
+    split = lambda s: [x.strip() for x in (s or '').split(',') if x.strip()]
+    try:
+        p = new_card(h, a.kind, a.id, a.title or '', split(a.requires), split(a.explains))
+    except (ValueError, FileExistsError) as e:
+        sys.exit(str(e))
+    print(f'-> {h.rel(p)} (add it to structure.yaml to show it in the paper)')
+    return 0
+
+
+def cmd_hook(a):
+    return pipeline.hook(sys.stdin.read())
+
+
+def cmd_serve(h, a):
+    import editor
+    return editor.serve(h, a.host, a.port, build=not a.no_build, pdf=not a.no_pdf)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--root', help='harness directory (default: nearest harness.toml at or above the cwd)')
@@ -785,9 +872,27 @@ def main(argv=None):
     p.add_argument('file', nargs='?')
     p.add_argument('--assumed', help='exposition-granularity profile.json; its assumed terms are not reported')
     p.add_argument('--json', action='store_true')
+    p = sp.add_parser('build')
+    p.add_argument('--no-pdf', action='store_true', help='TeX, viewer and reading page only')
+    p.add_argument('--background', action='store_true', help=argparse.SUPPRESS)
+    sp.add_parser('watch').add_argument('--no-pdf', action='store_true')
+    sp.add_parser('hook')
+    p = sp.add_parser('new')
+    p.add_argument('kind', choices=sorted(KIND_DIRS))
+    p.add_argument('id')
+    p.add_argument('--title')
+    p.add_argument('--requires', help='comma-separated card ids')
+    p.add_argument('--explains', help='comma-separated fact card ids (explanation cards; anchored now)')
+    p = sp.add_parser('serve')
+    p.add_argument('--host', default='127.0.0.1')
+    p.add_argument('--port', type=int, default=8765)
+    p.add_argument('--no-build', action='store_true', help='do not rebuild the outputs after a save')
+    p.add_argument('--no-pdf', action='store_true', help='rebuild without PDFs after a save')
     a = ap.parse_args(argv)
     if a.cmd == 'init':
         return cmd_init(a)
+    if a.cmd == 'hook':
+        return cmd_hook(a)
     h = Harness(a.root or find_root())
     return globals()['cmd_' + a.cmd](h, a)
 

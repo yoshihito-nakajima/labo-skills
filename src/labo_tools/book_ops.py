@@ -406,7 +406,8 @@ class _null:
 def place(root: Path, route: str, ids: list, section: str | None = None, after: str | None = None) -> list:
     """Add cards to a route's reading order (under the root lock, so concurrent writers do not clobber each other).
 
-    `section` is a title (created when missing) or an index; the default is the last section.  `after` puts the
+    `section` is a stable id, title or index; declare the section before placing cards in a chaptered route.
+    The default is the last section. `after` puts the
     cards right behind a card already listed.  A card that is already in the route, or is the proof of one that is
     (a claim shows its owning proof by itself), is skipped.
     """
@@ -445,13 +446,17 @@ def place(root: Path, route: str, ids: list, section: str | None = None, after: 
         else:
             if section is None:
                 if not sections:
+                    if data.get("chapters"):
+                        raise BookError(f"route {route}: declare a section with an id and chapter before placing cards")
                     sections.append({"title": route, "items": []})
                 sec = sections[-1]
             elif str(section).isdigit() and int(section) < len(sections):
                 sec = sections[int(section)]
             else:
-                sec = next((s for s in sections if s.get("title") == section), None)
+                sec = next((s for s in sections if section in (s.get("id"), s.get("title"))), None)
                 if sec is None:
+                    if data.get("chapters"):
+                        raise BookError(f"route {route}: unknown section {section!r}; declare its chapter first")
                     sec = {"title": section, "items": []}
                     sections.append(sec)
             sec.setdefault("items", []).extend(todo)

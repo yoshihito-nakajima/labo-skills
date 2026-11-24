@@ -40,14 +40,19 @@ fix the cause.
 
 ## Glue and routes (with `--route`)
 
+- `EQUATION-NAVIGATION` — a route with `typed_navigation: true` has a duplicate or missing equation label, an invalid `\eqref`, or a formula index entry without its exact equation target.
+
 | Code | Meaning and repair |
 |---|---|
 | `FORWARD` (error) | A card needs one that comes later in the route. Reorder, or preview it (B3) and keep the proof later. |
 | `UNLISTED-BORROW` (error) | A card needs one that is neither in the route nor listed in an entrance card's `borrows`. |
+| `BORROW-INVALID` (error) | Missing or conflicting borrow fields, invalid owner, ambiguous or missing proof, or unusable prerequisite chain. Check the owning route and preserve the exact claim and proof. |
+| `BORROW-STALE` (error) | A pinned card, selected proof or declared prerequisite changed. Re-read the owner and affected uses before updating the borrowing record. |
+| `TEX-REF-OUTSIDE-ROUTE` (error) | A raw TeX reference points to a label unavailable in the versioned route. For an external prerequisite use its registered card ID. |
 | `BORROW-IN-ROUTE` (warning) | A borrowed card also appears in the route. |
 | `ROUTE-UNKNOWN` (error) | The route lists an unknown card. |
-| `DUPLICATE-IN-ROUTE` (warning) | A card appears twice, usually `proof_of` for a claim whose proof already follows it. |
-| `REF-OUTSIDE-ROUTE` (warning) | Text cites `[[x]]`, which is neither in the route nor borrowed. |
+| `DUPLICATE-IN-ROUTE` (error for versioned routes, otherwise warning) | A card appears twice, usually `proof_of` for a claim whose proof already follows it. |
+| `REF-OUTSIDE-ROUTE` (error for versioned routes, otherwise warning) | Text cites a card absent from the route and its borrow records. |
 | `BAD-BETWEEN` (error), `NO-ANCHOR` (warning), `TRANSITION-PLACE` (warning) | A transition must name exactly two neighbours, anchor both, and sit between them. |
 | `PREVIEW-REQUIRED` (error), `PREVIEW-EARLIER`, `PREVIEW-MISSING` (warning) | A previewed result may not be a prerequisite; it should come later in the route and exist. |
 | `OPEN-QUESTION` (warning) | A motivation card without an answering card in the route. |

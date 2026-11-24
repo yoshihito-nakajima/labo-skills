@@ -46,6 +46,22 @@ it remains a supplied assessment. Revisit the affected statements and edges
 after changes. Do not claim complete mathematical dependency extraction from
 an acyclic graph or from a tool's successful exit.
 
+## Reuse a result across artifacts
+
+When a book or manuscript uses mathematics from another artifact, use its existing source or claim record to
+locate the owning statement and proof. Record the source version and exact locator (or card ID and recorded
+version), the statement and hypotheses used, and the evidence and scope of any prior check. Cite the accessible
+mathematical source in reader-facing text according to the destination's citation rules. For a local unpublished
+source, respect its access and citation constraints.
+
+At the point of use, match the objects, hypotheses, quantifiers, conventions and conclusion. Carry forward prior
+confirmation only for the statement, proof and relevant inputs it actually covered at their recorded versions.
+Check applicability at the new use. Keep any new argument, changed statement or missing proof step visible as a
+separate obligation, and verify it through the destination's review workflow. If a source or a prerequisite
+changes, trace the affected uses and recheck them before treating the borrowed result as current. Use an existing
+dependency graph where available; the same check can be recorded in existing notes or card fields.
+For card books, record the [owning route and exact borrow version](../book-harness/references/pool-and-route.md#prerequisites-from-another-book).
+
 ## Run the checked-out harness
 
 `<labo-script>` is the checkout-local launcher `scripts/labo.py` of this policy checkout: from the workspace root it is

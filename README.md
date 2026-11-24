@@ -46,9 +46,10 @@ Every skill in `skills/`, grouped by what it is for. Each entry links to its `SK
 - [story-interview](skills/story-interview/SKILL.md) — Stress-test a talk or paper storyline by dialogue with an adversarial listener.
 - `paper-introduction` — Discover and shape the story of an introduction.
 - [paper-structure](skills/paper-structure/SKILL.md) — Design or reassess the whole-paper architecture.
-- [paper-writing](skills/paper-writing/SKILL.md) — Draft or revise manuscripts from plans, sources and proof evidence.
-- [book-harness](skills/book-harness/SKILL.md) — Read books into, and build books from, a shared pool of cards: routes, lecture-note glue, source mappings, fingerprints, graph views and an intake review.
-- [writing-harness](skills/writing-harness/SKILL.md) — Author-led paper harness: fact cards, story and style ledgers, staleness and reading-order checks.
+- [paper-writing](skills/paper-writing/SKILL.md) — Draft or revise research manuscripts from plans, sources and proof evidence.
+- [book-harness](skills/book-harness/SKILL.md) — Build a book or lecture route from an assigned source, a mathematical topic, or both, using shared cards.
+- [writing-harness](skills/writing-harness/SKILL.md) — Support an author writing their own paper with fact cards, reference proofs, story and style ledgers, and reading-order checks.
+- [Reusing results across books and papers](skills/knowledge-dependencies/SKILL.md#reuse-a-result-across-artifacts) — Carry the exact result, source version and review scope into each use.
 - [paper-referee](skills/paper-referee/SKILL.md) — Audit papers, decisive proofs and exposition against numbered criteria.
 - [proof-adversarial-review](skills/proof-adversarial-review/SKILL.md) — Independent multi-viewpoint adversarial review of a frozen proof.
 - [undergraduate-lecture](skills/undergraduate-lecture/SKILL.md) — Lecture notes for undergraduate readers (an overlay on paper-writing).

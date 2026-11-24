@@ -81,8 +81,10 @@ entry file lists the steps only.
    when none is found, ask the user with a substitute proposed; AI-made pictures only with the user's permission per picture; the authors' published
    code and published numerical results; only then material made for the talk. Anything
    made for the talk (a schematic, an AI-written function, an AI-run experiment) is the
-   last resort, kept minimal, adjusted only for clarity, and visibly labelled; the plan lists,
-   for each such figure, where an original was looked for. The order and
+   last resort, kept minimal, adjusted only for clarity, and visibly labelled when the talk
+   presents someone else's work, where it could be mistaken for the source's own; in a talk on
+   the speaker's own results, a schematic the speaker presents as their picture carries no
+   label. The plan lists, for each such figure, where an original was looked for. The order and
    the license limits for code are those of
    [reading-reference](../../reading-reference/references/application-to-code.md#show-the-adopted-source-code-first). Credit
    every source as person, publication and title ([plan format](plan-format.md)).

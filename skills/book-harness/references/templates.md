@@ -82,6 +82,20 @@ Rules for the author and the reviewer (not machine-checked; say so when reportin
 - A4: a counterexample says which hypothesis it removes. A5: the question is restated in the
   book's own words, never quoted. A6: stated once; a card that needs it lists it in `conventions`.
 
+### Reader text and working notes
+
+- Put assumptions, quantifier order, essential notation, boundary cases and applicability where the reader uses
+  them. The statement as rendered must carry its own meaning. A dedicated field can record an audit of something
+  already explicit in the reader text. For fields the current renderer omits, write the reader-facing part in a
+  field it renders, following [building](building.md#card-content-in-the-reader-edition).
+- Put a mathematical caution with its fact. Its conditions belong in the definition, hypotheses or conclusion
+  covered by math review. The current fingerprint excludes `remarks`, `caution` and `why`. Put a question, a
+  motivation or a transition specific to the route in a B card. A reader-facing note that states a new mathematical
+  claim needs its own A card.
+- Keep source adoption decisions in C2, review findings against the fixed input in the review record, and work in
+  progress in the project ledger. Keep decisions that must survive a rewrite in those records. YAML comments can
+  disappear when a card is rewritten.
+
 ## B: lecture-note glue (per book, `route/<slug>/card/`)
 
 Glue states no new fact: it names fact cards by id and says what has been done, what is missing
@@ -93,9 +107,9 @@ and why the next thing follows. A fact found while writing glue is moved into an
 | B2 | transition | 済んだこと Done; 足りないこと Missing; 次にすること Next | `between: [prev, next]` and anchors on both; variants forward, supplement, turn, bridge-to-example, need-for-definition |
 | B3 | preview | 後で示すこと To be shown later | `forward: [cards]`; a previewed result is never a prerequisite |
 | B4 | recap | 確立したこと Established | — |
-| B5 | entrance | 問いと終点; 前提とする既知事実; 規約 | `borrows: [{card, owner, why}]` |
+| B5 | entrance | 問いと終点; 前提とする既知事実; 規約 | `borrows: [{card, owner, version, why}]` |
 
-The entrance lists the exact results the book borrows. `check --route` reports every card
+The entrance lists the exact results the book borrows. Follow the [versioned borrow format](pool-and-route.md#prerequisites-from-another-book). `check --route` reports every card
 a route needs that is neither in the route nor listed under `borrows` (UNLISTED-BORROW),
 so a missing convention or lemma is found before a reader finds it. An unproved borrowed
 result is not turned into an assumption without a recorded change of scope.

@@ -1,21 +1,50 @@
-# Running the intake with a light coordinator
+# Running a card route with a light coordinator
 
-For long, unattended work a **coordinator** (a small, cheap model, or a person) drives the intake and hands every
-piece of mathematics to a **worker**. The design is the table-follower of [long-run-rounds](../../long-run-rounds/SKILL.md),
-with the table computed by `labo book next`, so a coordinator never reads cards or judges anything. Nothing here
-names a model, a vendor or a host tool: it works with any LLM that can read files and run a command, and by hand.
+Use one light **coordinator** for the route's production, review and repair cycle. It dispatches substantive work
+to fresh workers. An independent reviewer receives the fixed scope and permitted evidence in a fresh context
+and returns findings to the producer.
 
-## Tiers, not models
+The current `labo book next --role all` automates C2-backed production and related review tasks. Assign other
+route units from the existing plan using the same [reading loop](reading-loop.md), and confirm closure against
+the plan. Use [long-run-rounds](../../long-run-rounds/SKILL.md) for scheduled operation.
+
+## Roles and model capability
 
 | Tier | Does | Never does |
 |---|---|---|
 | **coordinator** | calls `book next`, runs the `RUN` command, forwards a `DISPATCH` prompt to a fresh worker, relays the worker's last line, waits, wakes again | reads or writes cards, source or reports; judges a review; decides a variant, a merge, a repair; asks the user |
 | **worker** | reads the skill and its unit, does the unit in a fresh context, replies in at most three lines | goes beyond its unit; records an independent review itself; talks to the user |
 
-A coordinator is a restricted role (evidence collection and relaying): it must not be the one that writes the cards
-or judges the review, whatever it could do. Which concrete model fills a tier is host configuration (a project
-file), never part of an instruction or a prompt. A worker must be launched with an explicit capable choice, not by
-inheriting the coordinator's own.
+Use the [capability and effort table](../../reading-book/references/token-budget.md#能力の段階と思考量). A light
+coordinator handles dispatch and handoffs; scripts handle mechanical checks and builds. Use normal capability
+for reading, card writing, route design and ordinary math review, with low effort for routine source comparison,
+receipt handling and output review. Assign hard new proofs and their independent verification to upper capability
+with high effort. Assign the verification in a fresh context.
+
+Record role-to-model choices in the project's host configuration. Launch each worker with the capability assigned
+to its task. If a unit exposes a harder proof obligation, have the worker return its statement and prerequisites
+for assignment to the proof role.
+
+## Parent model and per-round cost
+
+When the project pins a parent model, verify the live turn before each live claim or dispatch, including direct
+hand-offs outside the automated queue. Use the project's guarded command for live claims and mechanical writes.
+See [parent-model verification](../../long-run-rounds/SKILL.md#親の実行モデルを確認する).
+
+- Give the coordinator the next action, unit or packet ID, result path and counts. Keep report contents, full
+  diffs and trace logs in files for the worker. Put one receipt in the durable run record per completed unit.
+  Keep the dispatch ID and fixed version durable when the unit starts, and combine related writes in one command.
+- Use the same frozen packet for routine receipt and coverage registration. When an eligible independent
+  reviewer returns an unambiguous result for the explicit scope, use the existing `record-review` command and
+  its fingerprint checks. Send findings, partial or inconsistent returns, and version mismatches to the
+  responsible producer or an intake worker. Keep custom cases on their existing receipt path until their
+  provenance, checked scope and fingerprints are accepted by the mechanical path.
+- Batch neighbouring exercises or examples with the same direct prerequisites and source scope at a stable
+  section boundary. Still require checked IDs and the full independent review of the agreed scope. Split a
+  packet that is too large to review in one fresh context, or whose prerequisites are still changing.
+- At a round boundary, use the durable progress pointer to resume after a host-supported context reset if the
+  coordinator's context has grown substantially. Track model calls and newly supplied input, cached input and
+  output separately, along with completed units and current review coverage.
 
 ## The one call
 
@@ -24,8 +53,8 @@ labo book next --route R --role producer|reviewer|all --review-dir D --work-dir 
     --source-text TEXTDIR [--source-text ...] --claim HOLDER [--format json]
 ```
 
-`--role` is the coordinator's job (one thread produces, another reviews; `all` for a single coordinator). `--claim`
-must be passed when running for real; without it the call is a dry run. The answer (first line of text output, or the
+Use `--role all` for one coordinator. Use `producer` and `reviewer` when intentionally running two coordinators
+in parallel. Pass `--claim` for a live run. Without it the call is a dry run. The answer (first line of text output, or the
 `action` field of JSON) is exactly one of:
 
 | Answer | The coordinator |
@@ -34,9 +63,9 @@ must be passed when running for real; without it the call is a dry run. The answ
 | `DISPATCH tier=worker worker_role=R unit=U prompt=FILE` | gives the file `FILE` to a fresh capable worker, waits for its reply, writes one log line, calls `next` again. The unit is claimed |
 | `WAIT` | writes `WAIT FINGERPRINT=...` and sleeps until the next wake. A second WAIT with the same fingerprint starts nothing |
 | `BLOCKED` | writes the reason; needs configuration or a person; keeps waking (does not invent a fix) |
-| `DONE` | the intake is finished: stops its periodic wake and reports |
+| `DONE` | the automated source-intake pass is finished: stops its periodic wake and reports |
 
-Never stop on a single worker's return; stop on `DONE` or an explicit stop by the user.
+A worker return continues the round. Apply the completion, parent-model, capacity and user stop rules in the run instructions.
 
 ## What `next` decides (in this order)
 
@@ -55,9 +84,16 @@ Never stop on a single worker's return; stop on `DONE` or an explicit stop by th
 6. **Nothing to start**: `DONE` only when `taken in` (see [intake review](intake-review.md)) and the verbatim check
    was run and is clean; `BLOCKED` when it is taken in but `--source-text` was not given; otherwise `WAIT`.
 
-Roles split the list: the producer coordinator never gets review work and the reviewer coordinator never gets
-production work, so two threads run in parallel. Review waits for the cards it needs to be ready; a producer thread
-with nothing left to do waits until the reviews close the batch.
+With `all`, one coordinator follows the table through both worker roles. The current command selects pending C2
+production before ordinary review. Apply the [review timing rules](intake-review.md#when-to-call-an-independent-reviewer)
+at stable section boundaries. When a producer reports a proof or serious prerequisite issue that blocks the next
+unit, use the existing fixed packet or open a scoped `book review-input --cards` packet and hand it directly to
+an independent reviewer. Resume the affected unit once the check clears it or necessary repairs are in. The same
+coordinator can arrange
+this handoff, and unrelated units can proceed. With two coordinators, each follows its own role's entries.
+
+With `--source-text`, `next` already runs the verbatim check. Give it the text caches for the assigned sources
+and use its result for that pass.
 
 ## Claims, packets, results
 
@@ -93,7 +129,7 @@ commands carry paths and ids, not card text.
 
 Use the [coordinator instruction template](../assets/rounds/coordinator-instructions.md) and its paste prompts: sections
 for what the coordinator may do, the table above, wake-up and stop rules, and the log line; keep them in the project
-beside its other run instructions, never in the skill. Record the host's tier-to-model mapping in a project file and
-say "capable worker" and "light coordinator" in the instructions. Use [long-run-rounds](../../long-run-rounds/SKILL.md)
+beside its other run instructions. State the work role and capability in instructions, and resolve the model through
+host configuration. Use [long-run-rounds](../../long-run-rounds/SKILL.md)
 for capacity stages, status fingerprints and restarts; its status table maps to `book next` and `book status`
 (`taken in`, review coverage, STALE ids).
