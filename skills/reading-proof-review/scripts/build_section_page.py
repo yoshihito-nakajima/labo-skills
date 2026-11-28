@@ -31,7 +31,7 @@ def m(s):
     """Text with $...$ math to HTML (MathML through pandoc when available)."""
     if not s: return ""
     if "$" not in s or not HAVE_PANDOC: return esc(s)
-    r = subprocess.run(["pandoc", "-f", "latex", "-t", "html", "--mathml"], input=s, capture_output=True, text=True)
+    r = subprocess.run(["pandoc", "-f", "latex", "-t", "html", "--mathml"], input=s, capture_output=True, text=True, encoding="utf-8")
     t = r.stdout.strip()
     return re.sub(r"^<p>|</p>$", "", t) if r.returncode == 0 and t else esc(s)
 
@@ -270,7 +270,7 @@ def locate(words, sid, first, a, b):
 
 
 def read_words(pdf):
-    x = subprocess.run(["pdftotext", "-bbox", str(pdf), "-"], capture_output=True, text=True).stdout
+    x = subprocess.run(["pdftotext", "-bbox", str(pdf), "-"], capture_output=True, text=True, encoding="utf-8").stdout
     words = {}
     for pm in re.finditer(r'<page width="([\d.]+)" height="([\d.]+)">(.*?)</page>', x, re.S):
         words[len(words) + 1] = [(float(a), float(b), html.unescape(w)) for a, b, w in re.findall(r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="[\d.]+" yMax="[\d.]+">(.*?)</word>', pm.group(3))]

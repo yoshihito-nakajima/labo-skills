@@ -20,7 +20,9 @@ research evidence; this skill owns the harness in which the author writes.
    `python3 scripts/cards.py init writing/<paper>/harness` and set `language`
    to the author's language. Existing drafts are imported into cards with the
    author's agreement; never overwrite an existing card.
-2. Run `check` and `status`. Report errors, `STALE` prose, `OUTDATED`
+2. Run `check` and `status`. Report errors, `STALE` prose (including text
+   whose cited code, run or figure changed; see `evidence` in
+   [cards](references/cards.md#evidence-from-code-runs-and-figures-reverse-staleness)), `OUTDATED`
    outputs, forward references and open questions before new work, and any
    new file in `reviews/comments/`.
 3. Read `story.md`, `vocab.toml` and `style.toml`, and the workspace's
@@ -35,10 +37,20 @@ research evidence; this skill owns the harness in which the author writes.
   [cards](references/cards.md). Check [borrowed results](references/cards.md#facts-from-another-harness),
   including those located through a book or lecture. The author's prose lives in explanation cards;
   edit its body only when the author asks.
+- When the author names an exemplar paper and asks the prose to follow it, its wording is
+  the target, not a soft cue: follow [an exemplar](references/harnesses.md#following-an-exemplar)
+  passage by passage, with its phrase table in `style.toml` and `cards.py exemplar` before reporting.
 - Run `check` after every change to cards or structure; run `impact` before
   changing a statement and tell the author which prose to reread.
 - Every rule learned from an edit is stated, applied paper-wide as a diff after
-  approval and recorded at its owner (field, author or this paper).
+  approval and recorded at its owner (field, author or this paper). A rule constrains
+  structure, such as the order of a proof, the quantifiers or the placement of a lemma; a
+  `PHRASE` check only catches typical wording. Reread each fixed passage against the rule's
+  intent before reporting it fixed, and never count a rewording that silences the check as
+  a fix.
+- `cards.py load` lists indicators of how heavy each proof is to read (named
+  symbols and their uses, invoked theorems, symbols named before they are
+  needed); use it to choose which proofs to reread, not as a verdict.
 - Lean: link declarations in `lean:`; raise a card to `lean` only when its own
   objects and statement are formalized.
 - Keep every output current: after any change to cards or structure run

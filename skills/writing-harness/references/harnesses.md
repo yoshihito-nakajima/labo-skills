@@ -43,8 +43,8 @@ make them stop. It reports; the story stays the author's
 The skeleton: definitions and statements in reading order, without proofs
 (`structure.yaml`). The agent may fill a first order from the story; the
 author rearranges. After every move, `check` reports statements that use a
-notion defined later (`FORWARD`), prerequisites never shown (`MISSING`) and
-unused facts. Report the breakage of a requested move rather than silently
+notion defined later (`FORWARD`), prerequisites never shown (`MISSING`),
+unused facts, and lemmas placed far from their first use (`PLACEMENT`). Report the breakage of a requested move rather than silently
 undoing it. For the reasoning behind section roles use
 [paper-structure](../../paper-structure/SKILL.md).
 
@@ -87,6 +87,42 @@ date and whether it was asked or inferred, at its owner:
 
 A rule moved to another owner leaves a one-line pointer in `style.toml` so the
 record of when it was asked survives.
+
+## Following an exemplar
+
+When the author asks that the paper follow a named exemplar as closely as possible
+(often their own or a coauthor's paper in the same theory), match its wording role by
+role. This request overrides the reading of a corpus as weak style cues.
+
+1. Set `exemplar = ["path/to/source.tex"]` in `harness.toml`. The path is relative to
+   the harness and the file stays in the private workspace.
+2. Before rewriting a card, open the exemplar passage with the same role, such as the
+   definition of an operator, a lemma statement, a proof step, a section opening or the
+   closing of a proof. Take its sentence forms and notation, for example "The ... operator
+   ... is defined by", "Then it holds that ... for a.e. t", "it follows from ... that",
+   "This completes the proof", and the exemplar's symbols. Keep the mathematics of the
+   card.
+3. Record the recurring choices in `style.toml` as a phrase table. Each `[[phrase]]`
+   entry has `avoid` (a regular expression for prose outside math), `use` (what the
+   exemplar writes in that role) and `basis` (where it was seen); an optional
+   `section`, such as `"Statement"`, limits the rule to that card section. `check` reports
+   every match as `PHRASE`.
+4. Run `cards.py exemplar` before reporting. It gives the rate per thousand words of each
+   phrase in the table and of common connectives, in the exemplar and in the cards, and it
+   lists word n-grams that the cards repeat but the exemplar never uses. Report the
+   remaining differences that you keep and the reason for each.
+
+A count of sentence openers alone cannot show that the prose follows the exemplar, and
+neither can a rewrite done from memory of its style.
+
+A phrase table is a net for typical wording, not the rule itself. When a phrase entry
+stands for a structural rule, such as "build a proof forward" behind `avoid = "It remains
+to show"`, a match is a pointer to a structure to change. Replacing "It remains to show
+that k is positive" by "We show by contradiction that k is positive" silences the check and
+leaves the backward step. Fix the structure, often in the statement: in that example the
+statement asked for a positive k where the equivalent condition gives only a nonnegative
+one and no later argument used positivity, so the statement was weakened and the step
+disappeared. Reread every passage you changed for such a rule, not only the matches.
 
 ## Tooling principle
 

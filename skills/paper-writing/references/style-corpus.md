@@ -31,6 +31,11 @@ manuscript, keep the initial local reader assessment ahead of corpus access.
    weak style cues, not hard constraints. Preserve the author's intent and the
    current request. Learn the pattern rather than reusing distinctive wording,
    sentence sequences, or claims.
+   An explicit request from the author to follow a named exemplar as closely
+   as possible changes this. That exemplar's stock phrasing and notation for each
+   role become the target. Compare each passage with the exemplar passage that has
+   the same role. Distinctive claims and sentences remain the source's own. In a
+   writing harness, see writing-harness, "Following an exemplar".
 5. Check whether the selected examples actually cover the requested style
    choice. Coverage is weak when no source is close in field, language, genre,
    or register; when source versions or locators cannot be checked; or when

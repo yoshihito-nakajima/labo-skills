@@ -25,11 +25,45 @@ paper's notation decisions belong with that paper.
 - Avoid parenthetical asides in statements and proofs. A convention a formula
   needs follows as its own sentence ("where ...", 「ただし…とする」); other
   remarks become a clause or are dropped.
+- Refer to results, sections and equations by label, never by typed numbers.
 - Proof paragraphs may carry working labels (1), (2), ... in drafts. Drop them
   in the output; if a step is cited, show "Step $k$" and cite it as such.
 
+## Notation and quantifiers
+
+- Introduce notation at the scope where it is used. Fix a symbol for the whole
+  paper only when the argument has that scope, and when a result lets a
+  parameter vary, state its range there and say which estimates are uniform in
+  it (a group $G$ fixed throughout, a prime $p$ fixed only within one section).
+- State a definition for the object that plays the role in the problem; use a
+  generic symbol only when the definition will be applied to several objects
+  (the Hodge star of the given metric $g$, not of "a metric", when only $g$
+  occurs).
+- State a standing convention (an identification, a choice of representatives,
+  a sign or orientation convention) before the first object that needs it,
+  not afterwards with "here we take ...".
+- Keep few symbols alive: introduce a symbol right before its first use and do
+  not carry it beyond its last use.
+- Do not fix with "Let" a letter that is already bound by a quantifier or by a
+  definition in the same argument; use another letter.
+- Present members of an indexed family in increasing index order, in formulas
+  and in prose, unless the mathematics requires another order
+  ($H^0\to H^1\to H^2$).
+- Do not refer to a mathematical object by a pronoun or a demonstrative phrase
+  ("the usual one", "the former") when a standard symbol exists.
+
 ## Definitions and statements
 
+- At a definition, state only the domain and hypotheses that make the
+  expression meaningful; put stronger assumptions with the result that uses
+  them (define the Euler characteristic for finite CW complexes and assume
+  orientability in the theorem).
+
+- Introduce the data of a statement with "Let" and keep "for every" for the
+  objects the conclusion ranges over, so that the proof does not begin by fixing
+  them again. Do not fix a parameter with "Let" and then let it vary in the
+  conclusion ("let $\varepsilon>0$ ... as $\varepsilon\to0$"); introduce the
+  family instead ("for $\varepsilon>0$, let $u_\varepsilon$ be ...").
 - A definition names objects and fixes notation; it does not assert facts.
   State a needed fact separately ("the metric $d$ is symmetric and ...").
 - Keep each definition to the objects it introduces. Introduce an auxiliary
@@ -74,6 +108,9 @@ paper's notation decisions belong with that paper.
   named constants and what they depend on, or write the limit.
 
 
+- If a proof announces its steps by order ("we next prove the second
+  assertion"), number all of them in order from the first, matching the items
+  (i), (ii), ... of the statement; otherwise use no ordinal words.
 - Expand a lemma used only once into the proof that uses it, even at some cost
   in length; keep a separate lemma when it is reused or isolates a genuinely
   separate idea. A short fact listed as a corollary item but used in one place

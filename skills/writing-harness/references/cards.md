@@ -34,7 +34,7 @@ the paper.
 ```
 ---
 id: def-graded-set           # stable kebab-case id; never reused for another fact
-kind: definition             # definition | theorem | proposition | lemma | corollary
+kind: definition             # definition | theorem | proposition | lemma | corollary | remark (no Proof; numbered with the theorems)
 label: def:graded-set        # TeX label (default card:<id>)
 title: Graded set
 symbols: ['G']               # notation introduced here (vocab.toml keys)
@@ -117,6 +117,30 @@ after the prose was written. `check` lists stale cards; after the author has
 reread the text, `anchor ID` records the current fingerprints. `impact ID`
 lists every fact depending on `ID` and every prose card to reread.
 
+### Evidence from code, runs and figures (reverse staleness)
+
+Prose and facts that describe code, a run's numbers or a figure kept by another
+harness (for example a method harness) list it under `evidence` as `ns:id`.
+The namespace is declared in `harness.toml`; its command prints a JSON object
+`{card id: fingerprint}` and runs from the harness root once per `check`
+(`{python}` is the current interpreter):
+
+```toml
+[evidence.method]
+command = ["{python}", "path/to/method.py", "--root", "..", "fingerprints"]
+```
+
+```yaml
+evidence: [method:step-solve, method:run-main]
+evidence_anchors: {method:step-solve: 88293f6f, method:run-main: 1c2d3e4f}
+```
+
+`anchor ID` records `evidence_anchors` (for any card kind that cites evidence).
+When the code, the run's result or the figure changes, `check` reports
+`STALE ID: evidence ns:id changed since this text was written`; an unknown id
+or a failing command is an error. Reread the sentence, the algorithm line or
+the reported number, then anchor again.
+
 ## Structure
 
 ```
@@ -133,6 +157,10 @@ sections:
       - lem-step
       - {proof_of: thm-main}                 # ... its proof after the lemmas it uses
       - {subsection: Proofs, label: sec:proofs}  # a numbered subsection heading (label optional)
+  - title: References
+    numbered: false                          # \section*, no number; only after the numbered sections
+    items:
+      - x-references
 appendix:
   - lem-technical
 ```
@@ -141,11 +169,34 @@ Section and subsection labels let explanation cards refer to sections with
 `\ref` or, with `ref_command = "Cref"` in `harness.toml` and cleveref in the
 preamble, with `\Cref`; the same setting renders bare card ids as `\Cref`.
 
+Never type an internal number. Refer to cards, sections and equations by label,
+also inside section titles (`title: Proof of \Cref{thm:main}`); the PDF bookmark
+receives the resolved number. Label a display inside it, `\[ ... \label{eq:energy} \]`,
+and cite it with `\eqref{eq:energy}`. The harness numbers labelled displays per
+section in printing order and writes `\tag{N}\label{eq:energy}`, so the PDF and the
+reading page agree; a display with its own name, `\tag{P}`, keeps that name.
+Unlabelled `\[ ... \]` stays unnumbered; put one label in one display. `check`
+reports `HANDNUM` for numbers typed by hand (`Section 3`, `Theorem 2.2`, `(5.1)`,
+numeric `\tag`) outside math and outside citation locators such as `[3, Theorem 2.1]`,
+and `UNRESOLVED` for a reference whose label exists nowhere. Numbers in cited
+sources stay as written.
+
 Without an option a proposition shows the author's proof when one exists,
 otherwise the reference proof (marked by a TeX comment). `check` reports
 unknown or duplicated ids, prerequisites shown later (`FORWARD`, or appendix),
-prerequisites not shown at all (`MISSING`) and fact cards no section uses
-(`UNUSED`).
+prerequisites not shown at all (`MISSING`), fact cards no section uses
+(`UNUSED`), and lemmas whose first use is in another section (`PLACEMENT`; a
+lemma should stand just before its first use). `PLACEMENT` allows a result used
+in several sections, a result used by two or more results of the section that
+proves a theorem (a tool of the main proof), and the last result of a section
+that a theorem uses; citations in remarks do not count as uses. It also reports a display line whose
+`\text{}` parts hold more than four words (`DISPLAYTEXT`): a display keeps
+formulas and a short qualifier such as "for a.e. $t\in(0,T)$", and a condition
+in words goes into the sentence. `cards.py load` lists, for every proof, its length, displays, named symbols
+with their uses, the theorems it invokes, whether it opens by naming an object
+(`NAMEFIRST`), symbols used at most once besides their definition (`ONCESYMBOL`)
+and symbols named two or more sentences before they are needed (`NAMEAHEAD`),
+heaviest first. These are reading aids, not checks.
 
 `proof: later` prints only the statement; the proof appears at the
 `{proof_of: ID}` item, headed with a reference back to the statement. Use it to

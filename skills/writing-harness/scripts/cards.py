@@ -38,8 +38,8 @@ import pipeline  # noqa: E402
 
 SKILL = Path(__file__).resolve().parents[1]
 TEMPLATE = SKILL / 'assets' / 'template'
-FACT_KINDS = {'definition', 'theorem', 'proposition', 'lemma', 'corollary'}
-PROP_KINDS = FACT_KINDS - {'definition'}
+FACT_KINDS = {'definition', 'theorem', 'proposition', 'lemma', 'corollary', 'remark'}
+PROP_KINDS = FACT_KINDS - {'definition', 'remark'}
 STATUS = ['stated', 'drafted', 'gap-free', 'verified', 'lean']
 ROLES = {'motivation', 'proof', 'remark', 'transition', 'intro'}
 PROOF_MODES = {'fact', 'author', 'omit', 'appendix', 'later'}
@@ -166,8 +166,190 @@ def structure_items(st):
 
 # ---------------------------------------------------------------- checks
 
+def placement_warnings(cards, pos, proof_pos):
+    """A lemma stands just before its first use: warn when that use is in another section.
+
+    Allowed: a result used in several sections (a shared tool stays before the first),
+    a result used by two or more results of the section holding the proof of a theorem
+    (a tool of the main proof, kept in the devices section), and the last result of a
+    section when a theorem uses it (the closing result of a section of devices for the
+    main proof). Remarks citing a result are not uses."""
+    def at(u):
+        return proof_pos.get(u, pos[u])
+    proof_secs = {at(u)[1] for u in pos if cards[u].kind == 'theorem'}
+    out = []
+    for cid, (n, si) in pos.items():
+        c = cards[cid]
+        if c.kind not in PROP_KINDS - {'theorem'}:
+            continue
+        label = card_label(c)
+        users = [u for u in pos if u != cid and (si is None or at(u)[0] > n)
+                 and cards[u].kind != 'remark' and cards[u].meta.get('role') != 'remark'
+                 and (cid in cards[u].requires or
+                 re.search(r'\\[cC]?ref\{[^}]*\b' + re.escape(label) + r'\b', cards[u].body))]
+        if not users:
+            continue
+        first = min(users, key=lambda u: at(u)[0])
+        if at(first)[1] == si and si is not None:
+            continue
+        if len({at(u)[1] for u in users}) > 1:
+            continue
+        if len(users) > 1 and {at(u)[1] for u in users} <= proof_secs:
+            continue
+        last = max((m for m, (k, s2) in pos.items() if s2 == si and cards[m].kind in PROP_KINDS),
+                   key=lambda m: pos[m][0])
+        if last == cid and any(cards[u].kind == 'theorem' for u in users):
+            continue
+        out.append(f'PLACEMENT {cid} is first used by {first} in another section; place it just before that use')
+    return out
+
+
+DISPLAY_RE = re.compile(r'\\\[(.*?)\\\]|\\begin\{(equation|align|gather|multline)\*?\}(.*?)\\end\{\2\*?\}', re.S)
+DISPLAY_TEXT_RE = re.compile(r'\\text(?:up|rm)?\{([^{}]*)\}')
+DISPLAY_WORDS = 4
+
+
+def display_text_warnings(cards):
+    """Prose stays out of displays: a display line keeps at most a short qualifier."""
+    out = []
+    for c in cards.values():
+        for m in DISPLAY_RE.finditer(c.body):
+            for line in (m.group(1) or m.group(3) or '').split('\\\\'):
+                texts = DISPLAY_TEXT_RE.findall(line)
+                n = sum(len(re.findall(r'[A-Za-z]+(?:\.[A-Za-z]+)*', x)) for x in texts)
+                if n > DISPLAY_WORDS:
+                    words = ' '.join(x.strip() for x in texts)
+                    out.append(f'DISPLAYTEXT {c.id}: "{words}" puts {n} words of prose in a display; '
+                               'move the condition into the sentence')
+    return out
+
+
+SYMDEF_RE = re.compile(r'((?:\\[A-Za-z]+|[A-Za-z])(?:_\{[^{}]*\}|_\\[A-Za-z]+|_[A-Za-z0-9])?)'
+                       r'\s*(?:\([^()]*\))?\s*\\coloneqq')
+TOOL_RE = re.compile(r"\b(?:[A-Z][a-z]+(?:--[A-Z][a-z]+)?(?:'s)? (?:theorem|lemma|inequality|formula|principle)"
+                     r"|the [a-z-]+ (?:convergence|selection|fixed-point|closed graph) theorem"
+                     r"|(?:Fubini|Tonelli|Fatou)'s (?:theorem|lemma))")
+SENT_RE = re.compile(r'(?<=[.!?])\s+(?=[A-Z\\$])')
+
+
+def proof_symbols(proof):
+    """Symbols a proof names with \\coloneqq: (symbol, position, uses other than the definition, named ahead).
+
+    A symbol is named ahead when its defining expression has not appeared earlier in the proof and
+    its first use comes two or more sentences later: the reader carries a name whose purpose is not
+    yet visible (a candidate for reading, not a verdict)."""
+    out = []
+    for m in SYMDEF_RE.finditer(proof):
+        sym = m.group(1)
+        pat = re.escape(sym) + (r'(?![A-Za-z])' if sym[-1].isalpha() else '')
+        uses = len(re.findall(pat, proof)) - 1  # a 'where' clause may name an expression after its use
+        rhs = re.sub(r'\s+', '', re.split(r'\$|\\\]|\\quad|,\s|\.\s', proof[m.end():], maxsplit=1)[0])[:12]
+        before = re.sub(r'\s+', '', proof[:m.start()])
+        later = [u.start() for u in re.finditer(pat, proof) if u.start() > m.end()]
+        gap = len(SENT_RE.findall(proof[m.end():later[0]])) if later else 0
+        used_before = re.search(pat, proof[:m.start()]) is not None  # a 'where' clause names after use
+        ahead = bool(rhs) and rhs not in before and gap >= 2 and not used_before
+        out.append((sym, m.start(), uses, ahead))
+    return out
+
+
+def proof_load(c):
+    """Indicators of the cognitive load of a proof (rules on deriving before naming, live symbols, tools)."""
+    proof = c.sec('Proof') or ''
+    if not proof.strip():
+        return None
+    syms = proof_symbols(proof)
+    first = SENT_RE.split(proof.strip(), 1)[0]
+    return {
+        'id': c.id,
+        'words': len(re.findall(r'[A-Za-z]+', re.sub(r'\$[^$]*\$|\\\[.*?\\\]', ' ', proof, flags=re.S))),
+        'displays': len(DISPLAY_RE.findall(proof)),
+        'symbols': [(s, u) for s, _, u, _ in syms],
+        'named_ahead': [s for s, _, _, ah in syms if ah],
+        'tools': sorted(set(TOOL_RE.findall(proof))),
+        'opens_by_naming': '\\coloneqq' in first,
+    }
+
+
+def proof_load_warnings(cards):
+    out = []
+    for c in cards.values():
+        if c.kind not in PROP_KINDS:
+            continue
+        ld = proof_load(c)
+        if not ld:
+            continue
+        if ld['opens_by_naming']:
+            out.append(f'NAMEFIRST {c.id}: the proof opens by naming an object; derive it first, then name it')
+        for s, u in ld['symbols']:
+            if u <= 1:
+                out.append(f'ONCESYMBOL {c.id}: {s} is named but used {u} time(s) besides its definition; write the expression instead')
+    return out
+
+
+def cmd_load(h, a):
+    cards, _ = load_cards(h)
+    rows = [ld for c in cards.values() if c.kind in PROP_KINDS for ld in [proof_load(c)] if ld]
+    rows.sort(key=lambda r: (len(r['symbols']) + len(r['tools']), r['words']), reverse=True)
+    if a.json:
+        print(json.dumps(rows, ensure_ascii=False, indent=1))
+        return 0
+    once = {r['id']: [s for s, u in r['symbols'] if u <= 1] for r in rows}
+    for r in rows:
+        syms = ', '.join(f'{s}×{u}' for s, u in r['symbols']) or '-'
+        print(f"{r['id']}: {r['words']} words, {r['displays']} displays, "
+              f"{len(r['symbols'])} named [{syms}], {len(r['tools'])} tools [{'; '.join(r['tools']) or '-'}]"
+              + (f" NAMEAHEAD [{', '.join(r['named_ahead'])}]" if r['named_ahead'] else '')
+              + (f" ONCESYMBOL [{', '.join(once[r['id']])}]" if once[r['id']] else '')
+              + (' NAMEFIRST' if r['opens_by_naming'] else ''))
+    return 0
+
+
+def evidence_fingerprints(h, ns, cache):
+    """Fingerprints published by another harness (code, runs, figures) under [evidence.<ns>] in harness.toml.
+
+    The command prints a JSON object {card id: fingerprint}; {python} is this interpreter. It runs once per check."""
+    if ns not in cache:
+        conf = (h.cfg.get('evidence') or {}).get(ns)
+        if not isinstance(conf, dict) or not isinstance(conf.get('command'), list):
+            cache[ns] = (None, f'no [evidence.{ns}] command in harness.toml')
+        else:
+            import subprocess
+            cmd = [str(x).replace('{python}', sys.executable) for x in conf['command']]
+            try:
+                out = subprocess.run(cmd, cwd=h.root, capture_output=True, text=True, timeout=300)
+                cache[ns] = ((json.loads(out.stdout), None) if out.returncode == 0 else
+                             (None, f'evidence source {ns} failed: {out.stderr.strip()[-200:]}'))
+            except (OSError, ValueError, subprocess.TimeoutExpired) as e:
+                cache[ns] = (None, f'evidence source {ns} failed: {e}')
+    return cache[ns]
+
+
+def check_evidence(h, cards, errors, warn):
+    """Reverse staleness: prose or facts that cite code, runs or figures kept by another harness."""
+    cache = {}
+    for c in cards.values():
+        refs = c.meta.get('evidence') or []
+        if not isinstance(refs, list):
+            errors.append(f'{c.id}: evidence must be a list of ns:id')
+            continue
+        anchors = c.meta.get('evidence_anchors') or {}
+        for ref in refs:
+            ns, _, rid = str(ref).partition(':')
+            fps, err = evidence_fingerprints(h, ns, cache) if rid else (None, f'evidence {ref} must be ns:id')
+            if err:
+                errors.append(f'{c.id}: {err}')
+            elif rid not in fps:
+                errors.append(f'{c.id}: evidence {ref} not found')
+            elif ref not in anchors:
+                warn.append(f'{c.id}: no anchor for evidence {ref} (run anchor)')
+            elif anchors[ref] != fps[rid]:
+                warn.append(f'STALE {c.id}: evidence {ref} changed since this text was written')
+
+
 def check(h, cards, errors):
     errors, warn = list(errors), []
+    check_evidence(h, cards, errors, warn)
     for c in cards.values():
         k = c.kind
         if k == 'explanation':
@@ -264,9 +446,14 @@ def check(h, cards, errors):
                     warn.append(f'MISSING {cid} needs {r}, which is not in the structure')
                 elif pos[r][0] > n:
                     warn.append(f'FORWARD {cid} uses {r} ({"appendix" if pos[r][1] is None else "later"})')
+        warn += placement_warnings(cards, pos, proof_pos)
         unused = sorted(c for c in cards if cards[c].is_fact and c not in pos)
         if unused:
             warn.append(f'UNUSED fact cards ({len(unused)}): ' + ', '.join(unused))
+    known = {card_label(c) for c in cards.values() if c.is_fact} | set(cards)
+    warn += _xref().warnings(cards, st, known)
+    warn += _exemplar().warnings(h, cards)
+    warn += display_text_warnings(cards)
     return errors, warn
 
 
@@ -374,15 +561,27 @@ def cmd_impact(h, a):
 def cmd_anchor(h, a):
     cards, _ = load_cards(h)
     c = cards.get(a.id)
-    if not c or c.kind != 'explanation':
-        sys.exit(f'{a.id} is not an explanation card')
+    if not c or (c.kind != 'explanation' and not c.meta.get('evidence')):
+        sys.exit(f'{a.id} is not an explanation card and cites no evidence')
     text = c.path.read_text(encoding='utf-8')
     m = re.match(r'^---\n(.*?)\n---\n?', text, re.S)
     meta = yaml.safe_load(m.group(1))
-    meta['anchors'] = {x: cards[x].fingerprint() for x in meta.get('explains') or [] if x in cards}
+    if c.kind == 'explanation':
+        meta['anchors'] = {x: cards[x].fingerprint() for x in meta.get('explains') or [] if x in cards}
+    if meta.get('evidence'):
+        cache, found = {}, {}
+        for ref in meta['evidence']:
+            ns, _, rid = str(ref).partition(':')
+            fps, err = evidence_fingerprints(h, ns, cache)
+            if err or rid not in (fps or {}):
+                sys.exit(f'{a.id}: cannot anchor evidence {ref}: {err or "not found"}')
+            found[ref] = fps[rid]
+        meta['evidence_anchors'] = found
+        print(f'{a.id}: evidence_anchors', found)
     c.path.write_text('---\n' + yaml.safe_dump(meta, allow_unicode=True, sort_keys=False) + '---\n' + text[m.end():],
                       encoding='utf-8')
-    print(f'{a.id}: anchors', meta['anchors'])
+    if c.kind == 'explanation':
+        print(f'{a.id}: anchors', meta['anchors'])
     return 0
 
 
@@ -476,10 +675,52 @@ def render_card(cards, cid, opt, author_proofs):
     return '\n'.join(out) + '\n'
 
 
-def section_head(st, si, stitle):
+def heading_tex(title, plain):
+    """A heading that may contain \\Cref{..}: the PDF bookmark gets the resolved number."""
+    if not _xref().REF_RE.search(title):
+        return title
+    return f'\\texorpdfstring{{{title}}}{{{_xref().plain_refs(title, plain)}}}'
+
+
+def section_head(st, si, stitle, plain=None):
     """\\section with the optional `label:` of that section in structure.yaml."""
-    label = (st.get('sections') or [])[si].get('label')
-    return f'\\section{{{stitle}}}' + (f'\\label{{{label}}}' if label else '') + '\n'
+    sec = (st.get('sections') or [])[si]
+    star = '*' if sec.get('numbered') is False else ''
+    label = None if star else sec.get('label')
+    return f'\\section{star}{{{heading_tex(stitle, plain or {})}}}' + (f'\\label{{{label}}}' if label else '') + '\n'
+
+
+def _xref():
+    sys.path.insert(0, str(SKILL / 'scripts'))
+    import xref
+    return xref
+
+
+def _exemplar():
+    sys.path.insert(0, str(SKILL / 'scripts'))
+    import exemplar
+    return exemplar
+
+
+def cmd_exemplar(h, a):
+    paths = a.paths or [str((h.root / p).resolve()) for p in h.cfg.get('exemplar') or []]
+    if not paths:
+        print('no exemplar: name files on the command line or set exemplar = [...] in harness.toml')
+        return 1
+    print(_exemplar().compare(h, load_cards(h)[0], paths, n=a.n, min_count=a.min))
+    return 0
+
+
+def cross_refs(cards, st, author_proofs):
+    """Equation numbers and the plain-text targets used for headings (see xref.py)."""
+    xref, items = _xref(), list(structure_items(st))
+    eqnums, _ = xref.equation_numbers(xref.printed_texts(cards, items, PROP_KINDS, author_proofs))
+    plain = {lab: ('Section', n) for lab, n in xref.section_numbers(st).items()}
+    plain.update({lab: ('Equation', n) for lab, n in eqnums.items()})
+    names = _reader().KIND_NAMES
+    plain.update({card_label(cards[c]): (names[cards[c].kind], n)
+                  for c, n in _reader().numbering(cards, items, FACT_KINDS).items()})
+    return eqnums, plain
 
 
 def cmd_render(h, a):
@@ -495,22 +736,25 @@ def cmd_render(h, a):
                      for x in c.meta.get('explains') or []}
     title = st.get('title') or h.cfg.get('title') or 'Draft'
     stepped = _reader().stepped_ids(cards, _reader().step_references(cards))
+    eqnums, plain = cross_refs(cards, st, author_proofs)
     body, cur, appendix = [], object(), False
     for si, stitle, cid, opt in structure_items(st):
         if opt.get('_subsection') and (a.sections is None or (si is not None and si < a.sections)):
             if si != cur:
-                body.append(section_head(st, si, stitle))
+                body.append(section_head(st, si, stitle, plain))
                 cur = si
             sub_label = f'\\label{{{opt["_label"]}}}' if opt.get('_label') else ''
-            body.append(f'\\subsection{{{opt["_subsection"]}}}{sub_label}\n')
+            body.append(f'\\subsection{{{heading_tex(opt["_subsection"], plain)}}}{sub_label}\n')
             continue
         if cid not in cards or (a.sections is not None and (si is None or si >= a.sections)):
+            continue
+        if cid == h.cfg.get('abstract_card'):
             continue
         if si is None and not appendix:
             body.append(f'\\appendix\n\\section{{{h.cfg.get("appendix_title", "Deferred proofs")}}}\n')
             appendix = True
         elif si is not None and si != cur:
-            body.append(section_head(st, si, stitle))
+            body.append(section_head(st, si, stitle, plain))
             cur = si
         body.append(render_card(cards, cid, {**opt, '_stepped': stepped, '_lang': h.language}, author_proofs))
     bib = ''
@@ -519,7 +763,9 @@ def cmd_render(h, a):
         bib = f'\n\\bibliographystyle{{amsplain}}\n\\bibliography{{{bibfile.with_suffix("").as_posix()}}}\n'
     out = h.path('paper_dir', 'paper') / (a.out or 'cards.tex')
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(preamble(h, title) + '\\begin{document}\n\\maketitle\n\n' + '\n'.join(body) + bib + '\\end{document}\n',
+    ab = cards.get(h.cfg.get('abstract_card') or '')
+    abstract = f'\\begin{{abstract}}\n{link_refs(ab.body.strip(), cards)}\n\\end{{abstract}}\n' if ab else ''
+    out.write_text(preamble(h, title) + '\\begin{document}\n' + abstract + '\\maketitle\n\n' + _xref().tag_displays('\n'.join(body), eqnums) + bib + '\\end{document}\n',
                    encoding='utf-8')
     pipeline.write_stamp(h, f'tex:{out.name}')
     print(f'-> {h.rel(out)}')
@@ -798,7 +1044,7 @@ def cmd_watch(h, a):
     return pipeline.watch(h, pdf=not a.no_pdf)
 
 
-KIND_DIRS = {'definition': 'def', 'explanation': 'expl', **{k: 'prop' for k in PROP_KINDS}}
+KIND_DIRS = {'definition': 'def', 'remark': 'prop', 'explanation': 'expl', **{k: 'prop' for k in PROP_KINDS}}
 
 
 def card_template(h, kind):
@@ -877,6 +1123,12 @@ def main(argv=None):
     p.add_argument('--background', action='store_true', help=argparse.SUPPRESS)
     sp.add_parser('watch').add_argument('--no-pdf', action='store_true')
     sp.add_parser('hook')
+    p = sp.add_parser('load', help='cognitive-load indicators of each proof')
+    p.add_argument('--json', action='store_true')
+    p = sp.add_parser('exemplar', help='compare the prose with the exemplar the author asked to follow')
+    p.add_argument('paths', nargs='*')
+    p.add_argument('-n', type=int, default=3)
+    p.add_argument('--min', type=int, default=3)
     p = sp.add_parser('new')
     p.add_argument('kind', choices=sorted(KIND_DIRS))
     p.add_argument('id')

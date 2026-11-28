@@ -62,6 +62,27 @@ class WritingHarnessTests(unittest.TestCase):
             self.assertEqual(self.run_cards("anchor", x).returncode, 0)
         self.assertEqual(self.check_json()[1]["warnings"], [])
 
+    def test_evidence_from_another_harness_makes_text_stale(self):
+        fps = self.h / "fps.json"
+        fps.write_text(json.dumps({"code-a": "11111111"}))
+        (self.h / "producer.py").write_text("import pathlib\nprint(pathlib.Path('fps.json').read_text())\n")
+        with (self.h / "harness.toml").open("a") as f:
+            f.write('\n[evidence.lab]\ncommand = ["{python}", "producer.py"]\n')
+        self.edit("cards/expl/x-why-settled.md", "anchors:", "evidence:\n- lab:code-a\nanchors:")
+        code, out = self.check_json()
+        self.assertIn("x-why-settled: no anchor for evidence lab:code-a (run anchor)", out["warnings"])
+        r = self.run_cards("anchor", "x-why-settled")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        code, out = self.check_json()
+        self.assertEqual((out["errors"], out["warnings"]), ([], []))
+        fps.write_text(json.dumps({"code-a": "22222222"}))
+        code, out = self.check_json()
+        self.assertEqual(out["warnings"],
+                         ["STALE x-why-settled: evidence lab:code-a changed since this text was written"])
+        self.edit("cards/expl/x-why-settled.md", "- lab:code-a", "- lab:code-b")
+        code, out = self.check_json()
+        self.assertIn("x-why-settled: evidence lab:code-b not found", out["errors"])
+
     def test_structure_order_and_unused_facts(self):
         self.edit("structure.yaml", "      - lem-tail\n      - thm-sum-settled\n",
                   "      - thm-sum-settled\n      - lem-tail\n")
@@ -143,6 +164,190 @@ class WritingHarnessTests(unittest.TestCase):
         p.write_text(p.read_text() + '\nref_command = "Cref"\n')
         self.run_cards("render")
         self.assertIn(r"By \Cref{def:settled}", (self.h / "paper/cards.tex").read_text())
+
+    def add_notes_section(self, title):
+        (self.h / "cards/expl/x-notes.md").write_text(
+            "---\nid: x-notes\nkind: explanation\nrole: remark\nexplains: []\n---\n"
+            "By \\eqref{eq:bound} and \\Cref{sec:defs}, the index is controlled.\n"
+            "\\[\nN(a+b)\\le\\max\\{N(a),N(b)\\}\\label{eq:bound}\n\\]\n"
+            "Compare the named display \\eqref{eq:named}.\n"
+            "\\[\na_n=a_M\\tag{S}\\label{eq:named}\n\\]\n")
+        self.edit("structure.yaml", "  - title: Definitions\n", "  - title: Definitions\n    label: sec:defs\n")
+        with open(self.h / "structure.yaml", "a") as f:
+            f.write(f"  - title: '{title}'\n    items:\n      - x-notes\n")
+
+    def test_labelled_displays_and_references_in_headings(self):
+        self.add_notes_section(r"Notes on \Cref{thm:sum}")
+        with open(self.h / "harness.toml", "a") as f:
+            f.write('ref_command = "Cref"\n')
+        (self.h / "macros.tex").write_text("\\usepackage[capitalize,noabbrev]{cleveref}\n")
+        code, out = self.check_json()
+        self.assertEqual((code, out["warnings"]), (0, []))
+        self.assertEqual(self.run_cards("render").returncode, 0)
+        tex = (self.h / "paper/cards.tex").read_text()
+        self.assertIn(r"\section{\texorpdfstring{Notes on \Cref{thm:sum}}{Notes on Theorem 2.2}}", tex)
+        self.assertIn("\\tag{3.1}\\label{eq:bound}", tex)
+        self.assertIn(r"a_n=a_M\tag{S}\label{eq:named}", tex)  # a named display keeps its name
+        self.assertEqual(self.run_cards("read").returncode, 0)
+        page = (self.h / "html/read.html").read_text()
+        self.assertIn("3　Notes on Theorem 2.2</h2>", page)
+        self.assertIn('<a class="ref" href="#x-notes">(3.1)</a>', page)
+        self.assertIn('<a class="ref" href="#x-notes">(S)</a>', page)
+        self.assertIn('<a class="ref" href="#sec-1">Section 1</a>', page)
+        self.assertIn("\\tag{3.1}", page)
+        self.assertNotIn("label{eq:bound}", page)
+        if shutil.which("pdflatex"):
+            for _ in range(2):
+                r = subprocess.run(["pdflatex", "-interaction=nonstopmode", "-halt-on-error", "cards.tex"],
+                                   cwd=self.h / "paper", capture_output=True, text=True)
+                self.assertEqual(r.returncode, 0, r.stdout[-2000:])
+            self.assertNotRegex(r.stdout, r"Reference `[^']*' .*undefined")
+            aux = (self.h / "paper/cards.aux").read_text()
+            self.assertRegex(aux, r"\\newlabel\{eq:bound\}\{\{\{3\.1\}\}")
+            self.assertIn("[equation]", aux)  # cleveref sees an equation
+
+    def test_check_warns_about_hand_typed_numbers_and_unknown_labels(self):
+        self.add_notes_section("Proof of Theorem 2.2")
+        self.edit("cards/expl/x-why-settled.md", "form a vector space.",
+                  "form a vector space (Section 2 and (2.1); compare [3, Theorem 2.1] and \\Cref{sec:none}).\n"
+                  "\\[\nx=y\\tag{2.1}\n\\]")
+        code, out = self.check_json()
+        self.assertEqual(code, 0)
+        warns = out["warnings"]
+        hand = sorted(w for w in warns if w.startswith("HANDNUM"))
+        self.assertEqual(len(hand), 4, hand)
+        for n in ('"Section 2"', '"(2.1)"', '"\\tag{2.1}"', 'structure: "Theorem 2.2"'):
+            self.assertTrue(any(n in w for w in hand), (n, hand))
+        self.assertFalse(any("Theorem 2.1" in w for w in hand))  # a citation locator
+        self.assertTrue(any(w.startswith("UNRESOLVED x-why-settled") and "sec:none" in w for w in warns), warns)
+
+    def test_reference_with_several_labels(self):
+        self.edit("cards/expl/x-why-settled.md", "form a vector space.",
+                  "form a vector space (see \\Cref{lem:tail,lem:none}).")
+        code, out = self.check_json()
+        unresolved = [w for w in out["warnings"] if w.startswith("UNRESOLVED")]
+        self.assertEqual(len(unresolved), 1, unresolved)
+        self.assertIn("lem:none", unresolved[0])
+        self.assertEqual(self.run_cards("read").returncode, 0)
+        page = (self.h / "html/read.html").read_text()
+        self.assertNotIn("lem:tail,", page)
+
+    def test_phrase_table_and_exemplar_comparison(self):
+        self.edit("cards/expl/x-why-settled.md", "form a vector space.",
+                  "form a vector space. The bound gives the claim, and one has $x=y$.")
+        with open(self.h / "style.toml", "a") as f:
+            f.write("\n[[phrase]]\navoid = '\\bgives?\\b'\nuse = 'it follows from ... that'\n"
+                    "basis = 'fictional exemplar'\n")
+        code, out = self.check_json()
+        self.assertEqual(code, 0)
+        phrase = [w for w in out["warnings"] if w.startswith("PHRASE")]
+        self.assertEqual(len(phrase), 1, phrase)
+        self.assertIn("x-why-settled", phrase[0])
+        self.assertIn("it follows from ... that", phrase[0])
+        ex = self.ws / "exemplar.tex"
+        ex.write_text("Let $x$ be given. Then it holds that $x=y$. It follows from (1) that $y=x$.\n" * 5)
+        r = self.run_cards("exemplar", ex, "--min", "1")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertRegex(r.stdout, r"\\bgives\?\\b +0\.0 / +[1-9]")
+        self.assertIn("never in the exemplar", r.stdout)
+        self.assertIn("one has M", r.stdout)
+
+    def test_unnumbered_trailing_section(self):
+        with open(self.h / "structure.yaml", "a") as f:
+            f.write("  - title: References\n    numbered: false\n    label: sec:refs\n    items:\n      - x-why-settled\n")
+        self.edit("structure.yaml", "      - x-why-settled\n      - lem-tail\n", "      - lem-tail\n")
+        self.assertEqual(self.run_cards("render").returncode, 0)
+        tex = (self.h / "paper/cards.tex").read_text()
+        self.assertIn("\\section*{References}", tex)
+        self.assertNotIn("\\label{sec:refs}", tex)
+        self.assertEqual(self.run_cards("read").returncode, 0)
+        page = (self.h / "html/read.html").read_text()
+        self.assertIn(">References</h2>", page)
+        self.assertIn(">2　Results</h2>", page)
+
+    def test_placement_of_lemmas_by_first_use(self):
+        (self.h / "cards/prop/lem-head.md").write_text(
+            "---\nid: lem-head\nkind: lemma\nlabel: lem:head\nstatus: stated\nrequires: []\n---\n"
+            "## Statement\nEvery settled sequence has a first term.\n")
+        self.edit("cards/prop/lem-tail.md", "requires: [def-settled]", "requires: [def-settled, lem-head]")
+        self.edit("structure.yaml", "      - def-settled\n", "      - def-settled\n      - lem-head\n")
+        code, out = self.check_json()
+        placement = [w for w in out["warnings"] if w.startswith("PLACEMENT")]
+        self.assertEqual(placement, ["PLACEMENT lem-head is first used by lem-tail in another section; "
+                                     "place it just before that use"])
+        # The closing lemma of a section of devices may serve the theorem of a later section.
+        self.edit("structure.yaml", "      - def-settled\n      - lem-head\n",
+                  "      - def-settled\n  - title: Devices\n    items:\n      - lem-head\n      - lem-tail\n")
+        self.edit("structure.yaml", "      - x-why-settled\n      - lem-tail\n", "      - x-why-settled\n")
+        code, out = self.check_json()
+        self.assertEqual([w for w in out["warnings"] if w.startswith("PLACEMENT")], [], out["warnings"])
+
+    def test_placement_allows_tools_of_the_main_proof(self):
+        (self.h / "cards/prop/lem-head.md").write_text(
+            "---\nid: lem-head\nkind: lemma\nlabel: lem:head\nstatus: stated\nrequires: []\n---\n"
+            "## Statement\nEvery settled sequence has a first term.\n")
+        self.edit("cards/prop/lem-tail.md", "requires: [def-settled]", "requires: [def-settled, lem-head]")
+        self.edit("structure.yaml", "      - def-settled\n",
+                  "      - def-settled\n  - title: Devices\n    items:\n      - lem-head\n      - x-head-note\n")
+        (self.h / "cards/expl/x-head-note.md").write_text(
+            "---\nid: x-head-note\nkind: explanation\nrole: transition\nexplains: []\n---\nWe now turn to the results.\n")
+        code, out = self.check_json()
+        self.assertEqual([w for w in out["warnings"] if w.startswith("PLACEMENT")],
+                         ["PLACEMENT lem-head is first used by lem-tail in another section; "
+                          "place it just before that use"])
+        # Used by two results of the section that proves the theorem: a tool of the main proof.
+        self.edit("cards/prop/thm-sum-settled.md", "requires: [def-settled, lem-tail]",
+                  "requires: [def-settled, lem-tail, lem-head]")
+        code, out = self.check_json()
+        self.assertEqual([w for w in out["warnings"] if w.startswith("PLACEMENT")], [], out["warnings"])
+
+    def test_proof_load_names_and_symbols(self):
+        (self.h / "cards/prop/lem-load.md").write_text(
+            "---\nid: lem-load\nkind: lemma\nlabel: lem:load\nstatus: drafted\nrequires: []\n---\n"
+            "## Statement\nThe sum is finite.\n\n## Proof\n"
+            "We set $\\nu\\coloneqq a+b$. The sum is a number. It is real. Then $\\nu$ is finite, and $\\nu+\\nu$ is finite. "
+            "Let $c\\coloneqq 2$. By Fatou's lemma, the sum is finite. This completes the proof.\n")
+        self.edit("structure.yaml", "      - def-settled\n", "      - def-settled\n      - lem-load\n")
+        code, out = self.check_json()
+        self.assertEqual([w for w in out["warnings"] if w.split()[0] in ("NAMEFIRST", "ONCESYMBOL")], [])
+        text = subprocess.run([sys.executable, str(CARDS), "--root", str(self.h), "load"],
+                              capture_output=True, text=True).stdout
+        self.assertIn("NAMEFIRST", text)
+        self.assertIn("ONCESYMBOL [c]", text)
+        r = subprocess.run([sys.executable, str(CARDS), "--root", str(self.h), "load", "--json"],
+                           capture_output=True, text=True)
+        rows = {x["id"]: x for x in json.loads(r.stdout)}
+        self.assertEqual(rows["lem-load"]["symbols"], [["\\nu", 3], ["c", 0]])
+        self.assertEqual(rows["lem-load"]["tools"], ["Fatou's lemma"])
+        self.assertEqual(rows["lem-load"]["named_ahead"], ["\\nu"])
+
+    def test_prose_in_displays_is_reported(self):
+        self.edit("cards/prop/lem-tail.md", "## Statement\n",
+                  "## Statement\n\\[\na_n\\to a\\quad\\text{at each point }n\\text{ of the tail set}\n\\]\n"
+                  "\\[\na_n=a\\quad\\text{for all }n\\geq N\n\\]\n")
+        code, out = self.check_json()
+        shown = [w for w in out["warnings"] if w.startswith("DISPLAYTEXT")]
+        self.assertEqual(len(shown), 1, out["warnings"])
+        self.assertIn("lem-tail", shown[0])
+
+    def test_remark_card_is_numbered_without_proof(self):
+        (self.h / "cards/prop/rem-tail.md").write_text(
+            "---\nid: rem-tail\nkind: remark\nlabel: rem:tail\nstatus: drafted\nrequires: [lem-tail]\n---\n"
+            "## Statement\nBy \\Cref{lem:tail}, the tail is constant. In particular, it is bounded.\n")
+        self.edit("structure.yaml", "      - lem-tail\n", "      - lem-tail\n      - rem-tail\n")
+        with open(self.h / "style.toml", "a") as f:
+            f.write("\n[[phrase]]\navoid = '\\bIn particular\\b'\nsection = 'Statement'\n"
+                    "use = 'a separate assertion'\nbasis = 'fictional rule'\n")
+        code, out = self.check_json()
+        self.assertEqual(code, 0, out)
+        phrase = [w for w in out["warnings"] if w.startswith("PHRASE")]
+        self.assertEqual(len(phrase), 1, phrase)
+        self.assertIn("rem-tail", phrase[0])
+        self.assertEqual(self.run_cards("render").returncode, 0)
+        tex = (self.h / "paper/cards.tex").read_text()
+        self.assertIn("\\begin{remark}\\label{rem:tail}", tex)
+        self.assertEqual(self.run_cards("read").returncode, 0)
+        self.assertIn("Remark 2.2", (self.h / "html/read.html").read_text())
 
     @unittest.skipUnless(shutil.which("pdflatex"), "pdflatex not installed")
     def test_rendered_tex_compiles(self):

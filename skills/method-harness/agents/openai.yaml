@@ -1,0 +1,4 @@
+interface:
+  display_name: "Method Harness"
+  short_description: "Read a method paper in paper order with proof and theorem-to-code appendices"
+  default_prompt: "Use $method-harness to check the method cards, the paragraph coverage and the origins of cited statements, and rebuild the reader."

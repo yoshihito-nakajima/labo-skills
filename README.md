@@ -49,6 +49,7 @@ Every skill in `skills/`, grouped by what it is for. Each entry links to its `SK
 - [paper-writing](skills/paper-writing/SKILL.md) — Draft or revise research manuscripts from plans, sources and proof evidence.
 - [book-harness](skills/book-harness/SKILL.md) — Build a book or lecture route from an assigned source, a mathematical topic, or both, using shared cards.
 - [writing-harness](skills/writing-harness/SKILL.md) — Support an author writing their own paper with fact cards, reference proofs, story and style ledgers, and reading-order checks.
+- [method-harness](skills/method-harness/SKILL.md) — Read a method paper in paper order: key statements in the main text, proofs and theorem-to-code correspondence in appendices, paragraph coverage, and comparison with the original works.
 - [Reusing results across books and papers](skills/knowledge-dependencies/SKILL.md#reuse-a-result-across-artifacts) — Carry the exact result, source version and review scope into each use.
 - [paper-referee](skills/paper-referee/SKILL.md) — Audit papers, decisive proofs and exposition against numbered criteria.
 - [proof-adversarial-review](skills/proof-adversarial-review/SKILL.md) — Independent multi-viewpoint adversarial review of a frozen proof.

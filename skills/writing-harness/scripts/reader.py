@@ -9,12 +9,13 @@ import json
 import re
 
 import comment_layer
+import xref
 
 LABELS = {'ja': {'toc': '目次', 'smaller': '文字を小さく', 'larger': '文字を大きく', 'narrower': '行を短く', 'wider': '行を長く', 'theme': '明暗', 'comments': 'コメント', 'copy': 'クリップボードにコピー', 'copied': 'コピーしました', 'add': 'コメントする', 'placeholder': 'コメント', 'save': '追加', 'cancel': '取り消し', 'none': 'コメントはまだありません．本文を選ぶとボタンが出ます．', 'delete': '削除', 'clear': '全部消す', 'close': '閉じる', 'confirm': 'コメントを全部消しますか？', 'nocomment': '(コメントなし)', 'proof': '証明', 'appendix': '付録'},
           'en': {'toc': 'Contents', 'smaller': 'Smaller text', 'larger': 'Larger text', 'narrower': 'Shorter lines', 'wider': 'Longer lines', 'theme': 'Light/dark', 'comments': 'Comments', 'copy': 'Copy to clipboard', 'copied': 'Copied', 'add': 'Comment', 'placeholder': 'Comment', 'save': 'Add', 'cancel': 'Cancel', 'none': 'No comments yet. Select text to add one.', 'delete': 'Delete', 'clear': 'Clear all', 'close': 'Close', 'confirm': 'Delete all comments?', 'nocomment': '(no comment)', 'proof': 'Proof', 'appendix': 'Appendix'}}
 
 KIND_NAMES = {'definition': 'Definition', 'theorem': 'Theorem', 'proposition': 'Proposition',
-              'lemma': 'Lemma', 'corollary': 'Corollary'}
+              'lemma': 'Lemma', 'corollary': 'Corollary', 'remark': 'Remark'}
 
 
 def numbering(cards, items, fact_kinds):
@@ -34,20 +35,23 @@ def numbering(cards, items, fact_kinds):
     return num
 
 
-def tex_to_html(text, cards, num, label_to_id, card_label):
+def tex_to_html(text, cards, num, label_to_id, card_label, targets=None):
     t = _html.escape(text.strip(), quote=False)
     t = re.sub(r'\\paragraph\{([^{}]*)\}', r'<strong class="para">\1</strong>', t)
     t = re.sub(r'\\emph\{([^{}]*)\}', r'<em>\1</em>', t)
     t = re.sub(r'\\textbf\{([^{}]*)\}', r'<strong>\1</strong>', t)
 
     def ref(m):
-        lab = m.group(1)
+        cmd, lab = m.group(1), m.group(2)
         cid = label_to_id.get(lab) or (lab if lab in cards else None)
         if cid and cid in num:
             return f'<a class="ref" href="#{cid}">{KIND_NAMES[cards[cid].kind]} {num[cid]}</a>'
-        return m.group(0)  # equation labels stay for MathJax
+        if lab in (targets or {}):
+            kind, n, href = targets[lab]
+            return f'<a class="ref" href="#{href}">{xref.ref_text(cmd, kind, n)}</a>'
+        return m.group(0)
 
-    t = re.sub(r'\\(?:ref|Cref|cref)\{([^}]*)\}', ref, t)
+    t = xref.REF_RE.sub(ref, xref.split_multi(t))
     t = re.sub(r'\\cite\[([^\]]*)\]\{([^}]*)\}', r'<span class="cite">[\2, \1]</span>', t)
     t = re.sub(r'\\cite\{([^}]*)\}', r'<span class="cite">[\1]</span>', t)
     for env, tag in (('enumerate', 'ol'), ('itemize', 'ul')):
@@ -145,19 +149,27 @@ def build(h, cards, st, items, card_label, prop_kinds, fact_kinds):
     author_proofs = {x: c for c in cards.values() if c.kind == 'explanation' and c.meta.get('role') == 'proof'
                      for x in c.meta.get('explains') or []}
     stepped = stepped_ids(cards, step_references(cards))
-    conv = lambda s: tex_to_html(external_steps_display(s, stepped), cards, num, label_to_id, card_label)  # noqa: E731
+    eqnums, eqanchors = xref.equation_numbers(xref.printed_texts(cards, items, prop_kinds, author_proofs))
+    targets = {lab: ('Section', n, 'sec-' + n.replace('.', '-')) for lab, n in xref.section_numbers(st).items()}
+    targets.update({lab: ('Equation', n, eqanchors[lab]) for lab, n in eqnums.items()})
+    plain = {lab: (k, n) for lab, (k, n, _) in targets.items()}
+    plain.update({card_label(cards[c]): (KIND_NAMES[cards[c].kind], n) for c, n in num.items()})
+    heading = lambda s: _html.escape(xref.plain_refs(s, plain))  # noqa: E731
+    conv = lambda s: tex_to_html(xref.tag_displays(external_steps_display(s, stepped), eqnums, tex=False),  # noqa: E731
+                                 cards, num, label_to_id, card_label, targets)
     out, toc, cur, appendix = [], [], object(), False
+    unnumbered = xref.unnumbered_sections(st)
     sub = 0
     for si, stitle, cid, opt in items:
         if opt.get('_subsection'):
             if si != cur:
                 cur = si
-                out.append(f'<h2 id="sec-{si + 1}">{si + 1}　{_html.escape(stitle)}</h2>')
-                toc.append((f'sec-{si + 1}', f'{si + 1}　{_html.escape(stitle)}'))
+                out.append(f'<h2 id="sec-{si + 1}">{si + 1}　{heading(stitle)}</h2>')
+                toc.append((f'sec-{si + 1}', f'{si + 1}　{heading(stitle)}'))
                 sub = 0
             sub += 1
-            out.append(f'<h3 id="sec-{si + 1}-{sub}">{si + 1}.{sub}　{_html.escape(opt["_subsection"])}</h3>')
-            toc.append((f'sec-{si + 1}-{sub}', f'{si + 1}.{sub}　{_html.escape(opt["_subsection"])}'))
+            out.append(f'<h3 id="sec-{si + 1}-{sub}">{si + 1}.{sub}　{heading(opt["_subsection"])}</h3>')
+            toc.append((f'sec-{si + 1}-{sub}', f'{si + 1}.{sub}　{heading(opt["_subsection"])}'))
             continue
         if cid not in cards:
             continue
@@ -169,8 +181,9 @@ def build(h, cards, st, items, card_label, prop_kinds, fact_kinds):
         elif si is not None and si != cur:
             cur = si
             sub = 0
-            out.append(f'<h2 id="sec-{si + 1}">{si + 1}　{_html.escape(stitle)}</h2>')
-            toc.append((f'sec-{si + 1}', f'{si + 1}　{_html.escape(stitle)}'))
+            no = '' if si in unnumbered else f'{si + 1}　'
+            out.append(f'<h2 id="sec-{si + 1}">{no}{heading(stitle)}</h2>')
+            toc.append((f'sec-{si + 1}', f'{no}{heading(stitle)}'))
         if opt.get('_proof_only'):
             proof = (author_proofs[cid].body if cid in author_proofs
                      else proof_display(cid, c.sec('Proof'), stepped))
@@ -183,7 +196,7 @@ def build(h, cards, st, items, card_label, prop_kinds, fact_kinds):
         if c.kind == 'explanation':
             if c.meta.get('role') == 'proof':
                 continue
-            out.append(f'<section class="prose" data-card="{cid}"><span class="cid">{cid}</span>{conv(c.body)}</section>')
+            out.append(f'<section id="{cid}" class="prose" data-card="{cid}"><span class="cid">{cid}</span>{conv(c.body)}</section>')
             continue
         title = f'（{_html.escape(c.meta["title"])}）' if c.meta.get('title') else ''
         head = f'<span class="kname">{KIND_NAMES[c.kind]} {num.get(cid, "")}</span>{title}'
