@@ -146,6 +146,19 @@ mjx-container.cl-msel,.katex.cl-msel{background:Highlight;color:HighlightText;bo
   $('cl-close').onclick = () => { box.style.display = 'none'; };
   $('cl-clear').onclick = () => { if (confirm(L.confirm)) { comments = []; save(); render(); } };
   const exportText = () => comments.map(c => c.where + '\n「' + c.quote + '」\n→ ' + (c.text || L.nocomment)).join('\n\n');
+  if (cfg.saveUrl) {
+    const bSave = el('button', {textContent: cfg.saveLabel || 'Save'});
+    bCopy.after(bSave);
+    bSave.onclick = async () => {
+      if (!comments.length) return;
+      try {
+        const r = await (await fetch(cfg.saveUrl, {method: 'POST', headers: {'Content-Type': 'application/json'},
+                                                   body: JSON.stringify({text: exportText()})})).json();
+        bSave.textContent = r.ok ? (cfg.savedLabel || 'Saved: ') + r.path : (r.error || 'error');
+      } catch (e) { bSave.textContent = String(e); }
+      setTimeout(() => bSave.textContent = cfg.saveLabel || 'Save', 4000);
+    };
+  }
   bCopy.onclick = async () => {
     const text = exportText();
     try { await navigator.clipboard.writeText(text); } catch (e) { const t = el('textarea', {value: text}); document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }

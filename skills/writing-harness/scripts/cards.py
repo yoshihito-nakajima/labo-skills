@@ -160,6 +160,10 @@ def structure_items(st):
     for it in st.get('appendix') or []:
         if isinstance(it, str):
             yield None, 'Appendix', it, {}
+        elif 'section' in it:
+            yield None, 'Appendix', '', {'_appendix_section': it['section'], '_label': it.get('label')}
+        elif 'proof_of' in it:
+            yield None, 'Appendix', it['proof_of'], {'_proof_only': True}
         else:
             yield None, 'Appendix', it['card'], {k: v for k, v in it.items() if k != 'card'}
 
@@ -192,6 +196,8 @@ def placement_warnings(cards, pos, proof_pos):
         first = min(users, key=lambda u: at(u)[0])
         if at(first)[1] == si and si is not None:
             continue
+        if si is None and all(at(u)[1] is None for u in users):
+            continue  # proofs collected in the appendix keep their own order
         if len({at(u)[1] for u in users}) > 1:
             continue
         if len(users) > 1 and {at(u)[1] for u in users} <= proof_secs:
@@ -222,6 +228,48 @@ def display_text_warnings(cards):
                     out.append(f'DISPLAYTEXT {c.id}: "{words}" puts {n} words of prose in a display; '
                                'move the condition into the sentence')
     return out
+
+
+def evidence_fingerprints(h, ns, cache):
+    """Fingerprints published by another harness (code, runs, figures) under [evidence.<ns>] in harness.toml.
+
+    The command prints a JSON object {card id: fingerprint}; {python} is this interpreter. It runs once per check."""
+    if ns not in cache:
+        conf = (h.cfg.get('evidence') or {}).get(ns)
+        if not isinstance(conf, dict) or not isinstance(conf.get('command'), list):
+            cache[ns] = (None, f'no [evidence.{ns}] command in harness.toml')
+        else:
+            import subprocess
+            cmd = [str(x).replace('{python}', sys.executable) for x in conf['command']]
+            try:
+                out = subprocess.run(cmd, cwd=h.root, capture_output=True, text=True, timeout=300)
+                cache[ns] = ((json.loads(out.stdout), None) if out.returncode == 0 else
+                             (None, f'evidence source {ns} failed: {out.stderr.strip()[-200:]}'))
+            except (OSError, ValueError, subprocess.TimeoutExpired) as e:
+                cache[ns] = (None, f'evidence source {ns} failed: {e}')
+    return cache[ns]
+
+
+def check_evidence(h, cards, errors, warn):
+    """Reverse staleness: prose or facts that cite code, runs or figures kept by another harness."""
+    cache = {}
+    for c in cards.values():
+        refs = c.meta.get('evidence') or []
+        if not isinstance(refs, list):
+            errors.append(f'{c.id}: evidence must be a list of ns:id')
+            continue
+        anchors = c.meta.get('evidence_anchors') or {}
+        for ref in refs:
+            ns, _, rid = str(ref).partition(':')
+            fps, err = evidence_fingerprints(h, ns, cache) if rid else (None, f'evidence {ref} must be ns:id')
+            if err:
+                errors.append(f'{c.id}: {err}')
+            elif rid not in fps:
+                errors.append(f'{c.id}: evidence {ref} not found')
+            elif ref not in anchors:
+                warn.append(f'{c.id}: no anchor for evidence {ref} (run anchor)')
+            elif anchors[ref] != fps[rid]:
+                warn.append(f'STALE {c.id}: evidence {ref} changed since this text was written')
 
 
 SYMDEF_RE = re.compile(r'((?:\\[A-Za-z]+|[A-Za-z])(?:_\{[^{}]*\}|_\\[A-Za-z]+|_[A-Za-z0-9])?)'
@@ -305,48 +353,6 @@ def cmd_load(h, a):
     return 0
 
 
-def evidence_fingerprints(h, ns, cache):
-    """Fingerprints published by another harness (code, runs, figures) under [evidence.<ns>] in harness.toml.
-
-    The command prints a JSON object {card id: fingerprint}; {python} is this interpreter. It runs once per check."""
-    if ns not in cache:
-        conf = (h.cfg.get('evidence') or {}).get(ns)
-        if not isinstance(conf, dict) or not isinstance(conf.get('command'), list):
-            cache[ns] = (None, f'no [evidence.{ns}] command in harness.toml')
-        else:
-            import subprocess
-            cmd = [str(x).replace('{python}', sys.executable) for x in conf['command']]
-            try:
-                out = subprocess.run(cmd, cwd=h.root, capture_output=True, text=True, timeout=300)
-                cache[ns] = ((json.loads(out.stdout), None) if out.returncode == 0 else
-                             (None, f'evidence source {ns} failed: {out.stderr.strip()[-200:]}'))
-            except (OSError, ValueError, subprocess.TimeoutExpired) as e:
-                cache[ns] = (None, f'evidence source {ns} failed: {e}')
-    return cache[ns]
-
-
-def check_evidence(h, cards, errors, warn):
-    """Reverse staleness: prose or facts that cite code, runs or figures kept by another harness."""
-    cache = {}
-    for c in cards.values():
-        refs = c.meta.get('evidence') or []
-        if not isinstance(refs, list):
-            errors.append(f'{c.id}: evidence must be a list of ns:id')
-            continue
-        anchors = c.meta.get('evidence_anchors') or {}
-        for ref in refs:
-            ns, _, rid = str(ref).partition(':')
-            fps, err = evidence_fingerprints(h, ns, cache) if rid else (None, f'evidence {ref} must be ns:id')
-            if err:
-                errors.append(f'{c.id}: {err}')
-            elif rid not in fps:
-                errors.append(f'{c.id}: evidence {ref} not found')
-            elif ref not in anchors:
-                warn.append(f'{c.id}: no anchor for evidence {ref} (run anchor)')
-            elif anchors[ref] != fps[rid]:
-                warn.append(f'STALE {c.id}: evidence {ref} changed since this text was written')
-
-
 def check(h, cards, errors):
     errors, warn = list(errors), []
     check_evidence(h, cards, errors, warn)
@@ -411,7 +417,7 @@ def check(h, cards, errors):
     if st:
         pos, proof_pos, later = {}, {}, set()
         for n, (si, _, cid, opt) in enumerate(structure_items(st)):
-            if opt.get('_subsection'):
+            if opt.get('_subsection') or opt.get('_appendix_section'):
                 continue
             if cid not in cards:
                 errors.append(f'structure: unknown card {cid}')
@@ -739,6 +745,14 @@ def cmd_render(h, a):
     eqnums, plain = cross_refs(cards, st, author_proofs)
     body, cur, appendix = [], object(), False
     for si, stitle, cid, opt in structure_items(st):
+        if opt.get('_appendix_section'):
+            if a.sections is None:
+                if not appendix:
+                    body.append('\\appendix\n')
+                    appendix = True
+                label = f'\\label{{{opt["_label"]}}}' if opt.get('_label') else ''
+                body.append(f'\\section{{{heading_tex(opt["_appendix_section"], plain)}}}{label}\n')
+            continue
         if opt.get('_subsection') and (a.sections is None or (si is not None and si < a.sections)):
             if si != cur:
                 body.append(section_head(st, si, stitle, plain))

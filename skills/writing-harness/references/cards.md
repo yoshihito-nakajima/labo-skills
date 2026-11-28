@@ -162,8 +162,16 @@ sections:
     items:
       - x-references
 appendix:
+  - {section: Proofs of Section 3, label: sec:app-proofs}  # optional appendix sections A, B, ...
   - lem-technical
+  - {proof_of: thm-main}                 # a proof deferred from the body (`proof: later`)
+  - {section: Formalization, label: sec:app-lean}
 ```
+
+Without `section` items the appendix is one section titled by `appendix_title` in
+`harness.toml`. With them, each item starts appendix section A, B, ...; cards,
+equations and section labels there are numbered A.1, B.2, ..., and a lemma used
+only by proofs in the appendix may stand in the appendix.
 
 Section and subsection labels let explanation cards refer to sections with
 `\ref` or, with `ref_command = "Cref"` in `harness.toml` and cleveref in the
@@ -249,8 +257,9 @@ adds a comment and copies all comments, each with its card id and the quoted tex
 to paste back to the agent. Comments stay in the browser tab. `reader_font_px` and
 `reader_width_em` in `harness.toml` set the defaults.
 
-The [book reader](../../book-harness/references/views.md#reader-facing-html) follows the same reading layout.
-The comment layer in `assets/comment-layer.js` works on any HTML page
+The layout and comment layer are shared with [book read](../../book-harness/references/views.md#reader-facing-html).
+Use the same layout for reader-facing changes to either harness. The
+[comment layer](../../../src/labo_tools/assets/comment-layer.js) works on any HTML page
 with MathJax 3 or KaTeX (formulas are quoted as their TeX source; "where" is the
 card, a `data-comment-label`, or the nearest heading). Add it to another page,
 for example a reading-proof-review page, with

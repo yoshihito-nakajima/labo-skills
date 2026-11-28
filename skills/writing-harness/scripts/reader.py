@@ -5,14 +5,14 @@ selects text, attaches a comment, and copies all comments (with card ids and the
 quoted text) to paste back to the agent. Comments live only in this browser tab.
 """
 import html as _html
-import json
 import re
+import sys
+from pathlib import Path
 
-import comment_layer
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
+from labo_tools.reading_page import DEFAULT_MATHJAX, render_reading_page
+
 import xref
-
-LABELS = {'ja': {'toc': '目次', 'smaller': '文字を小さく', 'larger': '文字を大きく', 'narrower': '行を短く', 'wider': '行を長く', 'theme': '明暗', 'comments': 'コメント', 'copy': 'クリップボードにコピー', 'copied': 'コピーしました', 'add': 'コメントする', 'placeholder': 'コメント', 'save': '追加', 'cancel': '取り消し', 'none': 'コメントはまだありません．本文を選ぶとボタンが出ます．', 'delete': '削除', 'clear': '全部消す', 'close': '閉じる', 'confirm': 'コメントを全部消しますか？', 'nocomment': '(コメントなし)', 'proof': '証明', 'appendix': '付録'},
-          'en': {'toc': 'Contents', 'smaller': 'Smaller text', 'larger': 'Larger text', 'narrower': 'Shorter lines', 'wider': 'Longer lines', 'theme': 'Light/dark', 'comments': 'Comments', 'copy': 'Copy to clipboard', 'copied': 'Copied', 'add': 'Comment', 'placeholder': 'Comment', 'save': 'Add', 'cancel': 'Cancel', 'none': 'No comments yet. Select text to add one.', 'delete': 'Delete', 'clear': 'Clear all', 'close': 'Close', 'confirm': 'Delete all comments?', 'nocomment': '(no comment)', 'proof': 'Proof', 'appendix': 'Appendix'}}
 
 KIND_NAMES = {'definition': 'Definition', 'theorem': 'Theorem', 'proposition': 'Proposition',
               'lemma': 'Lemma', 'corollary': 'Corollary', 'remark': 'Remark'}
@@ -20,18 +20,22 @@ KIND_NAMES = {'definition': 'Definition', 'theorem': 'Theorem', 'proposition': '
 
 def numbering(cards, items, fact_kinds):
     """Paper numbers: section.counter with one shared counter per section, A.n in the appendix."""
-    num, sec_no, count, last = {}, 0, 0, object()
+    num, sec_no, count, last, app = {}, 0, 0, object(), 0
     for si, _, cid, opt in items:
+        if opt.get('_appendix_section'):
+            app, last, count = app + 1, ('appendix', app + 1), 0
+            continue
         if cid not in cards or opt.get('_proof_only'):
             continue
-        if si != last:
-            last = si
+        key = ('appendix', max(app, 1)) if si is None else si
+        if key != last:
+            last = key
             count = 0
             if si is not None:
                 sec_no = si + 1
         if cards[cid].kind in fact_kinds:
             count += 1
-            num[cid] = f'{"A" if si is None else sec_no}.{count}'
+            num[cid] = f'{chr(64 + max(app, 1)) if si is None else sec_no}.{count}'
     return num
 
 
@@ -211,82 +215,8 @@ def build(h, cards, st, items, card_label, prop_kinds, fact_kinds):
                    f'<header>{head}<span class="cid">{cid}</span></header>{"".join(parts)}</article>')
     nav = ''.join(f'<a href="#{a}">{t}</a>' for a, t in toc)
     title = _html.escape(st.get('title') or h.cfg.get('title') or 'Draft')
-    macros = json.dumps(h.cfg.get('mathjax_macros') or {})
-    page = (PAGE.replace('%TITLE%', title).replace('%LANG%', _html.escape(h.language))
-            .replace('%MATHJAX%', _html.escape(h.cfg.get('mathjax', 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml-full.js')))
-            .replace('%MACROS%', macros).replace('%NAV%', nav).replace('%BODY%', '\n'.join(out))
-            .replace('%SIZE%', str(h.cfg.get('reader_font_px', 21))).replace('%WIDTH%', str(h.cfg.get('reader_width_em', 34))))
-    page = page.replace('%COMMENTS%', comment_layer.script('ja' if h.language == 'ja' else 'en'))
-    for k, v in LABELS['ja' if h.language == 'ja' else 'en'].items():
-        page = page.replace('{{' + k + '}}', _html.escape(v))
-    return page
-
-
-PAGE = r"""<!doctype html><html lang="%LANG%"><head><meta charset="utf-8"><title>%TITLE%</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<script>
-MathJax = {tex: {inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['\\[','\\]'],['$$','$$']],
-  processEnvironments: true, tags: 'ams', macros: %MACROS%},
-  options: {skipHtmlTags: ['script','noscript','style','textarea','code']},
-  startup: {pageReady() { return MathJax.startup.defaultPageReady().then(() => {
-    for (const it of MathJax.startup.document.math) {
-      const m = it.math, root = it.typesetRoot; if (!root) continue;
-      root.dataset.tex = !it.display ? '$' + m + '$' : (m.startsWith('\\begin') ? m : '\\[' + m + '\\]');
-    }});}}};
-</script>
-<script defer src="%MATHJAX%"></script>
-<style>
-:root{--fs:%SIZE%px;--w:%WIDTH%em;--bg:#fbfaf7;--fg:#1d1d1f;--muted:#76736d;--rule:#e2ddd3;--box:#f3f0e8;--accent:#8a5a00;--link:#1f5fa8;--hl:#fff1b8}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1b1b1d;--fg:#e8e6e1;--muted:#9a968e;--rule:#3a3936;--box:#25242a;--accent:#e0b060;--link:#8ab4f8;--hl:#5a4a10}}
-:root[data-theme="dark"]{--bg:#1b1b1d;--fg:#e8e6e1;--muted:#9a968e;--rule:#3a3936;--box:#25242a;--accent:#e0b060;--link:#8ab4f8;--hl:#5a4a10}
-html{background:var(--bg)}
-body{margin:0;color:var(--fg);background:var(--bg);font-family:"Noto Serif","Source Serif 4","Georgia","Times New Roman","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","Noto Serif CJK JP",serif;font-size:var(--fs);line-height:1.95}
-main{max-width:var(--w);margin:0 auto;padding:4.5em 1em 40vh}
-h1{font-size:1.5em;line-height:1.5;margin:.5em 0 1.5em}
-h2{font-size:1.2em;margin:2.5em 0 1em;padding-bottom:.2em;border-bottom:1px solid var(--rule)}
-p{margin:.55em 0}
-a{color:var(--link);text-decoration:none} a:hover{text-decoration:underline}
-.card{margin:1.6em 0;padding:.6em 1em;border-left:4px solid var(--rule);background:var(--box);border-radius:4px}
-.card:target{outline:2px solid var(--accent)}
-.k-theorem,.k-proposition,.k-corollary{border-left-color:var(--accent)}
-.card header{font-weight:bold;margin-bottom:.2em}
-.kname{margin-right:.3em}
-.cid{float:right;font:12px/1.6 ui-monospace,monospace;color:var(--muted);font-weight:normal;user-select:none}
-.proof summary{cursor:pointer;color:var(--muted);font-size:.9em}
-.proof[open] summary{margin-bottom:.4em}
-.proof{margin-top:.5em}
-.prose{margin:1.2em 0}
-.cite{color:var(--muted);font-size:.9em}
-ol,ul{padding-left:1.4em}
-mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden}
-li.lab{list-style:none}
-#bar{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;gap:.4em;align-items:center;padding:.4em .8em;background:var(--bg);border-bottom:1px solid var(--rule);font:14px system-ui,sans-serif}
-#bar button{font:13px system-ui,sans-serif;padding:.2em .6em;border:1px solid var(--rule);background:var(--box);color:var(--fg);border-radius:4px;cursor:pointer}
-#bar .sp{flex:1}
-#toc{display:none;position:fixed;top:2.6em;left:.8em;z-index:6;max-height:70vh;overflow:auto;background:var(--bg);border:1px solid var(--rule);padding:.5em .8em;font:14px/1.8 system-ui,sans-serif}
-#toc a{display:block}
-mark.cm{background:var(--hl);color:inherit}
-</style></head><body>
-<div id="bar"><button id="btoc">{{toc}}</button><button id="bsm" title="{{smaller}}">A−</button><button id="blg" title="{{larger}}">A＋</button>
-<button id="bnr" title="{{narrower}}">⇤⇥−</button><button id="bwd" title="{{wider}}">⇤⇥＋</button><button id="bth">{{theme}}</button>
-<span class="sp"></span><button id="bcom">{{comments}} <span id="ccount">0</span></button><button id="bcopy">{{copy}}</button></div>
-<nav id="toc">%NAV%</nav>
-<main><h1>%TITLE%</h1>
-%BODY%
-</main>
-<script>
-(function(){
-  const root=document.documentElement, store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-  const key='reader:'+location.pathname;
-  let fs=parseFloat(store.get(key+':fs'))||%SIZE%, w=parseFloat(store.get(key+':w'))||%WIDTH%;
-  const th=store.get(key+':theme'); if(th) root.dataset.theme=th;
-  function apply(){root.style.setProperty('--fs',fs+'px');root.style.setProperty('--w',w+'em');store.set(key+':fs',fs);store.set(key+':w',w);}
-  apply();
-  const $=id=>document.getElementById(id);
-  $('bsm').onclick=()=>{fs=Math.max(14,fs-1);apply()}; $('blg').onclick=()=>{fs=Math.min(34,fs+1);apply()};
-  $('bnr').onclick=()=>{w=Math.max(20,w-2);apply()}; $('bwd').onclick=()=>{w=Math.min(60,w+2);apply()};
-  $('bth').onclick=()=>{const d=root.dataset.theme==='dark'||(!root.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);root.dataset.theme=d?'light':'dark';store.set(key+':theme',root.dataset.theme)};
-  $('btoc').onclick=()=>{const t=$('toc');t.style.display=t.style.display==='block'?'none':'block'};
-  $('toc').onclick=()=>{$('toc').style.display='none'};
-})();
-</script>%COMMENTS%</body></html>"""
+    return render_reading_page(title, h.language, nav, '\n'.join(out),
+                               macros=h.cfg.get('mathjax_macros'),
+                               mathjax=h.cfg.get('mathjax', DEFAULT_MATHJAX),
+                               font_px=h.cfg.get('reader_font_px', 21),
+                               width_em=h.cfg.get('reader_width_em', 34))

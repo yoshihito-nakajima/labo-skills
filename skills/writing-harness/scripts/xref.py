@@ -22,11 +22,15 @@ HAND_RE = re.compile(
 
 def printed_texts(cards, items, prop_kinds, author_proofs):
     """(section number, anchor, text) in the order the paper prints them; mirrors `render_card`."""
+    app = 0
     for si, _, cid, opt in items:
+        if opt.get('_appendix_section'):
+            app += 1
+            continue
         if opt.get('_subsection') or cid not in cards:
             continue
         c = cards[cid]
-        key = 'A' if si is None else str(si + 1)
+        key = chr(64 + max(app, 1)) if si is None else str(si + 1)
         if c.kind == 'explanation':
             if c.meta.get('role') != 'proof':
                 yield key, cid, c.body
@@ -84,6 +88,12 @@ def section_numbers(st):
                 sub += 1
                 if it.get('label'):
                     nums[it['label']] = f'{si + 1}.{sub}'
+    app = 0
+    for it in st.get('appendix') or []:
+        if isinstance(it, dict) and 'section' in it:
+            app += 1
+            if it.get('label'):
+                nums[it['label']] = chr(64 + app)
     return nums
 
 

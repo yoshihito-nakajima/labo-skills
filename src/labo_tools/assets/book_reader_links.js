@@ -50,11 +50,16 @@
   const loaded = document.readyState === 'complete'
     ? Promise.resolve()
     : new Promise(resolve => window.addEventListener('load', resolve, { once: true }));
-  const typeset = window.MathJax?.startup?.promise ?? Promise.resolve();
-  Promise.allSettled([loaded, typeset, document.fonts?.ready]).then(() => {
-    requestAnimationFrame(() => {
-      for (const event of interactionEvents) window.removeEventListener(event, cancelRestore);
-      if (!interacted && location.hash === initialHash) target.scrollIntoView({ block: 'start' });
-    });
-  });
+  async function restoreInitialFragment() {
+    // A deferred MathJax loader may only expose its promise after page load.
+    await loaded;
+    await Promise.allSettled([window.MathJax?.startup?.promise]);
+    // Typesetting can start new font loads. Wait for the fonts of that layout.
+    await document.fonts?.ready;
+    // Let the browser finish its initial fragment scroll before correcting it.
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    for (const event of interactionEvents) window.removeEventListener(event, cancelRestore);
+    if (!interacted && location.hash === initialHash) target.scrollIntoView({ block: 'start' });
+  }
+  restoreInitialFragment();
 })();

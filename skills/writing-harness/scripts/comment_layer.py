@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add the comment layer (assets/comment-layer.js) to an HTML page.
+"""Add the shared reader comment layer to an HTML page.
 
     python3 comment_layer.py page.html [--lang ja] [--out other.html]
 
@@ -7,23 +7,17 @@ The script is inlined, so the page stays a single file. Running it twice on the
 same page replaces the earlier copy.
 """
 import argparse
-import json
 import re
+import sys
 from pathlib import Path
 
-ASSET = Path(__file__).resolve().parents[1] / 'assets' / 'comment-layer.js'
-MARK = '<!-- comment-layer -->'
-
-
-def script(lang=None, extra=None):
-    opts = {**({'lang': lang} if lang else {}), **(extra or {})}
-    cfg = f'<script>window.CommentLayer={json.dumps(opts, ensure_ascii=False)};</script>' if opts else ''
-    return f'{MARK}{cfg}<script>\n{ASSET.read_text(encoding="utf-8")}</script>{MARK}'
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
+from labo_tools.reading_page import COMMENT_MARK as MARK, comment_script as script
 
 
 def inject(html, lang=None, extra=None):
     html = re.sub(re.escape(MARK) + r'.*?' + re.escape(MARK), '', html, flags=re.S)
-    tag = script(lang, extra)
+    tag = script(lang, extra=extra)
     i = html.lower().rfind('</body>')
     return html[:i] + tag + html[i:] if i >= 0 else html + tag
 

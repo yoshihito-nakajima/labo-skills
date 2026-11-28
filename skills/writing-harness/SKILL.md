@@ -57,7 +57,7 @@ research evidence; this skill owns the harness in which the author writes.
   `cards.py build` (check, TeX, PDF, card viewer, reading page in one go), or
   rely on the editing hook, `watch` or the editor, and treat `OUTDATED` from
   `check` like `STALE`. Never tell the author a change is visible before the
-  build that contains it has succeeded. See
+  build that contains it has succeeded. `read` uses the shared book and paper reader layout. See
   [outputs and the editor](references/outputs-and-editor.md).
 - The author can edit cards directly in `cards.py serve` (reading page with
   edit links, live reload, comments saved to `reviews/comments/`). Read new

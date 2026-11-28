@@ -10,9 +10,10 @@ COMMENT_MARK = "<!-- comment-layer -->"
 DEFAULT_MATHJAX = "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml-full.js"
 
 
-def comment_script(lang=None, *, version=None, portable=False):
+def comment_script(lang=None, *, version=None, portable=False, extra=None):
     config = {key: value for key, value in
               (("lang", lang), ("version", version), ("portable", portable)) if value}
+    config.update(extra or {})
     safe_config = json.dumps(config).replace("<", r"\u003c")
     cfg = f"<script>window.CommentLayer={safe_config};</script>" if config else ""
     return f'{COMMENT_MARK}{cfg}<script>\n{COMMENT_ASSET.read_text(encoding="utf-8")}</script>{COMMENT_MARK}'
@@ -80,6 +81,7 @@ a{color:var(--link);text-decoration:none} a:hover{text-decoration:underline}
 .prose{margin:1.2em 0}
 .cite{color:var(--muted);font-size:.9em}
 ol,ul{padding-left:1.4em}
+li.lab{list-style:none}
 mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden}
 #bar{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;gap:.4em;align-items:center;padding:.4em .8em;background:var(--bg);border-bottom:1px solid var(--rule);font:14px system-ui,sans-serif}
 #bar button{font:13px system-ui,sans-serif;padding:.2em .6em;border:1px solid var(--rule);background:var(--box);color:var(--fg);border-radius:4px;cursor:pointer}
