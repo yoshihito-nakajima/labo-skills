@@ -34,14 +34,17 @@ See [parent-model verification](../../long-run-rounds/SKILL.md#親の実行モ�
 - Give the coordinator the next action, unit or packet ID, result path and counts. Keep report contents, full
   diffs and trace logs in files for the worker. Put one receipt in the durable run record per completed unit.
   Keep the dispatch ID and fixed version durable when the unit starts, and combine related writes in one command.
-- Use the same frozen packet for routine receipt and coverage registration. When an eligible independent
-  reviewer returns an unambiguous result for the explicit scope, use the existing `record-review` command and
-  its fingerprint checks. Send findings, partial or inconsistent returns, and version mismatches to the
-  responsible producer or an intake worker. Keep custom cases on their existing receipt path until their
-  provenance, checked scope and fingerprints are accepted by the mechanical path.
+- For a frozen handoff case with a complete no-finding math review, prepare the [machine receipt](review-receipt.md)
+  before dispatch and accept it on the independent worker's completion. The receipt emits the preassigned next
+  request in one line. Route findings, incomplete returns and version mismatches through ordinary intake.
+- While a worker is active, yield to the host's completion notification. Refresh the pointer on completion, a
+  substantive change, or the scheduled recovery check for a lost notification or abandoned claim. Repeated
+  unchanged waits do not need a model turn, guard, or another log entry. Guard the next live write or dispatch.
 - Batch neighbouring exercises or examples with the same direct prerequisites and source scope at a stable
   section boundary. Still require checked IDs and the full independent review of the agreed scope. Split a
-  packet that is too large to review in one fresh context, or whose prerequisites are still changing.
+  packet that is too large to review in one fresh context, or whose prerequisites are still changing. Check
+  output mechanically on the build in use and combine independent visual checks at a stable chapter boundary.
+  Check changes affecting the next unit and high-impact reader features on the version that introduces them.
 - At a round boundary, use the durable progress pointer to resume after a host-supported context reset if the
   coordinator's context has grown substantially. Track model calls and newly supplied input, cached input and
   output separately, along with completed units and current review coverage.
@@ -50,12 +53,12 @@ See [parent-model verification](../../long-run-rounds/SKILL.md#親の実行モ�
 
 ```sh
 labo book next --route R --role producer|reviewer|all --review-dir D --work-dir W \
-    --source-text TEXTDIR [--source-text ...] --claim HOLDER [--format json]
+    --source-text TEXTDIR [--source-text ...] --claim HOLDER [--compact | --format json]
 ```
 
 Use `--role all` for one coordinator. Use `producer` and `reviewer` when intentionally running two coordinators
-in parallel. Pass `--claim` for a live run. Without it the call is a dry run. The answer (first line of text output, or the
-`action` field of JSON) is exactly one of:
+in parallel. Pass `--claim` for a live run. Without it the call is a dry run. Use `--compact` for a single native-coordinator action line with its fingerprint.
+The answer (first line of text output, or the `action` field of JSON) is exactly one of:
 
 | Answer | The coordinator |
 |---|---|

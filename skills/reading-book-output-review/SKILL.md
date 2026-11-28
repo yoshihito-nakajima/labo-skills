@@ -22,7 +22,7 @@ description: Review indexes, rendering and navigation in a frozen long-course PD
 受け取る。所見は PDF 側の位置に加えて対応するカード id を示す。生成物の TeX は直さず、直すのはカードである。
 共通の組版に起因する所見は、代表位置と影響範囲を制作・統合担当へ報告する。
 
-- HTMLの読者版も渡す場合は [カードの読書画面](../book-harness/references/views.md#reader-facing-html) を使う。
+- HTMLの読者版も渡す場合は [共有の読書画面](../book-harness/references/views.md#reader-facing-html) を使う。
   同版PDFとの参照先、目次、証明の開閉、選択コメントが該当するカードと版に戻ることを代表箇所で確認する。
 - [カードと読者版の対応](../book-harness/references/building.md#card-content-in-the-reader-edition)に従い、適用範囲・例外・
   読者向けの注意が実際の本文に届くかを照合する。証明やつなぎに番号がなければ、節または主張のラベルとカード id を使う。
@@ -84,6 +84,8 @@ See [card build and navigation checks](../book-harness/references/building.md#re
 
 ## カード本の式・索引・番号一覧
 
-`typed_navigation: true` を使うカード本では、同じ版の aux の型と番号、PDF の索引・番号一覧ページにあるリンク、
+`typed_navigation: true` を使うカード本では同じ版の出力を照合する。F01/F02 形式では、同じビルドディレクトリに対して
+`python3 .agents/skills/reading-book-output-review/scripts/check_reader_references.py --build DIR`
+を実行する（`pypdf` が必要）。aux の型、PDF の実際の索引・番号一覧ページにあるリンク、
 HTML のアンカーと表示番号を照合する。数式索引では式への着地を確認する。
 代表操作では本文の式参照と、折りたたまれた証明または解答への索引リンクを確認する。

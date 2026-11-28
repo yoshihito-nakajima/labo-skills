@@ -1187,6 +1187,112 @@ class PerCardResultTests(ScriptedTakeIn):
         self.assertTrue(book.cards["claim-odd-product"].reviewed_ok(book))
 
 
+class ReviewReceiptTests(unittest.TestCase):
+    def setUp(self):
+        from labo_tools import book_review as review
+
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.ws = Path(tmp.name).resolve()
+        self.root = self.ws / "book"
+        self.root.mkdir()
+        make(self.root)
+        self.case = self.ws / "frozen"
+        self.report = self.case / "result/math-review.md"
+        self.report.parent.mkdir(parents=True)
+        self.next_request = self.ws / "next.md"
+        self.next_request.write_text("Independent output review of this version.\n", encoding="utf-8")
+        book = bk.Book(self.root, use_cache=False)
+        packet, = review.review_input(book, "intro-a", self.case / "input", cards=["claim-even-sum"])
+        manifest = json.loads((packet / "manifest.json").read_text())
+        self.full = manifest["cards"]
+        self.ids = ",".join(entry["id"] for entry in self.full)
+        scope = {}
+        for entry in self.full:
+            card = book.cards[entry["id"]]
+            scope[card.id] = {"file": card.path.relative_to(self.root).as_posix(),
+                              "sha256": entry["file_sha256"], "fp": entry["fp"]}
+        for cid in [*scope, *manifest["context"]]:
+            src = book.cards[cid].path
+            dest = self.case / "canonical" / src.relative_to(self.root)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(src.read_bytes())
+        (self.case / "scope.json").write_text(json.dumps({"route": "intro-a", "full_cards": scope}))
+        hashes = {path.relative_to(self.case).as_posix(): review._sha(path)
+                  for path in self.case.rglob("*") if path.is_file()}
+        (self.case / "freeze.json").write_text(json.dumps(hashes))
+        self.live = {cid: card.path for cid, card in book.cards.items()}
+
+    def cli(self, mode, *options, reviewer="reviewer-run"):
+        return run_cli(self.ws, "review-receipt", mode, "--case", "frozen", "--reviewer", reviewer, *options)
+
+    def prepare(self):
+        result = self.cli("prepare", "--producer", "producer-run", "--next-request", "next.md")
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def clean_report(self, ids=None):
+        self.report.write_text("Proof and use of the integer convention checked.\n"
+                               f"REVIEWER: reviewer-run\nRESULT: pass CHECKED: {ids or self.ids} FINDINGS: none\n")
+
+    def test_receipt_checks_then_records_once_and_emits_single_next_line(self):
+        self.prepare()
+        self.clean_report()
+        result = self.cli("check")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.splitlines(), ["ELIGIBLE checked=2"])
+        self.assertFalse((self.case / "result/review-receipt.json").exists())
+        self.assertFalse(bk.parse_card(self.live["claim-even-sum"]).meta.get("reviews"))
+        for _ in range(2):
+            result = self.cli("apply")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.splitlines(), [f"NEXT checked=2 request={self.next_request}"])
+        for entry in self.full:
+            card = bk.parse_card(self.live[entry["id"]])
+            self.assertEqual(card.meta["status"], "independent")
+            self.assertEqual(len(card.meta["reviews"]), 1)
+        self.assertFalse(bk.parse_card(self.live["def-even"]).meta.get("reviews"))
+        self.report.write_text(self.report.read_text().replace("Proof", "Proof (edited)"))
+        self.assertIn("differs from the recorded receipt", self.cli("apply").stderr)
+
+    def test_independence_and_explicit_coverage(self):
+        result = self.cli("prepare", "--producer", "reviewer-run")
+        self.assertIn("distinct", result.stderr)
+        self.prepare()
+        self.assertIn("already assigned", self.cli("prepare", "--producer", "producer-run").stderr)
+        self.clean_report()
+        self.assertIn("independent assignment", self.cli("apply", reviewer="other-run").stderr)
+        for ids in ("all", self.full[0]["id"], self.ids + ",def-even", self.ids + "," + self.full[0]["id"]):
+            self.clean_report(ids)
+            self.assertEqual(self.cli("apply").returncode, 2, ids)
+        self.report.write_text("Evidence.\nREVIEWER: reviewer-run\nRESULT: findings\n")
+        self.assertIn("manual intake", self.cli("apply").stderr)
+        self.assertFalse(bk.parse_card(self.live["claim-even-sum"]).meta.get("reviews"))
+
+    def test_changed_prerequisite_or_artifact_rejects_entire_receipt(self):
+        self.prepare()
+        self.clean_report()
+        path = self.live["def-even"]
+        card = bk.parse_card(path)
+        card.meta["requires"] = []
+        path.write_text(bk.dump_card(card.meta, card.body))
+        self.assertEqual(card.fingerprint(), bk.parse_card(path).fingerprint())
+        result = self.cli("apply")
+        self.assertIn("changed since freeze: def-even", result.stderr)
+        self.assertFalse(bk.parse_card(self.live["claim-even-sum"]).meta.get("reviews"))
+        path.write_bytes((self.case / "canonical" / path.relative_to(self.root)).read_bytes())
+        self.next_request.write_text("Different continuation.\n")
+        self.assertIn("next request changed", self.cli("apply").stderr)
+        manifest = self.case / "input/packet-01/manifest.json"
+        manifest.write_text(manifest.read_text() + "\n")
+        self.assertIn("freeze mismatch", self.cli("apply").stderr)
+
+    def test_next_compact_keeps_the_action_on_one_line(self):
+        result = run_cli(self.ws, "next", "--route", "intro-a", "--compact")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        line, = result.stdout.splitlines()
+        self.assertRegex(line, r"^(RUN|DISPATCH|WAIT|BLOCKED|DONE) .*FINGERPRINT=[a-f0-9]{10}")
+
+
 class CarriedOverLegacyTests(ScriptedTakeIn):
     def test_legacy_cards_in_a_route_are_carried_over_not_chased(self):
         self.take_in()

@@ -68,7 +68,8 @@ output to readers.
 - **Cross-format check.** Run `book check --route ROUTE` before freezing. In the real build, verify `@cref` types and
   destinations in TeX's aux output and reuse its numbers in the HTML. Check both index files, catalog links and
   HTML fragments. Test at least one equation in a folded proof, a definition or theorem, and an exercise from the
-  printed and HTML navigation.
+  printed and HTML navigation. For the F01/F02 builder the output review script is
+  [check_reader_references.py](../../reading-book-output-review/scripts/check_reader_references.py).
 - **Reader-facing headings.** Use the mathematical subject as the route and section title. Keep production
   unit IDs and revision codes in the plan or route metadata. Check the generated cover, section headings,
   printed PDF contents, PDF bookmarks and HTML headings. Apply the

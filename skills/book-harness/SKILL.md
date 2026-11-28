@@ -67,7 +67,7 @@ books and papers, use the [reuse check](../knowledge-dependencies/SKILL.md#reuse
 - Pool search, relations between books, routes, `includes`, show levels, borrows: [pool and route](references/pool-and-route.md).
 - Tidying a large pool — merge, rename, retire, legacy cards, dependency candidates, concurrent writers, scale:
   [pool operations](references/pool-operations.md).
-- Give readers the reading page with `book read`. Use `book html` for card searches and
+- Give readers the shared book/paper reading layout with `book read`. Use `book html` for card searches and
   dependency inspection. See [views](references/views.md) for local output and comment handoff.
 - Read [building](references/building.md) before the first reader-facing PDF. It connects the cards to the
   project's actual build, typed references, colors, indexes and output checks.

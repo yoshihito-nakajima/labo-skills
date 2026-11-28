@@ -12,6 +12,8 @@ import datetime as _dt
 import hashlib
 import json
 import re
+import stat
+import tempfile
 from collections import deque
 from pathlib import Path
 
@@ -31,7 +33,8 @@ or anything outside your result folder.  Do not copy source text into the report
 
 
 def _sha(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    with path.open("rb") as file:
+        return hashlib.file_digest(file, "sha256").hexdigest()
 
 
 def select(book: Book, route: str, *, cards: list | None = None, section: int | str | None = None,
@@ -128,7 +131,7 @@ def record_review(root: Path, manifest: Path, report: Path, result: str, kind: s
         raise BookError("result must be pass or findings")
     data = json.loads(manifest.read_text(encoding="utf-8"))
     kind = kind or data.get("kind", "math")
-    stamp = {"kind": kind, "result": result, "date": _dt.date.today().isoformat(), "report": _sha(report)}
+    report_hash = _sha(report)
     done, stale, skipped = [], [], []
     with book_lock(root):
         book = Book(root, use_cache=False)
@@ -141,15 +144,45 @@ def record_review(root: Path, manifest: Path, report: Path, result: str, kind: s
             if card is None or card.fingerprint() != entry["fp"]:
                 stale.append(cid)  # changed (or gone) since the packet was frozen: not reviewed
                 continue
-            meta = dict(card.meta)
             # a report that lists the cards with findings passes the other checked cards
             own = "findings" if result == "findings" and (flagged is None or cid in flagged) else "pass"
-            meta["reviews"] = list(meta.get("reviews") or []) + [{**stamp, "result": own, "fp": entry["fp"]}]
-            if promote and own == "pass" and kind == "math" and meta.get("status") in ("drafted", "self-checked"):
-                meta["status"] = "independent"
-            card.path.write_text(dump_card(meta, card.body), encoding="utf-8")
+            write_card_review(card, kind, own, report_hash, entry["fp"], promote=promote)
             done.append(cid)
     return {"recorded": done, "changed_since_packet": stale, "not_listed": skipped}
+
+
+def atomic_text(path: Path, content: str) -> None:
+    """Replace one file intact, including if the process is interrupted before the rename."""
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                                     suffix=".tmp", delete=False) as handle:
+        temporary = Path(handle.name)
+        try:
+            handle.write(content)
+            handle.close()
+            if path.exists():
+                temporary.chmod(stat.S_IMODE(path.stat().st_mode))
+            temporary.replace(path)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+
+def write_card_review(card, kind: str, result: str, report: str, fp: str, *,
+                      promote: bool, retry_safe: bool = False) -> None:
+    """Write one card while the caller holds the book lock."""
+    meta = dict(card.meta)
+    reviews = list(meta.get("reviews") or [])
+    stamp = {"kind": kind, "result": result, "report": report, "fp": fp}
+    if retry_safe and any(isinstance(review, dict) and
+                          all(review.get(key) == value for key, value in stamp.items()) for review in reviews):
+        return
+    meta["reviews"] = reviews + [{**stamp, "date": _dt.date.today().isoformat()}]
+    if promote and result == "pass" and kind == "math" and meta.get("status") in ("drafted", "self-checked"):
+        meta["status"] = "independent"
+    text = dump_card(meta, card.body)
+    if retry_safe:
+        atomic_text(card.path, text)
+    else:
+        card.path.write_text(text, encoding="utf-8")
 
 
 # ---------------------------------------------------------------- verbatim check

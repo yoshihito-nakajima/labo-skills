@@ -1440,7 +1440,7 @@ def _tex_card(book: Book, c: Card, language: str = "ja", macros: dict | None = N
         body = "\n".join(x for x in (s.get("hypotheses"), s.get("conclusion")) if x)
         return f"\\begin{{{env}}}{title}\n{label}{index}{body}\n\\end{{{env}}}\n"
     if c.kind == "A3":
-        return f"\\begin{{proof}}\n{s.get('steps', '')}\n\\end{{proof}}\n"
+        return f"\\begin{{proof}}\n{index}{s.get('steps', '')}\n\\end{{proof}}\n"
     if c.kind == "A4":
         return f"\\begin{{example}}\n{label}{index}{s.get('setting', '')}\n{s.get('verification', '')}\n\\end{{example}}\n"
     if c.kind == "A5":
@@ -1477,8 +1477,9 @@ def status(book: Book, route: str | None = None) -> dict:
     audit = [c for c in book.cards.values() if c.kind == "C2" and (route is None or c.route == route)]
     complete = bool(audit) and all(c.meta.get("scope_audit") in ("OK", "OUT") for c in audit) \
         and not open_major and not result["errors"]
+    route_ids = _route_ids(book, route) if route is not None else None
     in_route = [c for c in book.cards.values() if c.kind in ("A1", "A2", "A3", "A4", "A5", "A6")
-                and (route is None or c.id in _route_ids(book, route))]
+                and (route_ids is None or c.id in route_ids)]
     math = [c for c in in_route if not c.legacy]  # carried-over legacy cards are counted apart, not reviewed here
     review = {"math_cards": len(math), "reviewed_current": sum(1 for c in math if c.reviewed_ok(book)),
               "reviewed_stale": sum(1 for c in math if not c.reviewed_ok(book)

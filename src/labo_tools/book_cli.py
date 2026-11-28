@@ -10,6 +10,7 @@ import yaml
 from . import book as bk
 from . import book_ops as ops
 from . import book_review as rev
+from . import book_receipt as receipts
 from . import book_rounds as rounds
 from .book import Book, BookError
 from .book_borrows import BorrowSnapshots
@@ -18,7 +19,7 @@ DEFAULT_ROOT = "local/materials/book"
 LOCAL_MATHJAX = "local/cache/mathjax/3.2.2/tex-svg-full.js"
 ACTIONS = ("check", "status", "search", "new", "anchor", "borrow", "closure", "impact", "graph", "outline", "render", "read", "html",
            "show", "list", "merge", "rename", "retire", "restructure", "deps", "promote", "reject",
-           "review-input", "record-review", "leak-check", "next", "release", "place")
+           "review-input", "record-review", "review-receipt", "leak-check", "next", "release", "place")
 
 
 def register(areas, add_workspace) -> None:
@@ -117,7 +118,16 @@ def register(areas, add_workspace) -> None:
             sub.add_argument("--result", choices=("pass", "findings"))
             sub.add_argument("--kind", choices=("math", "output"))
             sub.add_argument("--ids", help="comma-separated ids actually checked (default: the whole packet)")
+        if name == "review-receipt":
+            sub.add_argument("mode", choices=("prepare", "check", "apply"))
+            sub.add_argument("--case", required=True, help="frozen review case directory")
+            sub.add_argument("--reviewer", required=True, help="reviewer run ID from host assignment or completion")
+            sub.add_argument("--producer", help="producer run ID from the host (prepare)")
+            sub.add_argument("--packet", default="packet-01", help="case packet name (prepare)")
+            sub.add_argument("--report", default="result/math-review.md", help="case-relative report path (prepare)")
+            sub.add_argument("--next-request", help="request file to hand off after a clean receipt (prepare)")
         if name == "next":
+            sub.add_argument("--compact", action="store_true", help="one action line for the coordinator (text output)")
             sub.add_argument("--role", default="all", choices=rounds.ROLES, help="the coordinator's role")
             sub.add_argument("--review-dir", help="folder for review packets and their results")
             sub.add_argument("--work-dir", help="folder where worker prompt files are written")
@@ -179,6 +189,21 @@ def run(args) -> int:
     if act == "merge":
         lines = ops.merge(root, args.keep, args.drop, args.apply)
         _emit(args, lines, lines + ([] if args.apply else ["(dry run; pass --apply)"]))
+        return 0
+    if act == "review-receipt":
+        case = _path(args, args.case)
+        if args.mode == "prepare":
+            out = receipts.prepare(case, args.packet, args.report, args.producer, args.reviewer,
+                                   _path(args, args.next_request) if args.next_request else None)
+            line = f"DISPATCH reviewer={out['reviewer']} assignment={out['assignment']}"
+        else:
+            if args.producer or args.next_request:
+                raise BookError("--producer and --next-request are prepare options")
+            out = receipts.receive(root, case, args.reviewer, apply=args.mode == "apply")
+            line = f"{out['action']} checked={out['checked']}"
+            if out["action"] == "NEXT":
+                line += f" request={out['next_request']}"
+        _emit(args, out, [line])
         return 0
     book = Book(root)
     if act == "check":
@@ -364,10 +389,17 @@ def run(args) -> int:
             print(json.dumps(out, ensure_ascii=False, indent=2))
         else:
             head = f"{out['action']} tier={out['tier']}"
+            if args.compact:
+                head += f" FINGERPRINT={out['fingerprint']}"
             if out["action"] == "DISPATCH":
                 head += f" worker_role={out['worker_role']} unit={out['unit']} prompt={out.get('prompt_file') or '(inline)'}"
             if out["action"] == "RUN":
                 head += f" command: {out['command']}"
+            if args.compact:
+                if out["action"] in ("WAIT", "BLOCKED"):
+                    head += f" {out['reason']}"
+                print(head)
+                return 0
             print(head)
             print(f"reason: {out['reason']}")
             print(f"FINGERPRINT={out['fingerprint']}")

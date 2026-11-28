@@ -4,7 +4,9 @@ All views are generated from the cards and may be regenerated at any time.
 
 ## Reader-facing HTML
 
-Use `book read --route R` for the page you give a reader. It follows the [paper reading layout](../../writing-harness/references/cards.md#reading-page) for the book's route. The page has a contents menu, readable paragraphs and transitions, adjustable type
+Use `book read --route R` for the page you give a reader. It uses the shared
+[paper reading layout](../../writing-harness/references/cards.md#reading-page) with the book's
+route. The page has a contents menu, readable paragraphs and transitions, adjustable type
 size and width, light and dark themes, and folded proofs and solutions. The default output is
 `output/book-R.html`. In the workspace that serves `output/` locally, give the reader its loopback URL.
 The local bundle at `local/cache/mathjax/3.2.2/tex-svg-full.js` is embedded when available.
